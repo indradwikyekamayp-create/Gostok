@@ -1,0 +1,65 @@
+@media print {
+  /* Hide everything except nota content */
+  body * {
+    visibility: hidden;
+  }
+
+  .nota-print-area,
+  .nota-print-area * {
+    visibility: visible;
+  }
+
+  .nota-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Hide UI elements */
+  .no-print,
+  nav, header, aside,
+  button:not(.print-button),
+  .sidebar, .header-bar {
+    display: none !important;
+  }
+
+  /* Nota formatting */
+  .nota-content {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+    white-space: pre;
+    page-break-inside: avoid;
+  }
+
+  .nota-content table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .nota-content td, .nota-content th {
+    padding: 2px 4px;
+    text-align: left;
+  }
+
+  .nota-content .text-right {
+    text-align: right;
+  }
+
+  .nota-separator {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 4px 0;
+  }
+
+  /* Page settings */
+  @page {
+    size: A5 portrait;
+    margin: 10mm;
+  }
+}

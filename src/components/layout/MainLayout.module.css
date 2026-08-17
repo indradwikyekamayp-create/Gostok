@@ -1,0 +1,27 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-background, hsl(220, 15%, 97%));
+  width: 100%;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Important for preventing flex children from overflowing */
+  transition: margin-left 0.3s ease;
+}
+
+.content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  height: calc(100vh - var(--header-height, 64px));
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: 1rem;
+  }
+}

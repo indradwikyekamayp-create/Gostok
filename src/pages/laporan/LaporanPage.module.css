@@ -1,0 +1,111 @@
+.container {
+  padding: 24px;
+  background-color: hsl(220, 15%, 97%);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: hsl(215, 50%, 30%);
+  margin: 0 0 4px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.tabsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tabsList {
+  display: flex;
+  gap: 24px;
+}
+
+.tabBtn {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tabBtn:hover {
+  color: hsl(215, 50%, 30%);
+}
+
+.tabBtn.active {
+  color: hsl(215, 50%, 30%);
+  font-weight: 600;
+}
+
+.tabBtn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: hsl(215, 50%, 30%);
+  border-radius: 3px 3px 0 0;
+}
+
+.dateFilter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateInput {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: hsl(215, 50%, 30%);
+}
+
+.dateSeparator {
+  color: #666;
+  font-weight: 500;
+}
+
+.tabContent {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .tabsList {
+    overflow-x: auto;
+    width: 100%;
+  }
+  .tabsContainer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

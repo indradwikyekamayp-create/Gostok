@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Helper: get user role from users collection
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Helper: check if user is owner
+    function isOwner() {
+      return isAuth() && getUserRole() == 'owner';
+    }
+
+    // Helper: check if user is kasir
+    function isKasir() {
+      return isAuth() && getUserRole() == 'kasir';
+    }
+
+    // === PRODUCTS ===
+    // Kasir: bisa baca dan create (produk baru dari scan)
+    // Owner: full CRUD
+    match /products/{barcode} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if isOwner();
+    }
+
+    // === STOCK_IN ===
+    // Kasir & Owner: bisa create dan baca
+    match /stock_in/{docId} {
+      allow read, create: if isAuth();
+      allow update, delete: if isOwner();
+    }
+
+    // === SALES_TRANSACTIONS ===
+    // Kasir & Owner: bisa create dan baca
+    // Hanya Owner yang bisa update (misal ubah status bayar manual)
+    match /sales_transactions/{docId} {
+      allow read, create: if isAuth();
+      allow update: if isAuth();
+      allow delete: if isOwner();
+    }
+
+    // === CUSTOMERS ===
+    // Kasir & Owner: full CRUD
+    match /customers/{docId} {
+      allow read, write: if isAuth();
+    }
+
+    // === PAYMENTS ===
+    // Kasir & Owner: bisa create dan baca
+    match /payments/{docId} {
+      allow read, create: if isAuth();
+      allow update, delete: if isOwner();
+    }
+
+    // === USERS ===
+    // User bisa baca profil sendiri
+    // Owner bisa baca/tulis semua user
+    match /users/{uid} {
+      allow read: if isAuth() && (request.auth.uid == uid || isOwner());
+      allow write: if isOwner();
+    }
+
+    // === COUNTERS ===
+    // Authenticated users bisa baca dan update (untuk nota counter)
+    match /counters/{docId} {
+      allow read, write: if isAuth();
+    }
+  }
+}

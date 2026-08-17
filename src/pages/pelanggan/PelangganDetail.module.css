@@ -1,0 +1,156 @@
+.container {
+  padding: 24px;
+  background-color: hsl(220, 15%, 97%);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: hsl(215, 50%, 30%);
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.customerCard {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 16px;
+}
+
+.cardHeader h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #1a1a1a;
+}
+
+.badge {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.editBtn {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cardBody {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.infoGrid {
+  display: flex;
+  gap: 40px;
+}
+
+.label {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 4px 0;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.debtBox {
+  background-color: hsl(0, 70%, 95%);
+  padding: 16px 24px;
+  border-radius: 8px;
+  text-align: right;
+  border: 1px solid hsl(0, 70%, 80%);
+}
+
+.debtBox p {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  color: hsl(0, 70%, 40%);
+}
+
+.debtBox h2 {
+  margin: 0;
+  font-size: 24px;
+  color: hsl(0, 70%, 40%);
+}
+
+.tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.tab, .tabActive {
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+  border-bottom: 2px solid transparent;
+}
+
+.tabActive {
+  color: hsl(215, 50%, 30%);
+  font-weight: 600;
+  border-bottom-color: hsl(215, 50%, 30%);
+}
+
+.tabContent {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.actionFooter {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.payBtn {
+  background-color: hsl(145, 55%, 42%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.payBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.riwayatEmpty {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+}
