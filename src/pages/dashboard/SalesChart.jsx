@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import styles from './DashboardPage.module.css';
 
 const formatRupiah = (value) => {
   return new Intl.NumberFormat('id-ID', {
@@ -18,8 +19,11 @@ const formatRupiah = (value) => {
   }).format(value);
 };
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label, metric }) => {
   if (active && payload && payload.length) {
+    const isOmzet = metric === 'total';
+    const val = payload[0].value;
+    
     return (
       <div style={{
         backgroundColor: '#fff',
@@ -30,20 +34,15 @@ const CustomTooltip = ({ active, payload, label }) => {
       }}>
         <p style={{ margin: '0 0 5px 0', fontWeight: '600', color: '#334155' }}>{label}</p>
         <p style={{ margin: 0, color: 'hsl(215, 50%, 30%)', fontWeight: '500' }}>
-          {formatRupiah(payload[0].value)}
+          {isOmzet ? formatRupiah(val) : `${val} Transaksi`}
         </p>
-        {payload[0].payload.count && (
-          <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>
-            {payload[0].payload.count} Transaksi
-          </p>
-        )}
       </div>
     );
   }
   return null;
 };
 
-const SalesChart = ({ data }) => {
+const SalesChart = ({ data, metric = 'total' }) => {
   // Mock data for initial rendering until Firebase is connected
   const defaultData = [
     { date: 'Senin', total: 1500000, count: 12 },
@@ -57,14 +56,19 @@ const SalesChart = ({ data }) => {
 
   const chartData = data && data.length > 0 ? data : defaultData;
 
+  const yAxisFormatter = (value) => {
+    if (metric === 'total') return `Rp ${(value/1000000).toFixed(1)}Jt`;
+    return value;
+  };
+
   return (
-    <div style={{ width: '100%', height: 300 }}>
-      <ResponsiveContainer>
+    <div className={styles.chartWrapper}>
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
           margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+          <CartesianGrid vertical={false} stroke="#f1f5f9" />
           <XAxis 
             dataKey="date" 
             axisLine={false}
@@ -73,21 +77,22 @@ const SalesChart = ({ data }) => {
             dy={10}
           />
           <YAxis 
-            tickFormatter={(value) => `Rp ${(value/1000000).toFixed(1)}Jt`}
+            tickFormatter={yAxisFormatter}
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#64748b', fontSize: 12 }}
             dx={-10}
             width={80}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip metric={metric} />} />
           <Area 
             type="monotone" 
-            dataKey="total" 
+            dataKey={metric}
             stroke="hsl(215, 50%, 30%)" 
             fill="hsl(215, 50%, 30%)" 
-            fillOpacity={0.1}
-            strokeWidth={3}
+            fillOpacity={0.05}
+            strokeWidth={2}
+            dot={{ r: 4, fill: 'hsl(215, 50%, 30%)', stroke: '#fff', strokeWidth: 2 }}
             activeDot={{ r: 6, fill: 'hsl(215, 50%, 30%)', stroke: '#fff', strokeWidth: 2 }}
           />
         </AreaChart>

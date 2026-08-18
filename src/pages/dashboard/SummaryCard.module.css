@@ -23,10 +23,37 @@
   margin: 0;
 }
 
+.subtitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.trendUp {
+  color: var(--color-success, hsl(145, 55%, 42%));
+}
+
+.trendDown {
+  color: var(--color-danger, hsl(0, 70%, 50%));
+}
+
+.trendNeutral {
+  color: var(--color-warning, hsl(38, 92%, 50%));
+}
+
 .subtitle {
   font-size: 0.75rem;
   color: var(--color-text-secondary, #64748b);
-  margin: 0.25rem 0 0 0;
+  margin: 0;
 }
 
 .iconWrapper {
@@ -56,4 +83,71 @@
 .danger {
   background-color: rgba(239, 68, 68, 0.1);
   color: var(--color-danger, hsl(0, 70%, 50%));
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 0.5rem 0;
+  position: relative;
+}
+
+.title {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #64748b);
+  font-weight: 500;
+  margin: 0;
+}
+
+.tooltipIcon {
+  color: var(--color-text-muted, #94a3b8);
+  cursor: help;
+}
+
+.tooltipIcon:hover {
+  color: var(--color-text-secondary, #64748b);
+}
+
+.tooltipText {
+  visibility: hidden;
+  opacity: 0;
+  width: max-content;
+  max-width: 200px;
+  background-color: var(--color-text, #334155);
+  color: #fff;
+  text-align: center;
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 0.5rem;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  box-shadow: var(--shadow-md);
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.tooltipText::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--color-text, #334155) transparent transparent transparent;
+}
+
+.tooltipContainer {
+  display: inline-flex;
+  position: relative;
+}
+
+.tooltipContainer:hover .tooltipText {
+  visibility: visible;
+  opacity: 1;
 }

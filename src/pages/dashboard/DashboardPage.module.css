@@ -1,5 +1,4 @@
 .container {
-  padding: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -7,18 +6,45 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+}
+
+.headerSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 .pageTitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-text, #334155);
+  margin: 0 0 0.25rem 0;
+}
+
+.welcomeText {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #64748b);
   margin: 0;
 }
 
+.datePickerWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 0.5rem);
+  font-size: 0.875rem;
+  color: var(--color-text, #334155);
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .sectionTitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text, #334155);
   margin: 0 0 1rem 0;
@@ -45,26 +71,54 @@
 .mainContent {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+}
+
+.topRow, .bottomRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
 }
 
 @media (min-width: 1024px) {
-  .mainContent {
-    flex-direction: row;
+  .topRow, .bottomRow {
+    grid-template-columns: 2fr 1fr;
   }
 }
 
 .chartSection {
-  flex: 2;
-  min-width: 0;
-}
-
-.sideGrid {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  min-width: 0;
+}
+
+.chartCard {
+  height: 100%;
+  display: flex !important;
+  flex-direction: column;
+}
+
+.chartWrapper {
+  flex: 1;
+  min-height: 300px;
+  width: 100%;
+}
+
+.topRightSection, .bottomRightSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tablesSection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .tablesSection {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .tableWrapper {

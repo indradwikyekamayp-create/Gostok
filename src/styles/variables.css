@@ -89,9 +89,9 @@
   --transition-slow: 300ms ease;
 
   /* === Layout === */
-  --sidebar-width: 260px;
+  --sidebar-width: 210px;
   --sidebar-collapsed-width: 72px;
-  --header-height: 64px;
+  --header-height: 80px;
   --max-content-width: 1400px;
 
   /* === Z-Index === */

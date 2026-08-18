@@ -58,7 +58,7 @@ const Table = ({
                   key={colIndex}
                   style={{ textAlign: col.align || 'left' }}
                 >
-                  {col.render ? col.render(row[col.key], row) : row[col.key]}
+                  {col.render ? col.render(row[col.key], row, rowIndex) : row[col.key]}
                 </td>
               ))}
             </tr>

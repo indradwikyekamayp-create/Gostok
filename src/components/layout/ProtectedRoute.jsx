@@ -5,7 +5,7 @@ import styles from './ProtectedRoute.module.css';
 // import { toast } from 'react-hot-toast'; // Assuming we might use this later
 
 const ProtectedRoute = ({ requiredRole, children }) => {
-  const { user, loading } = useAuth();
+  const { user, role, isOwner, loading } = useAuth();
 
   if (loading) {
     return (
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ requiredRole, children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user.role !== requiredRole && user.role !== 'owner') {
+  if (requiredRole && role !== requiredRole && !isOwner) {
     // Optional: show a toast notification here
     // toast.error('Anda tidak memiliki akses ke halaman ini');
     return <Navigate to="/dashboard" replace />;

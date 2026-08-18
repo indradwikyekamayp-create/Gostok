@@ -16,11 +16,11 @@ import { ROLES } from '../../constants/roles';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
-  const { user, logout } = useAuth();
+  const { userData, isOwner, logout } = useAuth();
   
-  // Default values to prevent errors if user is null during loading/transition
-  const userRole = user?.role || 'staff';
-  const userName = user?.name || 'Pengguna';
+  // Fetch from userData instead of user
+  const userRole = userData?.role || 'kasir';
+  const userName = userData?.nama || 'Pengguna';
   
   const getInitials = (name) => {
     return name
@@ -33,9 +33,9 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
 
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { path: '/produk', label: 'Master Produk', icon: <Package size={20} /> },
-    { path: '/masuk', label: 'Barang Masuk', icon: <PackagePlus size={20} /> },
-    { path: '/jual', label: 'Transaksi Jual', icon: <ShoppingCart size={20} /> },
+    { path: '/master-produk', label: 'Master Produk', icon: <Package size={20} /> },
+    { path: '/barang-masuk', label: 'Barang Masuk', icon: <PackagePlus size={20} /> },
+    { path: '/transaksi-jual', label: 'Transaksi Jual', icon: <ShoppingCart size={20} /> },
     { path: '/pelanggan', label: 'Pelanggan', icon: <Users size={20} /> },
     { path: '/riwayat', label: 'Riwayat', icon: <History size={20} /> },
   ];
@@ -60,7 +60,7 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
       >
         <div className={styles.header}>
           <div className={styles.logo}>
-            <span className={styles.logoText}>GoStok</span>
+            <img src="/logo/AyoStock!.png" alt="AyoStock!" className={styles.logoImg} />
           </div>
           {isMobile && (
             <button className={styles.closeButton} onClick={() => setMobileMenuOpen(false)}>

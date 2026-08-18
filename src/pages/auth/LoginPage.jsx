@@ -46,7 +46,7 @@ const LoginPage = () => {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h1 className={styles.logo}>GoStok</h1>
+          <img src="/logo/AyoStock!.png" alt="AyoStock!" className={styles.logoImg} />
           <p className={styles.subtitle}>PT. WELINDO SUKSES BERSAMA</p>
         </div>
         

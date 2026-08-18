@@ -8,6 +8,9 @@
 }
 
 html {
+  /* Set root font size explicitly to 11.7px (simulating 90% browser zoom of the previous 13px). 
+     This scales 1rem to 11.7px, making the entire UI more compact and perfectly matching the user's preferred scale. */
+  font-size: 11.7px;
   -moz-text-size-adjust: none;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;

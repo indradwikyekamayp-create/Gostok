@@ -1,0 +1,120 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  border: 1px solid var(--color-border-light, #eee);
+  border-radius: var(--radius-lg, 0.5rem);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--color-surface, #fff);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-color: var(--color-primary-200, #bfdbfe);
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.companyName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary, hsl(215, 50%, 30%));
+}
+
+.badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #666);
+  background-color: var(--color-bg, #f4f6f8);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  border: 1px solid var(--color-border, #ccc);
+}
+
+.details {
+  color: var(--color-text-secondary, #666);
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.details p {
+  margin: 0;
+}
+
+.details strong {
+  color: var(--color-text, #333);
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-light, #f0f0f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.debtInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.debtLabel {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.debtValue {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text, #333);
+}
+
+.debtBadge {
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.debtNone {
+  background-color: var(--color-success, hsl(145, 55%, 42%));
+}
+
+.debtHigh {
+  background-color: var(--color-danger, hsl(0, 70%, 50%));
+}
+
+.debtMedium {
+  background-color: var(--color-warning, hsl(38, 92%, 50%));
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-secondary, #666);
+  background-color: var(--color-surface, #fff);
+  border-radius: var(--radius-lg, 0.5rem);
+  border: 1px dashed var(--color-border, #ccc);
+}

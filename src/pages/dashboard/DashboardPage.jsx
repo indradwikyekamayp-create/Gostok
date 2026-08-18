@@ -5,10 +5,7 @@ import KasirDashboard from './KasirDashboard';
 import styles from './DashboardPage.module.css';
 
 const DashboardPage = () => {
-  const { user } = useAuth();
-  
-  // For now, if role is owner, show OwnerDashboard, else KasirDashboard
-  const isOwner = user?.role === 'owner';
+  const { isOwner } = useAuth();
 
   return (
     <div className={styles.container}>

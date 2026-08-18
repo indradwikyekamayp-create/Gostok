@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { History, Keyboard } from 'lucide-react';
 import styles from './BarangMasukPage.module.css';
 import ScanInput from './ScanInput';
 import StockInList from './StockInList';
@@ -30,7 +31,20 @@ const BarangMasukPage = () => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>Barang Masuk</h1>
+        <div className={styles.titleArea}>
+          <h1>Barang Masuk</h1>
+          <p className={styles.subtitle}>Catat produk yang masuk ke gudang</p>
+        </div>
+        <div className={styles.headerActions}>
+          <button className={styles.btnSecondary}>
+            <History size={18} />
+            Riwayat Barang Masuk
+          </button>
+          <button className={styles.btnPrimary}>
+            <Keyboard size={18} />
+            Input Manual
+          </button>
+        </div>
       </header>
 
       <section className={styles.scanSection}>

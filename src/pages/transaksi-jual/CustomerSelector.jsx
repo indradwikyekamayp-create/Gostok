@@ -8,10 +8,9 @@ const MOCK_CUSTOMERS = [
   { id: 'c3', nama_perusahaan: 'UD Makmur Sentosa', nama_pic: 'Pak Ahmad', total_hutang_berjalan: 12500000 },
 ];
 
-export default function CustomerSelector({ selectedCustomer, onSelectCustomer }) {
+export default function CustomerSelector({ selectedCustomer, onSelectCustomer, customers, onAddCustomerClick }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -90,7 +89,7 @@ export default function CustomerSelector({ selectedCustomer, onSelectCustomer })
                   type="button"
                   className={styles.addBtn}
                   onClick={() => {
-                    alert('Fitur tambah pelanggan baru belum diimplementasi');
+                    onAddCustomerClick();
                     setIsOpen(false);
                   }}
                 >

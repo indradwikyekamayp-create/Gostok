@@ -1,51 +1,60 @@
 import React, { useState } from 'react';
 import CustomerSelector from './CustomerSelector';
+import ProductGrid from './ProductGrid';
 import CartPanel from './CartPanel';
-import PaymentPanel from './PaymentPanel';
 import NotaPreview from './NotaPreview';
+import PelangganForm from '../pelanggan/PelangganForm';
 import styles from './TransaksiJualPage.module.css';
 
 // Mock Product Database for barcode scanning
 const MOCK_PRODUCTS = [
-  { id: 'p1', kode_barang: '899999900001', nama_barang: 'Beras Pandan Wangi 5kg', harga_jual: 75000 },
-  { id: 'p2', kode_barang: '899999900002', nama_barang: 'Minyak Goreng Bimoli 2L', harga_jual: 35000 },
-  { id: 'p3', kode_barang: '899999900003', nama_barang: 'Gula Pasir Gulaku 1kg', harga_jual: 16000 },
-  { id: 'p4', kode_barang: '899999900004', nama_barang: 'Indomie Goreng', harga_jual: 3000 },
+  { id: 'p1', kode_barang: '899999900001', nama_barang: 'Beras Pandan Wangi 5kg', harga_jual: 75000, stok: 120, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80' },
+  { id: 'p2', kode_barang: '899999900002', nama_barang: 'Minyak Goreng Bimoli 2L', harga_jual: 35000, stok: 95, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?auto=format&fit=crop&w=200&q=80' },
+  { id: 'p3', kode_barang: '899999900003', nama_barang: 'Gula Pasir Gulaku 1kg', harga_jual: 16000, stok: 80, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=200&q=80' },
+  { id: 'p4', kode_barang: '899999900004', nama_barang: 'Indomie Goreng', harga_jual: 3000, stok: 240, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1612061078272-97422f283287?auto=format&fit=crop&w=200&q=80' },
+  { id: 'p5', kode_barang: '899999900005', nama_barang: 'Tepung Terigu Segitiga 1kg', harga_jual: 12000, stok: 75, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1627485937980-221c88ac04f9?auto=format&fit=crop&w=200&q=80' },
+  { id: 'p6', kode_barang: '899999900006', nama_barang: 'Susu Frisian Flag 1L', harga_jual: 17000, stok: 60, kategori: 'Minuman', image: 'https://images.unsplash.com/photo-1563636619276-24a7e6e6b7b6?auto=format&fit=crop&w=200&q=80' },
+];
+
+const INITIAL_CUSTOMERS = [
+  { id: 'c1', nama_perusahaan: 'CV Sumber Rejeki', nama_pic: 'Pak Budi', total_hutang_berjalan: 5000000 },
+  { id: 'c2', nama_perusahaan: 'PT Maju Jaya', nama_pic: 'Bu Siti', total_hutang_berjalan: 0 },
+  { id: 'c3', nama_perusahaan: 'UD Makmur Sentosa', nama_pic: 'Pak Ahmad', total_hutang_berjalan: 12500000 },
 ];
 
 export default function TransaksiJualPage() {
+  const [customers, setCustomers] = useState(INITIAL_CUSTOMERS);
   const [customer, setCustomer] = useState(null);
   const [cart, setCart] = useState([]);
-  const [paymentMethod, setPaymentMethod] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [completedTransaction, setCompletedTransaction] = useState(null);
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+
+  const handleAddToCart = (product) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.id === product.id
+            ? { ...item, qty: item.qty + 1, subtotal: (item.qty + 1) * item.harga_jual }
+            : item
+        );
+      } else {
+        return [...prevCart, { ...product, qty: 1, subtotal: product.harga_jual }];
+      }
+    });
+  };
 
   const handleScanBarcode = (barcode) => {
-    // Look up product
     const product = MOCK_PRODUCTS.find((p) => p.kode_barang === barcode);
-    
     if (product) {
-      setCart((prevCart) => {
-        const existingItem = prevCart.find((item) => item.id === product.id);
-        if (existingItem) {
-          // Increment qty
-          return prevCart.map((item) =>
-            item.id === product.id
-              ? { ...item, qty: item.qty + 1, subtotal: (item.qty + 1) * item.harga_jual }
-              : item
-          );
-        } else {
-          // Add new item
-          return [...prevCart, { ...product, qty: 1, subtotal: product.harga_jual }];
-        }
-      });
+      handleAddToCart(product);
     } else {
-      // Show error (can be a toast in a real app)
       alert('Produk dengan barcode ' + barcode + ' tidak ditemukan');
     }
   };
 
-  const handleSaveTransaction = () => {
+  const handleSaveTransaction = (paymentMethod, catatan) => {
     if (!customer || cart.length === 0 || !paymentMethod) return;
     
     setIsSaving(true);
@@ -59,6 +68,7 @@ export default function TransaksiJualPage() {
         customer,
         cart,
         paymentMethod,
+        catatan,
         grandTotal
       };
       
@@ -73,37 +83,60 @@ export default function TransaksiJualPage() {
     // Reset state for next transaction
     setCustomer(null);
     setCart([]);
-    setPaymentMethod('');
     setCompletedTransaction(null);
+  };
+
+  const handleSaveCustomer = (newCustomerData) => {
+    const newCustomer = {
+      id: `c${Date.now()}`,
+      nama_perusahaan: newCustomerData.nama_perusahaan,
+      nama_pic: newCustomerData.nama_pic || '-',
+      total_hutang_berjalan: 0
+    };
+    
+    setCustomers((prev) => [...prev, newCustomer]);
+    setCustomer(newCustomer);
+    setShowCustomerForm(false);
   };
 
   return (
     <div className={styles.pageContainer}>
       <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Kasir (Transaksi Jual)</h1>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.pageTitle}>Kasir (Transaksi Jual)</h1>
+          <p className={styles.pageSubtitle}>Tambah produk ke keranjang dan selesaikan transaksi</p>
+        </div>
         <div className={styles.headerCustomer}>
-          <CustomerSelector 
-            selectedCustomer={customer} 
-            onSelectCustomer={setCustomer} 
-          />
+          <div className={styles.customerSelectorWrapper}>
+            <CustomerSelector 
+              selectedCustomer={customer} 
+              onSelectCustomer={setCustomer}
+              customers={customers}
+              onAddCustomerClick={() => setShowCustomerForm(true)}
+            />
+          </div>
+          <button 
+            className={styles.newCustomerBtn}
+            onClick={() => setShowCustomerForm(true)}
+          >
+            + Pelanggan Baru
+          </button>
         </div>
       </header>
       
       <div className={styles.mainContent}>
         <div className={styles.leftColumn}>
-          <CartPanel 
-            cart={cart} 
-            setCart={setCart} 
-            onScanBarcode={handleScanBarcode} 
+          <ProductGrid 
+            products={MOCK_PRODUCTS} 
+            onAddToCart={handleAddToCart}
+            onScanBarcode={handleScanBarcode}
           />
         </div>
         
         <div className={styles.rightColumn}>
-          <PaymentPanel 
-            customer={customer}
-            cart={cart}
-            paymentMethod={paymentMethod}
-            setPaymentMethod={setPaymentMethod}
+          <CartPanel 
+            cart={cart} 
+            setCart={setCart} 
             onSave={handleSaveTransaction}
             isSaving={isSaving}
           />
@@ -114,6 +147,13 @@ export default function TransaksiJualPage() {
         <NotaPreview 
           transaction={completedTransaction} 
           onClose={handleCloseNota} 
+        />
+      )}
+
+      {showCustomerForm && (
+        <PelangganForm 
+          onSave={handleSaveCustomer}
+          onCancel={() => setShowCustomerForm(false)}
         />
       )}
     </div>

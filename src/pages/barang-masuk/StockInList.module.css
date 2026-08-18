@@ -1,0 +1,209 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border, #ccc);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text, #333);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.375rem);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text, #333);
+  cursor: pointer;
+  transition: var(--transition-fast, 150ms ease);
+}
+
+.filterBtn:hover {
+  background-color: var(--color-surface-hover, #f5f5f5);
+}
+
+/* Table Area */
+.tableContainer {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background-color: var(--color-surface, #fff);
+  padding: 1rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, #666);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border, #ccc);
+  z-index: 10;
+}
+
+.table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border-light, #eee);
+  font-size: 0.875rem;
+  color: var(--color-text, #333);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background-color: var(--color-surface-hover, #f9fafb);
+}
+
+/* Specific Columns */
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.productImg {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm, 0.25rem);
+  object-fit: cover;
+  border: 1px solid var(--color-border, #ccc);
+}
+
+.productImgPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm, 0.25rem);
+  background-color: var(--color-bg, #f5f5f5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted, #999);
+  font-size: 0.6rem;
+}
+
+.productName {
+  font-weight: 500;
+  color: var(--color-text, #333);
+}
+
+.qtyText {
+  color: var(--color-success, hsl(145, 55%, 42%));
+  font-weight: 700;
+}
+
+.actionCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid var(--color-border-light, #eee);
+  background: var(--color-surface, #fff);
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  transition: var(--transition-fast, 150ms ease);
+}
+
+.actionBtn:hover {
+  background-color: var(--color-surface-hover, #f5f5f5);
+  border-color: var(--color-border, #ccc);
+}
+
+.actionBtn.delete {
+  color: var(--color-danger, hsl(0, 70%, 50%));
+}
+
+.actionBtn.delete:hover {
+  background-color: var(--color-danger-light, hsl(0, 70%, 95%));
+  border-color: var(--color-danger-light, hsl(0, 70%, 95%));
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--color-text-secondary, #666);
+  text-align: center;
+  gap: 1rem;
+}
+
+.emptyState p {
+  margin: 0;
+}
+
+/* Footer */
+.footer {
+  padding: 1.25rem;
+  border-top: 1px solid var(--color-border, #ccc);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.linkBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary, hsl(215, 50%, 30%));
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}

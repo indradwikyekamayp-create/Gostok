@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import styles from './MainLayout.module.css';
 
-const MainLayout = ({ title = 'GoStok' }) => {
+const MainLayout = ({ title = 'AyoStock!' }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

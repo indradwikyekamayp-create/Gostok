@@ -7,6 +7,8 @@
   flex-direction: column;
   transition: width 0.3s ease, transform 0.3s ease;
   z-index: 40;
+  position: sticky;
+  top: 0;
 }
 
 .collapsed {
@@ -27,15 +29,15 @@
   justify-content: center;
 }
 
-.logoText {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-primary, hsl(215, 50%, 30%));
-  letter-spacing: -0.025em;
+.logoImg {
+  max-height: 70px;
+  width: 100%;
+  object-fit: contain;
 }
 
-.collapsed .logoText {
-  display: none;
+.collapsed .logoImg {
+  display: block;
+  padding: 0 0.5rem;
 }
 
 .closeButton {

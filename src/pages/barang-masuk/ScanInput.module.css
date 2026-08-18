@@ -1,0 +1,444 @@
+.scanWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* === Top Scan Area === */
+.scanTop {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .scanTop {
+    flex-direction: column;
+  }
+}
+
+.modeToggleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.modeLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.toggleGroup {
+  display: flex;
+  background-color: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.5rem);
+  overflow: hidden;
+  height: 100%;
+}
+
+.toggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #666);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast, 150ms ease);
+}
+
+.toggleBtn.active {
+  background-color: var(--color-primary, hsl(215, 50%, 30%));
+  color: #fff;
+}
+
+.scanInputArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scanBarContainer {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 0.5rem;
+  background-color: var(--color-surface, #fff);
+  height: 100%;
+}
+
+.scanIcon {
+  color: var(--color-text-secondary, #666);
+  margin: 0 0.75rem;
+}
+
+.scanInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--color-text, #333);
+  background: transparent;
+}
+
+.scanInput::placeholder {
+  color: var(--color-text-muted, #999);
+}
+
+.cariBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background-color: var(--color-primary, hsl(215, 50%, 30%));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm, 0.25rem);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.scanHint {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+/* === Scanning Animation UI === */
+.scanAnimationBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--color-primary-200, hsl(215, 50%, 82%));
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 2rem;
+  background-color: var(--color-primary-50, hsl(215, 50%, 97%));
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.scanAnimationBox:focus-within {
+  border-color: var(--color-primary, hsl(215, 50%, 30%));
+}
+
+.barcodeGraphic {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.bar {
+  background-color: var(--color-text, #333);
+  height: 100%;
+}
+.bar:nth-child(1) { width: 4px; }
+.bar:nth-child(2) { width: 2px; }
+.bar:nth-child(3) { width: 6px; }
+.bar:nth-child(4) { width: 2px; }
+.bar:nth-child(5) { width: 8px; }
+.bar:nth-child(6) { width: 2px; }
+.bar:nth-child(7) { width: 4px; }
+.bar:nth-child(8) { width: 6px; }
+.bar:nth-child(9) { width: 2px; }
+.bar:nth-child(10) { width: 4px; }
+.bar:nth-child(11) { width: 2px; }
+.bar:nth-child(12) { width: 8px; }
+
+.laser {
+  position: absolute;
+  top: 0;
+  left: -10%;
+  width: 120%;
+  height: 2px;
+  background-color: var(--color-danger, hsl(0, 70%, 50%));
+  box-shadow: 0 0 4px var(--color-danger, hsl(0, 70%, 50%));
+  animation: scanLaser 2s infinite linear;
+}
+
+@keyframes scanLaser {
+  0% { top: 0; }
+  50% { top: 100%; }
+  100% { top: 0; }
+}
+
+.scanText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary, hsl(215, 50%, 30%));
+  margin: 0;
+}
+
+.scanSubtext {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+  margin-top: 0.25rem;
+}
+
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+/* === Cards === */
+.statusCards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .statusCards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  border-radius: var(--radius-lg, 0.5rem);
+  background-color: var(--color-surface, #fff);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border, #ccc);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.cardBody {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Blue Card */
+.cardBlue {
+  border: 1px solid var(--color-primary-200, hsl(215, 50%, 82%));
+}
+
+.cardBlue .cardHeader {
+  background-color: var(--color-primary-50, hsl(215, 50%, 97%));
+  color: var(--color-primary, hsl(215, 50%, 30%));
+  border-bottom-color: var(--color-primary-200, hsl(215, 50%, 82%));
+}
+
+/* Yellow Card */
+.cardYellow {
+  border: 1px solid var(--color-warning, hsl(38, 92%, 50%));
+}
+
+.cardYellow .cardHeader {
+  background-color: var(--color-warning-light, hsl(38, 92%, 94%));
+  color: var(--color-warning-hover, hsl(38, 92%, 44%));
+  border-bottom-color: var(--color-warning, hsl(38, 92%, 50%));
+}
+
+/* Product Info (Blue) */
+.productInfoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.productImage {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-md, 0.375rem);
+  border: 1px solid var(--color-border, #ccc);
+}
+
+.productDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.productNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.productName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text, #333);
+  margin: 0;
+}
+
+.badge {
+  background-color: var(--color-bg, #f5f5f5);
+  color: var(--color-text-secondary, #666);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.productMeta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.metaLabel {
+  color: var(--color-text-secondary, #666);
+}
+
+.metaValue {
+  color: var(--color-text, #333);
+  font-weight: 500;
+}
+
+/* Form Fields */
+.inputGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text, #333);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.375rem);
+  font-size: 1rem;
+  outline: none;
+  background-color: var(--color-surface, #fff);
+  color: var(--color-text, #333);
+}
+
+.input:disabled {
+  background-color: var(--color-bg, #f5f5f5);
+  color: var(--color-text-secondary, #666);
+}
+
+.input:focus {
+  border-color: var(--color-primary, hsl(215, 50%, 30%));
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.375rem);
+  overflow: hidden;
+  height: 42px;
+}
+
+.stepBtn {
+  width: 42px;
+  background-color: var(--color-surface, #fff);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text, #333);
+}
+
+.stepBtn:hover {
+  background-color: var(--color-bg, #f5f5f5);
+}
+
+.stepInput {
+  flex: 1;
+  width: 0; /* allows it to shrink */
+  border: none;
+  border-left: 1px solid var(--color-border, #ccc);
+  border-right: 1px solid var(--color-border, #ccc);
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+}
+
+/* Action Buttons inside Cards */
+.btnAddBlue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--color-primary, hsl(215, 50%, 30%));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md, 0.375rem);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast, 150ms ease);
+}
+
+.btnAddBlue:hover {
+  background-color: var(--color-primary-hover, hsl(215, 50%, 25%));
+}
+
+.btnAddYellow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: hsl(38, 92%, 50%); /* Using direct color for the orange/yellow btn */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md, 0.375rem);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast, 150ms ease);
+}
+
+.btnAddYellow:hover {
+  background-color: hsl(38, 92%, 44%);
+}
+
+.cardHint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-primary, hsl(215, 50%, 30%));
+  margin-top: -0.5rem;
+}
