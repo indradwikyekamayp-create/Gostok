@@ -4,8 +4,23 @@ import styles from './ScanInput.module.css';
 
 // Mock DB
 const MOCK_DB = {
-  '8999999999999': { barcode: '8999999999999', nama_barang: 'Indomie Goreng', satuan: 'pcs', stok: 240, img: '/placeholder.jpg' },
-  '8998888888888': { barcode: '8998888888888', nama_barang: 'Minyak Bimoli 2L', satuan: 'pcs', stok: 85, img: null }
+  '8999999999999': { 
+    barcode: '8999999999999', 
+    nama_barang: 'Indomie Goreng', 
+    satuan: 'pcs', 
+    stok: 240, 
+    img: '/placeholder.jpg',
+    has_multi_satuan: true,
+    satuan_besar: 'dus',
+    konversi: 40
+  },
+  '8998888888888': { 
+    barcode: '8998888888888', 
+    nama_barang: 'Minyak Bimoli 2L', 
+    satuan: 'pcs', 
+    stok: 85, 
+    img: null 
+  }
 };
 
 const ScanInput = ({ onScan, onNewProduct }) => {
@@ -18,6 +33,7 @@ const ScanInput = ({ onScan, onNewProduct }) => {
   
   // Form states for existing product
   const [qty, setQty] = useState(1);
+  const [selectedUnit, setSelectedUnit] = useState(''); // 'dasar' or 'besar'
   
   // Form states for new product
   const [newProductName, setNewProductName] = useState('');
@@ -41,6 +57,8 @@ const ScanInput = ({ onScan, onNewProduct }) => {
       setScannedProduct(product);
       setNotFoundBarcode(null);
       setQty(1);
+      // Default to satuan besar if it exists
+      setSelectedUnit(product.has_multi_satuan ? 'besar' : 'dasar');
     } else {
       setScannedProduct(null);
       setNotFoundBarcode(barcode);
@@ -54,10 +72,20 @@ const ScanInput = ({ onScan, onNewProduct }) => {
     e.preventDefault();
     if (!qty || isNaN(qty) || Number(qty) <= 0) return;
 
+    // Hitung konversi jika memilih satuan besar
+    let finalQty = Number(qty);
+    let finalUnit = scannedProduct.satuan;
+    let keterangan = '';
+
+    if (scannedProduct.has_multi_satuan && selectedUnit === 'besar') {
+      finalQty = Number(qty) * scannedProduct.konversi;
+      keterangan = `(Masuk: ${qty} ${scannedProduct.satuan_besar})`;
+    }
+
     onScan({
       ...scannedProduct,
-      qty: Number(qty),
-      keterangan: '',
+      qty: finalQty,
+      keterangan: keterangan,
       waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     });
 
@@ -154,7 +182,8 @@ const ScanInput = ({ onScan, onNewProduct }) => {
                   autoFocus
                   onBlur={(e) => {
                     // Always try to keep focus if in scan mode so it's ready for hardware scanner
-                    if (mode === 'scan') {
+                    // BUT only if we are not currently interacting with a result card
+                    if (mode === 'scan' && !scannedProduct && !notFoundBarcode) {
                       setTimeout(() => e.target.focus(), 100);
                     }
                   }}
@@ -203,7 +232,22 @@ const ScanInput = ({ onScan, onNewProduct }) => {
                 <form onSubmit={handleAddExisting}>
                   <div className={styles.inputGrid}>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>Jumlah Masuk</label>
+                      <label className={styles.label}>Satuan Masuk</label>
+                      {scannedProduct.has_multi_satuan ? (
+                        <select 
+                          className={styles.input} 
+                          value={selectedUnit} 
+                          onChange={(e) => setSelectedUnit(e.target.value)}
+                        >
+                          <option value="besar">{scannedProduct.satuan_besar} (1 = {scannedProduct.konversi} {scannedProduct.satuan})</option>
+                          <option value="dasar">{scannedProduct.satuan} (Eceran)</option>
+                        </select>
+                      ) : (
+                        <input type="text" className={styles.input} value={scannedProduct.satuan} disabled />
+                      )}
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Jumlah</label>
                       <div className={styles.stepper}>
                         <button type="button" className={styles.stepBtn} onClick={() => setQty(Math.max(1, qty - 1))}>
                           <Minus size={16} />
@@ -220,10 +264,6 @@ const ScanInput = ({ onScan, onNewProduct }) => {
                         </button>
                       </div>
                     </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Satuan</label>
-                      <input type="text" className={styles.input} value={scannedProduct.satuan} disabled />
-                    </div>
                   </div>
                   
                   <div style={{ marginTop: '1.5rem' }}>
@@ -231,10 +271,17 @@ const ScanInput = ({ onScan, onNewProduct }) => {
                       <Plus size={18} />
                       Tambahkan ke Daftar
                     </button>
-                    <p className={styles.cardHint} style={{ marginTop: '0.75rem' }}>
-                      <Info size={14} />
-                      Produk akan ditambahkan ke daftar barang masuk
-                    </p>
+                    {scannedProduct.has_multi_satuan && selectedUnit === 'besar' ? (
+                      <p className={styles.cardHint} style={{ marginTop: '0.75rem', color: 'hsl(215, 50%, 30%)', fontWeight: '500' }}>
+                        <Info size={14} />
+                        Sistem otomatis menambahkan {qty * scannedProduct.konversi} {scannedProduct.satuan} ke stok gudang.
+                      </p>
+                    ) : (
+                      <p className={styles.cardHint} style={{ marginTop: '0.75rem' }}>
+                        <Info size={14} />
+                        Produk akan ditambahkan ke daftar barang masuk
+                      </p>
+                    )}
                   </div>
                 </form>
               </div>
@@ -269,7 +316,7 @@ const ScanInput = ({ onScan, onNewProduct }) => {
 
                   <div className={styles.inputGrid}>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>Satuan</label>
+                      <label className={styles.label}>Satuan (Dasar)</label>
                       <select 
                         className={styles.input}
                         value={newProductUnit}
@@ -278,6 +325,7 @@ const ScanInput = ({ onScan, onNewProduct }) => {
                         <option value="pcs">pcs</option>
                         <option value="dus">dus</option>
                         <option value="kg">kg</option>
+                        <option value="liter">liter</option>
                       </select>
                     </div>
                     <div className={styles.formGroup}>
@@ -298,6 +346,9 @@ const ScanInput = ({ onScan, onNewProduct }) => {
                       <Save size={18} />
                       Simpan Produk & Tambahkan
                     </button>
+                    <p className={styles.cardHint} style={{ marginTop: '0.75rem' }}>
+                      *Untuk setting konversi Dus, bisa dilakukan di Master Produk nanti.
+                    </p>
                   </div>
                 </form>
               </div>

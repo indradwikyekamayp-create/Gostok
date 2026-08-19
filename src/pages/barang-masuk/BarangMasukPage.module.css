@@ -76,11 +76,34 @@
   background-color: var(--color-primary-hover, hsl(215, 50%, 25%));
 }
 
+.contentArea {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0; /* Important for scrollable children */
+}
+
+@media (max-width: 1024px) {
+  .contentArea {
+    flex-direction: column;
+  }
+}
+
 .scanSection {
+  flex: 0 0 450px; /* Fixed width or you can use flex: 1 */
   background-color: var(--color-surface, #fff);
   padding: 1.5rem;
   border-radius: var(--radius-lg, 0.5rem);
   box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+  overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .scanSection {
+    flex: auto;
+    width: 100%;
+  }
 }
 
 .listSection {

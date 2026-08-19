@@ -47,17 +47,19 @@ const BarangMasukPage = () => {
         </div>
       </header>
 
-      <section className={styles.scanSection}>
-        <ScanInput onScan={handleAddItem} onNewProduct={handleNewProduct} />
-      </section>
+      <div className={styles.contentArea}>
+        <section className={styles.scanSection}>
+          <ScanInput onScan={handleAddItem} onNewProduct={handleNewProduct} />
+        </section>
 
-      <section className={styles.listSection}>
-        <StockInList 
-          items={items} 
-          onEditQty={handleEditQty}
-          onDelete={handleDelete}
-        />
-      </section>
+        <section className={styles.listSection}>
+          <StockInList 
+            items={items} 
+            onEditQty={handleEditQty}
+            onDelete={handleDelete}
+          />
+        </section>
+      </div>
     </div>
   );
 };

@@ -11,15 +11,22 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
     harga_jual: product?.harga_jual || '',
     harga_modal: product?.harga_modal || '',
     stok: product?.stok || 0,
-    foto: product?.foto || null
+    foto: product?.foto || null,
+    // Multi-Satuan Fields
+    has_multi_satuan: product?.has_multi_satuan || false,
+    satuan_besar: product?.satuan_besar || '',
+    konversi: product?.konversi || ''
   });
   const [loading, setLoading] = useState(false);
 
   const isEditing = !!product;
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -31,7 +38,8 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
         ...formData,
         harga_jual: Number(formData.harga_jual),
         harga_modal: Number(formData.harga_modal),
-        stok: Number(formData.stok)
+        stok: Number(formData.stok),
+        konversi: formData.has_multi_satuan ? Number(formData.konversi) : 1
       });
       setLoading(false);
     }, 500);
@@ -83,15 +91,66 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
         </div>
       </div>
 
-      <div className={styles.field}>
-        <label>Satuan (contoh: pcs, dus)</label>
-        <input 
-          type="text" 
-          name="satuan" 
-          value={formData.satuan} 
-          onChange={handleChange} 
-          required 
-        />
+      {/* Satuan Area */}
+      <div className={styles.sectionCard}>
+        <h3 className={styles.sectionTitle}>Pengaturan Satuan</h3>
+        
+        <div className={styles.field}>
+          <label>Satuan Dasar (Eceran, cth: pcs)</label>
+          <input 
+            type="text" 
+            name="satuan" 
+            value={formData.satuan} 
+            onChange={handleChange} 
+            required 
+            placeholder="pcs"
+          />
+        </div>
+
+        <div className={styles.checkboxField}>
+          <input 
+            type="checkbox" 
+            id="has_multi_satuan"
+            name="has_multi_satuan"
+            checked={formData.has_multi_satuan}
+            onChange={handleChange}
+          />
+          <label htmlFor="has_multi_satuan">Produk ini memiliki satuan besar (Grosir / Dus / Pack)</label>
+        </div>
+
+        {formData.has_multi_satuan && (
+          <div className={styles.multiSatuanBox}>
+            <div className={styles.row}>
+              <div className={styles.field}>
+                <label>Satuan Besar (cth: dus)</label>
+                <input 
+                  type="text" 
+                  name="satuan_besar" 
+                  value={formData.satuan_besar} 
+                  onChange={handleChange} 
+                  required={formData.has_multi_satuan}
+                  placeholder="dus"
+                />
+              </div>
+              <div className={styles.field}>
+                <label>Isi per {formData.satuan_besar || 'Satuan Besar'} (Konversi)</label>
+                <div className={styles.inputWithSuffix}>
+                  <input 
+                    type="number" 
+                    name="konversi" 
+                    value={formData.konversi} 
+                    onChange={handleChange} 
+                    required={formData.has_multi_satuan}
+                    min="2"
+                    placeholder="24"
+                  />
+                  <span className={styles.suffix}>{formData.satuan || 'pcs'}</span>
+                </div>
+              </div>
+            </div>
+            <p className={styles.helpText}>1 {formData.satuan_besar || 'Satuan Besar'} sama dengan {formData.konversi || 'X'} {formData.satuan || 'Satuan Dasar'}. Stok akan dihitung dalam satuan dasar.</p>
+          </div>
+        )}
       </div>
 
       {isOwner && (
@@ -107,7 +166,7 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
             />
           </div>
           <div className={styles.field}>
-            <label>Harga Jual (Rp)</label>
+            <label>Harga Jual (Rp) - Satuan Dasar</label>
             <input 
               type="number" 
               name="harga_jual" 
@@ -121,7 +180,7 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
 
       {!isEditing && (
         <div className={styles.field}>
-          <label>Stok Awal</label>
+          <label>Stok Awal ({formData.satuan || 'satuan'})</label>
           <input 
             type="number" 
             name="stok" 

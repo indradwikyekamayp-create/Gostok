@@ -1,70 +1,154 @@
 .form {
-  padding: 24px;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .form h2 {
   margin-top: 0;
-  margin-bottom: 8px;
-  color: #333;
+  margin-bottom: 0.5rem;
+  color: var(--color-text, #333);
+  font-size: 1.25rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
   flex: 1;
 }
 
 .field label {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #555;
+  color: var(--color-text-secondary, #555);
 }
 
 .field input, .field select {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.375rem);
+  font-size: 0.875rem;
   font-family: inherit;
 }
 
 .field input:disabled {
-  background-color: #f5f5f5;
-  color: #888;
+  background-color: var(--color-bg, #f5f5f5);
+  color: var(--color-text-muted, #888);
 }
 
 .row {
   display: flex;
-  gap: 16px;
+  gap: 1rem;
+}
+
+.sectionCard {
+  border: 1px solid var(--color-border-light, #eee);
+  border-radius: var(--radius-lg, 0.5rem);
+  padding: 1rem;
+  background-color: var(--color-surface, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary, hsl(215, 50%, 30%));
+  margin: 0;
+  border-bottom: 1px solid var(--color-border-light, #eee);
+  padding-bottom: 0.5rem;
+}
+
+.checkboxField {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkboxField input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.checkboxField label {
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--color-text, #333);
+}
+
+.multiSatuanBox {
+  background-color: var(--color-bg, #f9fafb);
+  border: 1px dashed var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.375rem);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inputWithSuffix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-md, 0.375rem);
+  overflow: hidden;
+}
+
+.inputWithSuffix input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+}
+
+.inputWithSuffix input:focus {
+  outline: none;
+}
+
+.suffix {
+  padding: 0.625rem 0.75rem;
+  background-color: var(--color-bg, #f5f5f5);
+  border-left: 1px solid var(--color-border, #ccc);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  font-weight: 500;
+}
+
+.helpText {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #666);
+  font-style: italic;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-light, #eee);
 }
 
 .cancelBtn, .saveBtn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 16px;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md, 0.375rem);
+  font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
   border: none;
 }
 
 .cancelBtn {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: var(--color-bg, #f0f0f0);
+  color: var(--color-text, #333);
 }
 
 .saveBtn {
-  background-color: hsl(215, 50%, 30%);
+  background-color: var(--color-primary, hsl(215, 50%, 30%));
   color: white;
 }
 
