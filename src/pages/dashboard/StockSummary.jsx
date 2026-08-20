@@ -3,15 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Card from '../../components/common/Card';
 import styles from './StockSummary.module.css';
 
-const StockSummary = () => {
-  // Mock data for stock summary
-  const data = [
-    { name: 'Stok Aman', value: 240, color: '#3b82f6', percentage: '75%' },
-    { name: 'Stok Menipis', value: 12, color: '#f59e0b', percentage: '4%' },
-    { name: 'Stok Habis', value: 8, color: '#ef4444', percentage: '2%' },
-    { name: 'Tidak Aktif', value: 60, color: '#94a3b8', percentage: '19%' },
-  ];
-
+const StockSummary = ({ data = [] }) => {
   const totalProducts = data.reduce((sum, item) => sum + item.value, 0);
 
   const CustomTooltip = ({ active, payload }) => {

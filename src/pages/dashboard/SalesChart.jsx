@@ -43,18 +43,7 @@ const CustomTooltip = ({ active, payload, label, metric }) => {
 };
 
 const SalesChart = ({ data, metric = 'total' }) => {
-  // Mock data for initial rendering until Firebase is connected
-  const defaultData = [
-    { date: 'Senin', total: 1500000, count: 12 },
-    { date: 'Selasa', total: 2300000, count: 18 },
-    { date: 'Rabu', total: 1800000, count: 15 },
-    { date: 'Kamis', total: 2900000, count: 24 },
-    { date: 'Jumat', total: 2100000, count: 17 },
-    { date: 'Sabtu', total: 3500000, count: 30 },
-    { date: 'Minggu', total: 4200000, count: 35 }
-  ];
-
-  const chartData = data && data.length > 0 ? data : defaultData;
+  const chartData = data || [];
 
   const yAxisFormatter = (value) => {
     if (metric === 'total') return `Rp ${(value/1000000).toFixed(1)}Jt`;

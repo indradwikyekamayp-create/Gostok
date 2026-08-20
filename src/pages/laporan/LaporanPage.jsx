@@ -4,6 +4,7 @@ import LaporanPenjualan from './LaporanPenjualan';
 import LaporanStok from './LaporanStok';
 import LaporanPiutang from './LaporanPiutang';
 import LaporanKeuntungan from './LaporanKeuntungan';
+import DateRangePicker from '../../components/common/DateRangePicker';
 
 const LaporanPage = () => {
   const [activeTab, setActiveTab] = useState('penjualan');
@@ -53,18 +54,12 @@ const LaporanPage = () => {
         
         {(activeTab === 'penjualan' || activeTab === 'keuntungan') && (
           <div className={styles.dateFilter}>
-            <input 
-              type="date" 
-              className={styles.dateInput}
-              value={dateRange.startDate}
-              onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-            />
-            <span className={styles.dateSeparator}>-</span>
-            <input 
-              type="date" 
-              className={styles.dateInput}
-              value={dateRange.endDate}
-              onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+            <DateRangePicker 
+              label=""
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+              onStartDateChange={(val) => setDateRange({...dateRange, startDate: val})}
+              onEndDateChange={(val) => setDateRange({...dateRange, endDate: val})}
             />
           </div>
         )}

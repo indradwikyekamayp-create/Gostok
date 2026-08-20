@@ -1,45 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, FileText, ShoppingCart, ArrowDownToLine } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
 import Card from '../../components/common/Card';
 import styles from './RecentActivity.module.css';
 
-const activities = [
-  {
-    id: 1,
-    title: 'Stok menipis: Indomie Goreng (tersisa 10)',
-    time: '10 menit yang lalu',
-    icon: Package,
-    color: 'warning'
-  },
-  {
-    id: 2,
-    title: 'Piutang jatuh tempo: Warung Bu Ani',
-    subtitle: 'Rp 3.200.000',
-    time: '2 jam yang lalu',
-    icon: FileText,
-    color: 'primary'
-  },
-  {
-    id: 3,
-    title: 'Transaksi besar hari ini',
-    subtitle: 'Rp 5.500.000',
-    time: '3 jam yang lalu',
-    icon: ShoppingCart,
-    color: 'success'
-  },
-  {
-    id: 4,
-    title: 'Barang masuk baru',
-    subtitle: '25 item',
-    time: '5 jam yang lalu',
-    icon: ArrowDownToLine,
-    color: 'purple'
-  }
-];
+const formatTimeAgo = (dateStr) => {
+  const dateObj = typeof dateStr === 'string' ? new Date(dateStr) : dateStr?.toDate ? dateStr.toDate() : new Date();
+  const diffMs = Date.now() - dateObj.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return `${diffMins} menit lalu`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs} jam lalu`;
+  return `${Math.floor(diffHrs / 24)} hari lalu`;
+};
 
 const RecentActivity = () => {
   const navigate = useNavigate();
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'transactions'), (snap) => {
+      const data = [];
+      snap.forEach(doc => {
+        const t = doc.data();
+        let dateObj = t.tanggal;
+        if (dateObj?.toDate) dateObj = dateObj.toDate();
+        else if (typeof dateObj === 'string') dateObj = new Date(dateObj);
+        else dateObj = new Date();
+
+        data.push({
+          id: doc.id,
+          title: `Penjualan ${t.noNota || doc.id}`,
+          subtitle: `Pelanggan: ${t.pelanggan?.nama || 'Umum'}`,
+          time: formatTimeAgo(dateObj),
+          icon: ShoppingCart,
+          color: 'success',
+          rawDate: dateObj
+        });
+      });
+      data.sort((a, b) => b.rawDate - a.rawDate);
+      setActivities(data.slice(0, 5));
+    });
+    return () => unsub();
+  }, []);
 
   return (
     <Card padding="lg">

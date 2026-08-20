@@ -72,12 +72,43 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
         />
       </div>
 
+      <div className={styles.field}>
+        <label>Foto Produk</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {formData.foto ? (
+            <img src={formData.foto} alt="Preview" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }} />
+          ) : (
+            <div style={{ width: '60px', height: '60px', backgroundColor: '#f4f6f8', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #ccc', color: '#999', fontSize: '12px' }}>
+              Kosong
+            </div>
+          )}
+          <input 
+            type="file" 
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                // For preview purposes, we use URL.createObjectURL.
+                // In a real app, this would be uploaded to a server.
+                const imageUrl = URL.createObjectURL(file);
+                setFormData(prev => ({ ...prev, foto: imageUrl }));
+              }
+            }}
+            style={{ fontSize: '0.875rem' }}
+          />
+        </div>
+        <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+          Gunakan foto dari kamera HP (bebas ukuran). Sistem otomatis menyesuaikan tampilannya.
+        </p>
+      </div>
+
       <div className={styles.row}>
         <div className={styles.field}>
           <label>Kategori</label>
           <select name="kategori" value={formData.kategori} onChange={handleChange}>
-            <option value="Makanan">Makanan</option>
-            <option value="Minuman">Minuman</option>
+            <option value="Makanan & Minuman">Makanan & Minuman</option>
+            <option value="Kesehatan">Kesehatan</option>
+            <option value="Kebutuhan Rumah Tangga">Kebutuhan Rumah Tangga</option>
             <option value="Lainnya">Lainnya</option>
           </select>
         </div>
@@ -153,8 +184,8 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
         )}
       </div>
 
-      {isOwner && (
-        <div className={styles.row}>
+      <div className={styles.row}>
+        {isOwner && (
           <div className={styles.field}>
             <label>Harga Modal (Rp)</label>
             <input 
@@ -165,18 +196,18 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
               required 
             />
           </div>
-          <div className={styles.field}>
-            <label>Harga Jual (Rp) - Satuan Dasar</label>
-            <input 
-              type="number" 
-              name="harga_jual" 
-              value={formData.harga_jual} 
-              onChange={handleChange} 
-              required 
-            />
-          </div>
+        )}
+        <div className={styles.field}>
+          <label>Harga Jual (Rp) - Satuan Dasar</label>
+          <input 
+            type="number" 
+            name="harga_jual" 
+            value={formData.harga_jual} 
+            onChange={handleChange} 
+            required 
+          />
         </div>
-      )}
+      </div>
 
       {!isEditing && (
         <div className={styles.field}>

@@ -1,21 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
 import ExportButtons from './ExportButtons';
 
 const LaporanStok = () => {
-  const summary = {
-    totalProduk: 450,
-    stokHabis: 12,
-    stokMenipis: 45
-  };
+  const [stockData, setStockData] = useState([]);
+  const [summary, setSummary] = useState({
+    totalProduk: 0,
+    stokHabis: 0,
+    stokMenipis: 0,
+    totalNilaiStok: 0
+  });
 
-  const stockData = [
-    { nama: 'Semen Tiga Roda', barcode: '8991234567890', kategori: 'Material Dasar', stok: 0, satuan: 'Sak', status: 'Habis' },
-    { nama: 'Cat Avian 5kg', barcode: '8999876543210', kategori: 'Cat', stok: 3, satuan: 'Kaleng', status: 'Menipis' },
-    { nama: 'Paku 5cm', barcode: '8991112223334', kategori: 'Besi & Paku', stok: 5, satuan: 'Kotak', status: 'Menipis' },
-    { nama: 'Besi Beton 10mm', barcode: '8994445556667', kategori: 'Material Dasar', stok: 150, satuan: 'Batang', status: 'Aman' },
-    { nama: 'Triplek 18mm', barcode: '8997778889990', kategori: 'Kayu', stok: 200, satuan: 'Lembar', status: 'Aman' },
-  ];
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'products'), (snapshot) => {
+      let totalProduk = 0;
+      let stokAman = 0;
+      let stokMenipis = 0;
+      let stokHabis = 0;
+      let totalNilaiStok = 0;
+      const data = [];
 
+      snapshot.forEach(doc => {
+        const product = doc.data();
+        let status = 'Aman';
+        if (product.stok === 0) status = 'Habis';
+        else if (product.stok <= 10) status = 'Menipis';
+        
+        data.push({ ...product, id: doc.id, status });
+        
+        totalProduk += 1;
+        totalNilaiStok += (product.stok || 0) * (product.harga_modal || 0);
+        
+        if (product.stok === 0) {
+          stokHabis += 1;
+        } else if (product.stok <= 10) {
+          stokMenipis += 1;
+        } else {
+          stokAman += 1;
+        }
+      });
+
+      setStockData(data);
+      setSummary({ totalProduk, stokAman, stokMenipis, stokHabis, totalNilaiStok });
+    });
+
+    return () => unsub();
+  }, []);
   const getStatusColor = (status) => {
     switch(status) {
       case 'Habis': return { bg: 'hsl(0, 70%, 90%)', color: 'hsl(0, 70%, 40%)' };
@@ -24,11 +55,10 @@ const LaporanStok = () => {
       default: return { bg: '#eee', color: '#333' };
     }
   };
-
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Laporan Stok Barang</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 style={{ fontSize: '1.125rem', margin: 0, color: 'var(--color-text, #333)' }}>Laporan Stok Barang</h3>
         <ExportButtons 
           data={stockData} 
           columns={['Nama Barang', 'Barcode', 'Kategori', 'Stok', 'Satuan', 'Status']}
@@ -36,58 +66,63 @@ const LaporanStok = () => {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-        <div style={{ padding: '20px', backgroundColor: 'hsl(215, 50%, 95%)', borderRadius: '8px', border: '1px solid hsl(215, 50%, 80%)' }}>
-          <div style={{ fontSize: '14px', color: '#555', marginBottom: '8px' }}>Total Produk</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'hsl(215, 50%, 30%)' }}>{summary.totalProduk}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Total Produk</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary, hsl(215, 50%, 30%))' }}>{summary.totalProduk}</div>
         </div>
-        <div style={{ padding: '20px', backgroundColor: 'hsl(0, 70%, 95%)', borderRadius: '8px', border: '1px solid hsl(0, 70%, 80%)' }}>
-          <div style={{ fontSize: '14px', color: '#555', marginBottom: '8px' }}>Produk Stok Habis (0)</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'hsl(0, 70%, 40%)' }}>{summary.stokHabis}</div>
+        <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Produk Stok Habis (0)</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-danger-hover, hsl(0, 70%, 40%))' }}>{summary.stokHabis}</div>
         </div>
-        <div style={{ padding: '20px', backgroundColor: 'hsl(38, 92%, 95%)', borderRadius: '8px', border: '1px solid hsl(38, 92%, 80%)' }}>
-          <div style={{ fontSize: '14px', color: '#555', marginBottom: '8px' }}>Produk Menipis (&lt;10)</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'hsl(38, 92%, 40%)' }}>{summary.stokMenipis}</div>
+        <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Produk Menipis (&lt;10)</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-warning-hover, hsl(38, 92%, 40%))' }}>{summary.stokMenipis}</div>
         </div>
       </div>
 
-      <div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
-            <tr style={{ backgroundColor: '#f0f0f0', borderBottom: '2px solid #ddd' }}>
-              <th style={{ padding: '12px' }}>Nama Barang</th>
-              <th style={{ padding: '12px' }}>Barcode</th>
-              <th style={{ padding: '12px' }}>Kategori</th>
-              <th style={{ padding: '12px', textAlign: 'right' }}>Stok</th>
-              <th style={{ padding: '12px' }}>Satuan</th>
-              <th style={{ padding: '12px', textAlign: 'center' }}>Status</th>
+            <tr>
+              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Nama Barang</th>
+              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Barcode</th>
+              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Kategori</th>
+              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'right' }}>Stok</th>
+              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Satuan</th>
+              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>Status</th>
             </tr>
           </thead>
           <tbody>
-            {stockData.map((row, i) => {
+            {stockData.length > 0 ? stockData.map((row, i) => {
               const statusStyle = getStatusColor(row.status);
               return (
-                <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                  <td style={{ padding: '12px' }}>{row.nama}</td>
-                  <td style={{ padding: '12px' }}>{row.barcode}</td>
-                  <td style={{ padding: '12px' }}>{row.kategori}</td>
-                  <td style={{ padding: '12px', textAlign: 'right', fontWeight: row.stok < 10 ? 'bold' : 'normal', color: row.stok === 0 ? 'hsl(0, 70%, 50%)' : 'inherit' }}>{row.stok}</td>
-                  <td style={{ padding: '12px' }}>{row.satuan}</td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                <tr key={i} style={{ transition: 'background-color 150ms ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary-50, #f5f8ff)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.nama}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.barcode}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.kategori}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'right', fontWeight: row.stok < 10 ? 'bold' : 'normal', color: row.stok === 0 ? 'var(--color-danger-hover, hsl(0, 70%, 40%))' : 'inherit' }}>{row.stok}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.satuan}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>
                     <span style={{ 
                       backgroundColor: statusStyle.bg, 
                       color: statusStyle.color,
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: 'var(--radius-full, 0.75rem)',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      display: 'inline-block'
                     }}>
                       {row.status}
                     </span>
                   </td>
                 </tr>
               );
-            })}
+            }) : (
+              <tr>
+                <td colSpan="6" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>Belum ada data stok</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

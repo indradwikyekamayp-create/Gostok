@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, LogIn } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/common/Button';
 import styles from './LoginPage.module.css';
@@ -44,59 +44,76 @@ const LoginPage = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <img src="/logo/AyoStock!.png" alt="AyoStock!" className={styles.logoImg} />
-          <p className={styles.subtitle}>PT. WELINDO SUKSES BERSAMA</p>
-        </div>
-        
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>Email</label>
-            <div className={styles.inputWrapper}>
-              <Mail className={styles.icon} size={20} />
-              <input
-                id="email"
-                type="email"
-                ref={emailRef}
-                className={styles.input}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@contoh.com"
-                disabled={loading}
-              />
+      {/* Animated Background Blobs */}
+      <div className={styles.blob} style={{ top: '-10%', left: '-10%', animationDelay: '0s' }}></div>
+      <div className={styles.blob} style={{ top: '40%', right: '-10%', animationDelay: '2s', background: 'linear-gradient(to right, #3b82f6, #93c5fd)' }}></div>
+      <div className={styles.blob} style={{ bottom: '-20%', left: '20%', animationDelay: '4s', background: 'linear-gradient(to right, #8b5cf6, #d8b4fe)' }}></div>
+      
+      <div className={styles.cardWrapper}>
+        <div className={styles.card}>
+          <div className={styles.header}>
+            <div className={styles.logoWrapper}>
+              <img src="/logo/AyoStock!.png" alt="AyoStock!" className={styles.logoImg} />
             </div>
+            <p className={styles.subtitle}>Selamat Datang di Portal Manajemen<br/><strong>PT. WELINDO SUKSES BERSAMA</strong></p>
           </div>
           
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>Password / PIN</label>
-            <div className={styles.inputWrapper}>
-              <Lock className={styles.icon} size={20} />
-              <input
-                id="password"
-                type="password"
-                className={styles.input}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Masukkan password atau PIN"
-                disabled={loading}
-              />
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>Email Akses</label>
+              <div className={styles.inputWrapper}>
+                <Mail className={styles.icon} size={18} />
+                <input
+                  id="email"
+                  type="email"
+                  ref={emailRef}
+                  className={styles.input}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@welindo.com"
+                  disabled={loading}
+                />
+              </div>
             </div>
-          </div>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="password" className={styles.label}>Kata Sandi</label>
+              <div className={styles.inputWrapper}>
+                <Lock className={styles.icon} size={18} />
+                <input
+                  id="password"
+                  type="password"
+                  className={styles.input}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Masukkan kata sandi"
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-          <div style={{ marginTop: '2rem' }}>
-            <Button 
-              type="submit" 
-              variant="primary" 
-              fullWidth 
-              loading={loading}
-            >
-              Masuk
-            </Button>
-          </div>
+            {error && <div className={styles.error}>{error}</div>}
 
-          {error && <div className={styles.error}>{error}</div>}
-        </form>
+            <div className={styles.submitWrapper}>
+              <button 
+                type="submit" 
+                className={`${styles.submitBtn} ${loading ? styles.loading : ''}`}
+                disabled={loading}
+              >
+                {loading ? 'Memverifikasi...' : (
+                  <>
+                    <span>Masuk ke Sistem</span>
+                    <LogIn size={18} />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+          
+          <div className={styles.footer}>
+            <p>&copy; {new Date().getFullYear()} GoStok. All rights reserved.</p>
+          </div>
+        </div>
       </div>
     </div>
   );

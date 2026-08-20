@@ -5,11 +5,11 @@ import KasirDashboard from './KasirDashboard';
 import styles from './DashboardPage.module.css';
 
 const DashboardPage = () => {
-  const { isOwner } = useAuth();
+  const { isOwner, isAdmin } = useAuth();
 
   return (
     <div className={styles.container}>
-      {isOwner ? <OwnerDashboard /> : <KasirDashboard />}
+      {isOwner || isAdmin ? <OwnerDashboard /> : <KasirDashboard />}
     </div>
   );
 };

@@ -1,25 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Package, CheckCircle, AlertCircle, XCircle, Search, Filter, LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useAuth } from '../../hooks/useAuth';
 import styles from './MasterProdukPage.module.css';
 import ProductGrid from './ProductGrid';
 import ProductForm from './ProductForm';
 
-// Mock data (extended)
-const MOCK_PRODUCTS = [
-  { barcode: '8999999999999', nama_barang: 'Indomie Goreng', kategori: 'Makanan & Minuman', asal: 'Lokal', satuan: 'pcs', harga_jual: 3500, harga_modal: 2800, stok: 240, foto: 'https://images.unsplash.com/photo-1612061078272-97422f283287?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8998888888888', nama_barang: 'Minyak Bimoli 2L', kategori: 'Kebutuhan Rumah', asal: 'Lokal', satuan: 'pcs', harga_jual: 28000, harga_modal: 25000, stok: 15, foto: 'https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8997777777777', nama_barang: 'Beras Rojolele 5kg', kategori: 'Kebutuhan Rumah', asal: 'Lokal', satuan: 'pcs', harga_jual: 64000, harga_modal: 55000, stok: 30, foto: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8996666666666', nama_barang: 'Kopi Kapal Api 165g', kategori: 'Makanan & Minuman', asal: 'Lokal', satuan: 'pcs', harga_jual: 15000, harga_modal: 12000, stok: 8, foto: 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8995555555555', nama_barang: 'Susu Ultra Milk 1L', kategori: 'Makanan & Minuman', asal: 'Lokal', satuan: 'pcs', harga_jual: 18000, harga_modal: 15000, stok: 0, foto: 'https://images.unsplash.com/photo-1563636619276-24a7e6e6b7b6?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8994444444444', nama_barang: 'Roma Biskuit Kelapa', kategori: 'Makanan & Minuman', asal: 'Lokal', satuan: 'dus', harga_jual: 12000, harga_modal: 9000, stok: 5, foto: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8993333333333', nama_barang: 'Tango Wafer Cokelat', kategori: 'Makanan & Minuman', asal: 'Lokal', satuan: 'pcs', harga_jual: 4000, harga_modal: 3000, stok: 50, foto: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8992222222222', nama_barang: 'Rinso Anti Noda 1.8kg', kategori: 'Kebutuhan Rumah', asal: 'Lokal', satuan: 'pcs', harga_jual: 39000, harga_modal: 35000, stok: 12, foto: 'https://images.unsplash.com/photo-1584824486509-11459466a203?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8991111111111', nama_barang: 'Pepsodent 190g', kategori: 'Kebutuhan Rumah', asal: 'Lokal', satuan: 'pcs', harga_jual: 9000, harga_modal: 7000, stok: 25, foto: 'https://images.unsplash.com/photo-1554189097-ffe88e998a2b?auto=format&fit=crop&w=200&q=80' },
-  { barcode: '8990000000000', nama_barang: 'Lifebuoy Total 10', kategori: 'Kebutuhan Rumah', asal: 'Lokal', satuan: 'pcs', harga_jual: 5000, harga_modal: 3500, stok: 0, foto: null },
-];
-
 const MasterProdukPage = () => {
-  const [products, setProducts] = useState(MOCK_PRODUCTS);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [categoryFilter, setCategoryFilter] = useState('Semua Kategori');
@@ -28,7 +18,22 @@ const MasterProdukPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const isOwner = true; // Mock owner status
+  const { isOwner } = useAuth();
+
+  // Fetch products from Firestore
+  useEffect(() => {
+    const productsRef = collection(db, 'products');
+    const unsubscribe = onSnapshot(productsRef, (snapshot) => {
+      const productsData = [];
+      snapshot.forEach((doc) => {
+        productsData.push({ ...doc.data(), id: doc.id });
+      });
+      setProducts(productsData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Filtering Logic
   const filteredProducts = products.filter(p => {
@@ -63,13 +68,26 @@ const MasterProdukPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleSaveProduct = (savedProduct) => {
-    if (editingProduct) {
-      setProducts(products.map(p => p.barcode === savedProduct.barcode ? savedProduct : p));
-    } else {
-      setProducts([...products, savedProduct]);
+  const handleSaveProduct = async (savedProduct) => {
+    try {
+      // Remove temporary object URL if it exists so we don't save blob URLs to Firestore
+      if (savedProduct.foto && savedProduct.foto.startsWith('blob:')) {
+        savedProduct.foto = null; 
+        // In a complete app, you'd upload this file to Firebase Storage here and save the download URL
+      }
+
+      if (editingProduct) {
+        const productRef = doc(db, 'products', editingProduct.id || editingProduct.barcode);
+        await updateDoc(productRef, savedProduct);
+      } else {
+        const productRef = doc(db, 'products', savedProduct.barcode);
+        await setDoc(productRef, savedProduct);
+      }
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Gagal menyimpan produk: " + error.message);
     }
-    setIsFormOpen(false);
   };
 
   return (
@@ -179,7 +197,7 @@ const MasterProdukPage = () => {
         <div className={styles.pillsGroupSeparator}></div>
 
         <div className={styles.pillsGroup}>
-          {['Semua Kategori', 'Makanan & Minuman', 'Kebutuhan Rumah', 'Elektronik', 'Lainnya'].map(c => (
+          {['Semua Kategori', 'Makanan & Minuman', 'Kesehatan', 'Kebutuhan Rumah Tangga', 'Lainnya'].map(c => (
             <button 
               key={c} 
               className={`${styles.pill} ${categoryFilter === c ? styles.active : ''}`}

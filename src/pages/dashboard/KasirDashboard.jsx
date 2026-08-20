@@ -1,10 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PackagePlus, ShoppingCart } from 'lucide-react';
+import { PackagePlus, ShoppingCart, Users } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Table from '../../components/common/Table';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
 import styles from './DashboardPage.module.css';
+
+import { useAuth } from '../../hooks/useAuth';
 
 const formatRupiah = (value) => {
   return new Intl.NumberFormat('id-ID', {
@@ -17,14 +21,49 @@ const formatRupiah = (value) => {
 
 const KasirDashboard = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
-  // Mock data for transactions to be replaced with Firebase later
-  const recentTransactions = [
-    { no_nota: 'TRX-20231015-001', pelanggan: 'Umum', total: 150000, status: 'Lunas', waktu: '08:15' },
-    { no_nota: 'TRX-20231015-002', pelanggan: 'Toko Budi Maju', total: 4500000, status: 'BON', waktu: '09:30' },
-    { no_nota: 'TRX-20231015-003', pelanggan: 'Warung Bu Ani', total: 850000, status: 'Lunas', waktu: '11:45' },
-    { no_nota: 'TRX-20231015-004', pelanggan: 'Umum', total: 45000, status: 'Lunas', waktu: '13:20' },
-  ];
+  const [recentTransactions, setRecentTransactions] = React.useState([]);
+
+  React.useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'transactions'), (snapshot) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const data = [];
+      snapshot.forEach((doc) => {
+        const trans = doc.data();
+        let dateObj = trans.tanggal;
+        if (dateObj && dateObj.toDate) {
+          dateObj = dateObj.toDate();
+        } else if (typeof dateObj === 'string') {
+          dateObj = new Date(dateObj);
+        } else {
+          return; // Skip invalid dates
+        }
+
+        // Only include today's transactions
+        if (dateObj >= today) {
+          const waktu = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+          data.push({
+            id: doc.id,
+            no_nota: trans.noNota || doc.id,
+            waktu,
+            pelanggan: trans.pelanggan?.nama || 'Umum',
+            total: trans.grandTotal || 0,
+            status: trans.statusPembayaran || 'Lunas',
+            rawDate: dateObj
+          });
+        }
+      });
+      
+      // Sort by newest first
+      data.sort((a, b) => b.rawDate - a.rawDate);
+      setRecentTransactions(data);
+    });
+
+    return () => unsub();
+  }, []);
 
   const transactionColumns = [
     { key: 'no_nota', label: 'No. Nota' },
@@ -49,17 +88,20 @@ const KasirDashboard = () => {
 
   return (
     <div className={styles.dashboard}>
-      <h1 className={styles.pageTitle}>Dashboard Kasir</h1>
+      <h1 className={styles.pageTitle}>{isAdmin ? 'Dashboard Admin' : 'Dashboard Kasir'}</h1>
 
-      <div className={styles.actionGrid}>
-        <Button 
-          size="xl" 
-          icon={PackagePlus} 
-          onClick={() => navigate('/barang-masuk')}
-          className={styles.actionButton}
-        >
-          + Barang Masuk
-        </Button>
+      <div className={styles.actionGrid} style={{ gridTemplateColumns: isAdmin ? 'repeat(3, 1fr)' : undefined }}>
+        {isAdmin && (
+          <Button 
+            size="xl" 
+            variant="secondary"
+            icon={PackagePlus} 
+            onClick={() => navigate('/barang-masuk')}
+            className={styles.actionButton}
+          >
+            + Barang Masuk
+          </Button>
+        )}
         <Button 
           size="xl" 
           icon={ShoppingCart} 
@@ -67,6 +109,15 @@ const KasirDashboard = () => {
           className={styles.actionButton}
         >
           + Transaksi Jual
+        </Button>
+        <Button 
+          size="xl" 
+          variant="secondary"
+          icon={Users}
+          onClick={() => navigate('/pelanggan')}
+          className={styles.actionButton}
+        >
+          Data Pelanggan
         </Button>
       </div>
 

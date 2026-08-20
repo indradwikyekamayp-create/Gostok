@@ -14,16 +14,7 @@ const formatRupiah = (value) => {
 const TopDebtorsTable = ({ data }) => {
   const navigate = useNavigate();
 
-  // Mock data for initial development
-  const defaultData = [
-    { id: '1', nama_pelanggan: 'Toko Budi Maju', total_hutang: 4500000 },
-    { id: '2', nama_pelanggan: 'Warung Bu Ani', total_hutang: 3200000 },
-    { id: '3', nama_pelanggan: 'Koperasi Sejahtera', total_hutang: 2800000 },
-    { id: '4', nama_pelanggan: 'Toko Kelontong Jaya', total_hutang: 1500000 },
-    { id: '5', nama_pelanggan: 'Minimarket Barokah', total_hutang: 900000 },
-  ];
-
-  const tableData = data && data.length > 0 ? data : defaultData;
+  const tableData = data || [];
 
   const columns = [
     {

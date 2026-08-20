@@ -1,8 +1,29 @@
-import React from 'react';
-import { Menu, Search, Bell, HelpCircle, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, Search, Bell, HelpCircle, ChevronDown, User } from 'lucide-react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useAuth } from '../../hooks/useAuth';
 import styles from './Header.module.css';
 
 const Header = ({ onToggleSidebar, title }) => {
+  const [notifCount, setNotifCount] = useState(0);
+  const { userData } = useAuth();
+  
+  const userName = userData?.nama || 'Pengguna';
+
+  useEffect(() => {
+    // Listen to low stock products for notifications
+    const unsub = onSnapshot(collection(db, 'products'), (snapshot) => {
+      let count = 0;
+      snapshot.forEach(doc => {
+        if (doc.data().stok <= 10) count++;
+      });
+      setNotifCount(count);
+    });
+
+    return () => unsub();
+  }, []);
+
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -17,21 +38,11 @@ const Header = ({ onToggleSidebar, title }) => {
       </div>
       
       <div className={styles.right}>
-        <div className={styles.searchWrapper}>
-          <Search size={16} className={styles.searchIcon} />
-          <input 
-            type="text" 
-            className={styles.searchInput} 
-            placeholder="Cari produk, pelanggan, transaksi..." 
-          />
-          <kbd className={styles.searchShortcut}>Ctrl + K</kbd>
-        </div>
-        
         <div className={styles.actions}>
-          <button className={styles.iconButton}>
+          <button className={styles.iconButton} title={notifCount > 0 ? `${notifCount} produk stok menipis` : 'Tidak ada notifikasi baru'}>
             <div className={styles.bellWrapper}>
               <Bell size={20} />
-              <span className={styles.badge}>5</span>
+              {notifCount > 0 && <span className={styles.badge}>{notifCount > 99 ? '99+' : notifCount}</span>}
             </div>
           </button>
           
@@ -40,7 +51,10 @@ const Header = ({ onToggleSidebar, title }) => {
           </button>
           
           <button className={styles.profileDropdown}>
-            <span className={styles.watermark}>AyoStock!</span>
+            <div style={{ backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <User size={14} color="#475569" />
+            </div>
+            <span className={styles.watermark} style={{ fontWeight: '500', color: '#334155', fontSize: '0.875rem' }}>{userName}</span>
             <ChevronDown size={14} className={styles.chevron} />
           </button>
         </div>

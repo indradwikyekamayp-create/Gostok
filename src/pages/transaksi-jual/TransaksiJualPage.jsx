@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { db } from '../../firebase';
 import CustomerSelector from './CustomerSelector';
 import ProductGrid from './ProductGrid';
 import CartPanel from './CartPanel';
@@ -6,29 +8,37 @@ import NotaPreview from './NotaPreview';
 import PelangganForm from '../pelanggan/PelangganForm';
 import styles from './TransaksiJualPage.module.css';
 
-// Mock Product Database for barcode scanning
-const MOCK_PRODUCTS = [
-  { id: 'p1', kode_barang: '899999900001', nama_barang: 'Beras Pandan Wangi 5kg', harga_jual: 75000, stok: 120, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=200&q=80' },
-  { id: 'p2', kode_barang: '899999900002', nama_barang: 'Minyak Goreng Bimoli 2L', harga_jual: 35000, stok: 95, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?auto=format&fit=crop&w=200&q=80' },
-  { id: 'p3', kode_barang: '899999900003', nama_barang: 'Gula Pasir Gulaku 1kg', harga_jual: 16000, stok: 80, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=200&q=80' },
-  { id: 'p4', kode_barang: '899999900004', nama_barang: 'Indomie Goreng', harga_jual: 3000, stok: 240, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1612061078272-97422f283287?auto=format&fit=crop&w=200&q=80' },
-  { id: 'p5', kode_barang: '899999900005', nama_barang: 'Tepung Terigu Segitiga 1kg', harga_jual: 12000, stok: 75, kategori: 'Makanan', image: 'https://images.unsplash.com/photo-1627485937980-221c88ac04f9?auto=format&fit=crop&w=200&q=80' },
-  { id: 'p6', kode_barang: '899999900006', nama_barang: 'Susu Frisian Flag 1L', harga_jual: 17000, stok: 60, kategori: 'Minuman', image: 'https://images.unsplash.com/photo-1563636619276-24a7e6e6b7b6?auto=format&fit=crop&w=200&q=80' },
-];
-
-const INITIAL_CUSTOMERS = [
-  { id: 'c1', nama_perusahaan: 'CV Sumber Rejeki', nama_pic: 'Pak Budi', total_hutang_berjalan: 5000000 },
-  { id: 'c2', nama_perusahaan: 'PT Maju Jaya', nama_pic: 'Bu Siti', total_hutang_berjalan: 0 },
-  { id: 'c3', nama_perusahaan: 'UD Makmur Sentosa', nama_pic: 'Pak Ahmad', total_hutang_berjalan: 12500000 },
-];
-
 export default function TransaksiJualPage() {
-  const [customers, setCustomers] = useState(INITIAL_CUSTOMERS);
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [customer, setCustomer] = useState(null);
   const [cart, setCart] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [completedTransaction, setCompletedTransaction] = useState(null);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
+
+  useEffect(() => {
+    // Listen to customers
+    const custRef = collection(db, 'customers');
+    const unsubCust = onSnapshot(custRef, (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => data.push({ ...doc.data(), id: doc.id }));
+      setCustomers(data);
+    });
+
+    // Listen to products
+    const prodRef = collection(db, 'products');
+    const unsubProd = onSnapshot(prodRef, (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => data.push({ ...doc.data(), id: doc.id }));
+      setProducts(data);
+    });
+
+    return () => {
+      unsubCust();
+      unsubProd();
+    };
+  }, []);
 
   const handleAddToCart = (product) => {
     setCart((prevCart) => {
@@ -46,7 +56,7 @@ export default function TransaksiJualPage() {
   };
 
   const handleScanBarcode = (barcode) => {
-    const product = MOCK_PRODUCTS.find((p) => p.kode_barang === barcode);
+    const product = products.find((p) => p.barcode === barcode || p.kode_barang === barcode);
     if (product) {
       handleAddToCart(product);
     } else {
@@ -54,49 +64,79 @@ export default function TransaksiJualPage() {
     }
   };
 
-  const handleSaveTransaction = (paymentMethod, catatan) => {
+  const handleSaveTransaction = async (paymentMethod, catatan) => {
     if (!customer || cart.length === 0 || !paymentMethod) return;
     
     setIsSaving(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
       const grandTotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
+      const totalModal = cart.reduce((acc, item) => acc + (item.qty * (item.harga_modal || 0)), 0);
+      
       const newTransaction = {
-        id: `INV-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random() * 1000).toString().padStart(4, '0')}`,
-        tanggal: new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date()),
+        tanggal: new Date().toISOString(),
         customer,
         cart,
         paymentMethod,
         catatan,
-        grandTotal
+        grandTotal,
+        totalModal,
+        keuntungan: grandTotal - totalModal
       };
       
-      setCompletedTransaction(newTransaction);
-      setIsSaving(false);
+      const batch = writeBatch(db);
       
-      // Reset form will happen after closing the nota preview
-    }, 800);
+      // Create transaction document
+      const txRef = doc(collection(db, 'transactions'));
+      batch.set(txRef, { ...newTransaction, id: txRef.id });
+
+      // Update product stocks
+      for (const item of cart) {
+        const prodRef = doc(db, 'products', item.id);
+        const newStock = Math.max(0, (item.stok || 0) - item.qty);
+        batch.update(prodRef, { stok: newStock });
+      }
+
+      // If Piutang (Kredit), update customer total hutang
+      if (paymentMethod === 'Kredit') {
+        const custRef = doc(db, 'customers', customer.id);
+        const newHutang = (customer.total_hutang_berjalan || 0) + grandTotal;
+        batch.update(custRef, { total_hutang_berjalan: newHutang });
+      }
+
+      await batch.commit();
+
+      setCompletedTransaction({ ...newTransaction, id: txRef.id, displayDate: new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date()) });
+    } catch (err) {
+      console.error('Error saving transaction:', err);
+      alert('Gagal menyimpan transaksi: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCloseNota = () => {
-    // Reset state for next transaction
     setCustomer(null);
     setCart([]);
     setCompletedTransaction(null);
   };
 
-  const handleSaveCustomer = (newCustomerData) => {
-    const newCustomer = {
-      id: `c${Date.now()}`,
-      nama_perusahaan: newCustomerData.nama_perusahaan,
-      nama_pic: newCustomerData.nama_pic || '-',
-      total_hutang_berjalan: 0
-    };
-    
-    setCustomers((prev) => [...prev, newCustomer]);
-    setCustomer(newCustomer);
-    setShowCustomerForm(false);
+  const handleSaveCustomer = async (newCustomerData) => {
+    try {
+      const custRef = doc(collection(db, 'customers'));
+      const newCustomer = {
+        ...newCustomerData,
+        nama_pic: newCustomerData.nama_pic || '-',
+        total_hutang_berjalan: 0
+      };
+      await setDoc(custRef, newCustomer);
+      
+      setCustomer({ ...newCustomer, id: custRef.id });
+      setShowCustomerForm(false);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menyimpan pelanggan baru');
+    }
   };
 
   return (
@@ -127,7 +167,7 @@ export default function TransaksiJualPage() {
       <div className={styles.mainContent}>
         <div className={styles.leftColumn}>
           <ProductGrid 
-            products={MOCK_PRODUCTS} 
+            products={products} 
             onAddToCart={handleAddToCart}
             onScanBarcode={handleScanBarcode}
           />

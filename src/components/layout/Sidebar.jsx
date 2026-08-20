@@ -33,15 +33,20 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
 
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { path: '/master-produk', label: 'Master Produk', icon: <Package size={20} /> },
-    { path: '/barang-masuk', label: 'Barang Masuk', icon: <PackagePlus size={20} /> },
     { path: '/transaksi-jual', label: 'Transaksi Jual', icon: <ShoppingCart size={20} /> },
     { path: '/pelanggan', label: 'Pelanggan', icon: <Users size={20} /> },
     { path: '/riwayat', label: 'Riwayat', icon: <History size={20} /> },
   ];
 
+  if (userRole === ROLES?.OWNER || userRole === 'owner' || userRole === ROLES?.ADMIN || userRole === 'admin') {
+    // Sisipkan menu Admin/Owner di indeks ke-1
+    menuItems.splice(1, 0, { path: '/master-produk', label: 'Master Produk', icon: <Package size={20} /> });
+    menuItems.splice(2, 0, { path: '/barang-masuk', label: 'Barang Masuk', icon: <PackagePlus size={20} /> });
+  }
+
   if (userRole === ROLES?.OWNER || userRole === 'owner') {
     menuItems.push({ path: '/laporan', label: 'Laporan', icon: <BarChart3 size={20} /> });
+    menuItems.push({ path: '/karyawan', label: 'Karyawan', icon: <Users size={20} /> });
   }
 
   const handleNavClick = () => {
@@ -61,6 +66,16 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
         <div className={styles.header}>
           <div className={styles.logo}>
             <img src="/logo/AyoStock!.png" alt="AyoStock!" className={styles.logoImg} />
+            {(!isCollapsed || isMobile) && (
+              <div style={{ textAlign: 'center', marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'hsl(215, 50%, 30%)', letterSpacing: '0.5px' }}>
+                  POS Manajemen
+                </span>
+                <span style={{ fontSize: '0.65rem', fontWeight: '600', color: '#64748b' }}>
+                  PT. WELINDO SUKSES BERSAMA
+                </span>
+              </div>
+            )}
           </div>
           {isMobile && (
             <button className={styles.closeButton} onClick={() => setMobileMenuOpen(false)}>
@@ -94,7 +109,7 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
             <div className={styles.userDetails}>
               <span className={styles.userName}>{userName}</span>
               <span className={styles.userRole}>
-                {userRole === 'owner' ? 'Pemilik' : 'Staf'}
+                {userRole === 'owner' ? 'Pemilik' : userRole === 'admin' ? 'Admin' : 'Kasir'}
               </span>
             </div>
           </div>

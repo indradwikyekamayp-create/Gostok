@@ -1,27 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, ScanLine, Keyboard, CheckCircle2, AlertTriangle, Plus, Minus, Info, Save } from 'lucide-react';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase';
 import styles from './ScanInput.module.css';
-
-// Mock DB
-const MOCK_DB = {
-  '8999999999999': { 
-    barcode: '8999999999999', 
-    nama_barang: 'Indomie Goreng', 
-    satuan: 'pcs', 
-    stok: 240, 
-    img: '/placeholder.jpg',
-    has_multi_satuan: true,
-    satuan_besar: 'dus',
-    konversi: 40
-  },
-  '8998888888888': { 
-    barcode: '8998888888888', 
-    nama_barang: 'Minyak Bimoli 2L', 
-    satuan: 'pcs', 
-    stok: 85, 
-    img: null 
-  }
-};
 
 const ScanInput = ({ onScan, onNewProduct }) => {
   const [mode, setMode] = useState('scan'); // 'scan' | 'manual'
@@ -30,6 +11,7 @@ const ScanInput = ({ onScan, onNewProduct }) => {
   // Status state
   const [scannedProduct, setScannedProduct] = useState(null);
   const [notFoundBarcode, setNotFoundBarcode] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Form states for existing product
   const [qty, setQty] = useState(1);
@@ -46,25 +28,35 @@ const ScanInput = ({ onScan, onNewProduct }) => {
     inputRef.current?.focus();
   }, [mode]);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e?.preventDefault();
     if (!inputVal.trim()) return;
 
     const barcode = inputVal.trim();
-    const product = MOCK_DB[barcode];
+    setIsSearching(true);
     
-    if (product) {
-      setScannedProduct(product);
-      setNotFoundBarcode(null);
-      setQty(1);
-      // Default to satuan besar if it exists
-      setSelectedUnit(product.has_multi_satuan ? 'besar' : 'dasar');
-    } else {
-      setScannedProduct(null);
-      setNotFoundBarcode(barcode);
-      setNewProductName('');
-      setNewProductUnit('pcs');
-      setNewProductQty(1);
+    try {
+      const q = query(collection(db, 'products'), where('barcode', '==', barcode));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const product = { ...querySnapshot.docs[0].data(), id: querySnapshot.docs[0].id };
+        setScannedProduct(product);
+        setNotFoundBarcode(null);
+        setQty(1);
+        setSelectedUnit(product.has_multi_satuan ? 'besar' : 'dasar');
+      } else {
+        setScannedProduct(null);
+        setNotFoundBarcode(barcode);
+        setNewProductName('');
+        setNewProductUnit('pcs');
+        setNewProductQty(1);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error searching product');
+    } finally {
+      setIsSearching(false);
     }
   };
 

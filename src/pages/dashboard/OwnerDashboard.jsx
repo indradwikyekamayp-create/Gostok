@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, AlertCircle, ShoppingCart, PackageX, Calendar } from 'lucide-react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { useAuth } from '../../hooks/useAuth';
 import SummaryCard from './SummaryCard';
 import SalesChart from './SalesChart';
@@ -22,18 +24,71 @@ const formatRupiah = (value) => {
 };
 
 const OwnerDashboard = () => {
-  const { userData } = useAuth();
+  const { userData, isOwner } = useAuth();
   const navigate = useNavigate();
   const [chartMetric, setChartMetric] = useState('total');
   
-  // Mock data to be replaced with Firebase later
-  const topProducts = [
-    { id: '1', nama: 'Indomie Goreng', terjual: 450, omzet: 1575000 },
-    { id: '2', nama: 'Beras Rojolele 5kg', terjual: 120, omzet: 1440000 },
-    { id: '3', nama: 'Minyak Goreng Bimoli 2L', terjual: 95, omzet: 1330000 },
-    { id: '4', nama: 'Gula Pasir 1kg', terjual: 80, omzet: 960000 },
-    { id: '5', nama: 'Tepung Terigu Segitiga 1kg', terjual: 75, omzet: 787500 },
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
+  useEffect(() => {
+    const unsubTx = onSnapshot(collection(db, 'transactions'), (snap) => {
+      setTransactions(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    });
+    const unsubProd = onSnapshot(collection(db, 'products'), (snap) => {
+      setProducts(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    });
+    const unsubCust = onSnapshot(collection(db, 'customers'), (snap) => {
+      setCustomers(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    });
+
+    return () => { unsubTx(); unsubProd(); unsubCust(); };
+  }, []);
+
+  // Compute Metrics
+  const today = new Date().toISOString().split('T')[0];
+  const todayTxs = transactions.filter(t => t.tanggal?.startsWith(today));
+  
+  const omzetHariIni = todayTxs.reduce((sum, t) => sum + (t.grandTotal || 0), 0);
+  const txCountHariIni = todayTxs.length;
+  
+  const totalPiutang = customers.reduce((sum, c) => sum + (c.total_hutang_berjalan || 0), 0);
+  const lowStockCount = products.filter(p => p.stok <= 10).length;
+
+  // Chart Data (Last 7 Days)
+  const last7Days = Array.from({length: 7}, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d;
+  });
+
+  const chartData = last7Days.map(dateObj => {
+    const dateStr = dateObj.toISOString().split('T')[0];
+    const txs = transactions.filter(t => t.tanggal?.startsWith(dateStr));
+    const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+    return {
+      date: dayName,
+      total: txs.reduce((sum, t) => sum + (t.grandTotal || 0), 0),
+      count: txs.length
+    };
+  });
+
+  // Top Products
+  const prodSales = {};
+  transactions.forEach(t => {
+    t.cart?.forEach(item => {
+      if (!prodSales[item.id]) {
+        prodSales[item.id] = { id: item.id, nama: item.nama_barang || item.nama, terjual: 0, omzet: 0 };
+      }
+      prodSales[item.id].terjual += item.qty;
+      prodSales[item.id].omzet += item.subtotal;
+    });
+  });
+  
+  const topProducts = Object.values(prodSales)
+    .sort((a, b) => b.terjual - a.terjual)
+    .slice(0, 5);
 
   const topProductsColumns = [
     { key: 'no', label: 'No', render: (_, __, index) => index + 1 },
@@ -44,66 +99,75 @@ const OwnerDashboard = () => {
       align: 'right',
       render: (val) => <span style={{ fontWeight: '600', color: 'var(--color-primary)' }}>{val}</span>
     },
-    { 
+    ...(isOwner ? [{ 
       key: 'omzet', 
       label: 'Omzet', 
       align: 'right',
       render: (val) => <span style={{ color: 'var(--color-text-secondary)' }}>{formatRupiah(val)}</span>
-    },
+    }] : []),
+  ];
+
+  const topDebtors = customers
+    .filter(c => c.total_hutang_berjalan > 0)
+    .sort((a, b) => b.total_hutang_berjalan - a.total_hutang_berjalan)
+    .slice(0, 5)
+    .map(c => ({ id: c.id, nama_pelanggan: c.nama_perusahaan || c.nama_pic, total_hutang: c.total_hutang_berjalan }));
+
+  const stokAmanCount = products.filter(p => p.stok > 10).length;
+  const stokHabisCount = products.filter(p => p.stok === 0).length;
+  const stokMenipisCount = products.filter(p => p.stok > 0 && p.stok <= 10).length;
+  
+  const stockSummaryData = [
+    { name: 'Stok Aman', value: stokAmanCount, color: '#3b82f6', percentage: products.length ? Math.round((stokAmanCount/products.length)*100)+'%' : '0%' },
+    { name: 'Stok Menipis', value: stokMenipisCount, color: '#f59e0b', percentage: products.length ? Math.round((stokMenipisCount/products.length)*100)+'%' : '0%' },
+    { name: 'Stok Habis', value: stokHabisCount, color: '#ef4444', percentage: products.length ? Math.round((stokHabisCount/products.length)*100)+'%' : '0%' }
   ];
 
   return (
     <div className={styles.dashboard}>
       <div className={styles.headerSection}>
         <div>
-          <h1 className={styles.pageTitle}>Dashboard Utama</h1>
+          <h1 className={styles.pageTitle}>{isOwner ? 'Dashboard Utama (Owner)' : 'Dashboard Utama (Admin)'}</h1>
           <p className={styles.welcomeText}>
-            Selamat datang, {userData?.nama || 'Owner'}! 👋
+            Selamat datang, {userData?.nama || (isOwner ? 'Owner' : 'Admin')}! 👋
           </p>
         </div>
         <div className={styles.datePickerWrapper}>
           <Calendar size={16} />
-          <span>18 Mei 2025</span>
+          <span>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
       </div>
       
       <div className={styles.summaryGrid}>
-        <SummaryCard 
-          title="Omzet Hari Ini"
-          value={formatRupiah(12500000)}
-          icon={TrendingUp}
-          color="primary"
-          tooltip="Total kotor penjualan hari ini (Cash + Transfer + BON). Bukan keuntungan bersih."
-          trend="up"
-          trendValue="18%"
-          trendText="dari kemarin"
-        />
+        {isOwner && (
+          <SummaryCard 
+            title="Omzet Hari Ini"
+            value={formatRupiah(omzetHariIni)}
+            icon={TrendingUp}
+            color="primary"
+            tooltip="Total kotor penjualan hari ini (Cash + Transfer + BON)."
+          />
+        )}
         <SummaryCard 
           title="Piutang Berjalan"
-          value={formatRupiah(35000000)}
+          value={formatRupiah(totalPiutang)}
           icon={AlertCircle}
           color="danger"
           tooltip="Total sisa hutang BON dari seluruh pelanggan yang belum lunas."
-          trend="up"
-          trendValue="12%"
-          trendText="dari kemarin"
         />
         <SummaryCard 
           title="Transaksi Hari Ini"
-          value="48"
+          value={txCountHariIni}
           icon={ShoppingCart}
           color="success"
           tooltip="Jumlah lembar nota yang diterbitkan hari ini."
-          trend="up"
-          trendValue="15%"
-          trendText="dari kemarin"
         />
         <SummaryCard 
           title="Produk Stok Menipis"
-          value="12"
+          value={lowStockCount}
           icon={PackageX}
           color="warning"
-          tooltip="Jumlah jenis produk yang sisa stoknya mendekati atau habis (0)."
+          tooltip="Jumlah jenis produk yang sisa stoknya menipis."
           subtitle="Perlu restock"
         />
       </div>
@@ -114,22 +178,26 @@ const OwnerDashboard = () => {
             <Card padding="lg" className={styles.chartCard}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Penjualan 7 Hari Terakhir</h2>
-                <select 
-                  value={chartMetric}
-                  onChange={(e) => setChartMetric(e.target.value)}
-                  style={{ padding: '0.25rem 0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', fontSize: '0.75rem', outline: 'none' }}
-                >
-                  <option value="total">Omzet</option>
-                  <option value="count">Transaksi</option>
-                </select>
+                {isOwner ? (
+                  <select 
+                    value={chartMetric}
+                    onChange={(e) => setChartMetric(e.target.value)}
+                    style={{ padding: '0.25rem 0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', fontSize: '0.75rem', outline: 'none' }}
+                  >
+                    <option value="total">Omzet</option>
+                    <option value="count">Transaksi</option>
+                  </select>
+                ) : (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Jumlah Transaksi</span>
+                )}
               </div>
-              <SalesChart metric={chartMetric} />
+              <SalesChart data={chartData.reverse()} metric={isOwner ? chartMetric : 'count'} />
             </Card>
           </div>
 
           <div className={styles.topRightSection}>
             <QuickActions />
-            <StockSummary />
+            <StockSummary data={stockSummaryData} />
           </div>
         </div>
 
@@ -137,7 +205,7 @@ const OwnerDashboard = () => {
           <div className={styles.tablesSection}>
             <Card padding="lg">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Top 5 Produk Terlaris Bulan Ini</h2>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Top 5 Produk Terlaris</h2>
                 <button 
                   onClick={() => navigate('/master-produk')}
                   style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.75rem', cursor: 'pointer' }}
@@ -165,7 +233,7 @@ const OwnerDashboard = () => {
                 </button>
               </div>
               <div className={styles.tableWrapper}>
-                <TopDebtorsTable />
+                <TopDebtorsTable data={topDebtors} />
               </div>
             </Card>
           </div>

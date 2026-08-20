@@ -16,6 +16,8 @@ import PelangganDetail from './pages/pelanggan/PelangganDetail';
 import RiwayatPage from './pages/riwayat/RiwayatPage';
 import LaporanPage from './pages/laporan/LaporanPage';
 
+import KaryawanPage from './pages/karyawan/KaryawanPage';
+
 // Global styles
 import './styles/reset.css';
 import './styles/variables.css';
@@ -42,19 +44,42 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/master-produk" element={<MasterProdukPage />} />
-              <Route path="/barang-masuk" element={<BarangMasukPage />} />
               <Route path="/transaksi-jual" element={<TransaksiJualPage />} />
               <Route path="/pelanggan" element={<PelangganPage />} />
               <Route path="/pelanggan/:id" element={<PelangganDetail />} />
               <Route path="/riwayat" element={<RiwayatPage />} />
+              {/* Admin & Owner only routes */}
+              <Route
+                path="/master-produk"
+                element={
+                  <ProtectedRoute requiredRole={ROLES.ADMIN}>
+                    <MasterProdukPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/barang-masuk"
+                element={
+                  <ProtectedRoute requiredRole={ROLES.ADMIN}>
+                    <BarangMasukPage />
+                  </ProtectedRoute>
+                }
+              />
 
-              {/* Owner-only route */}
+              {/* Owner-only routes */}
               <Route
                 path="/laporan"
                 element={
                   <ProtectedRoute requiredRole={ROLES.OWNER}>
                     <LaporanPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/karyawan"
+                element={
+                  <ProtectedRoute requiredRole={ROLES.OWNER}>
+                    <KaryawanPage />
                   </ProtectedRoute>
                 }
               />
