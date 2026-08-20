@@ -12,7 +12,7 @@ const formatRupiah = (number) => {
   }).format(number || 0);
 };
 
-export default function CartPanel({ cart, setCart, onSave, isSaving }) {
+export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer }) {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [catatan, setCatatan] = useState('');
 
@@ -152,10 +152,14 @@ export default function CartPanel({ cart, setCart, onSave, isSaving }) {
         <button 
           className={styles.saveBtn} 
           onClick={() => onSave(paymentMethod, catatan)}
-          disabled={cart.length === 0 || !paymentMethod || isSaving}
+          disabled={cart.length === 0 || !hasCustomer || !paymentMethod || isSaving}
         >
           <Receipt size={20} />
-          {isSaving ? 'Menyimpan...' : 'Simpan & Cetak Nota'}
+          {isSaving ? 'Menyimpan...' 
+            : cart.length === 0 ? 'Keranjang Kosong' 
+            : !hasCustomer ? 'Pilih Pelanggan Dulu'
+            : !paymentMethod ? 'Pilih Pembayaran' 
+            : 'Simpan & Cetak Nota'}
         </button>
       </div>
     </Card>

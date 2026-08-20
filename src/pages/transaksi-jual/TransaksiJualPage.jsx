@@ -179,6 +179,7 @@ export default function TransaksiJualPage() {
             setCart={setCart} 
             onSave={handleSaveTransaction}
             isSaving={isSaving}
+            hasCustomer={!!customer}
           />
         </div>
       </div>
