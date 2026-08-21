@@ -104,6 +104,7 @@ const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) =>
                       <table className={styles.innerTable}>
                         <thead>
                           <tr>
+                            <th>Kode Barang</th>
                             <th>Nama Barang</th>
                             <th>Qty</th>
                             <th>Harga Satuan</th>
@@ -113,6 +114,7 @@ const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) =>
                         <tbody>
                           {trx.items.map((item) => (
                             <tr key={item.id}>
+                              <td>{item.kode_barang}</td>
                               <td>{item.nama_barang}</td>
                               <td>{item.qty}</td>
                               <td className={styles.numeric}>{formatCurrency(item.harga)}</td>
@@ -122,12 +124,12 @@ const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) =>
                         </tbody>
                         <tfoot>
                           <tr>
-                            <td colSpan={3} style={{ textAlign: 'right', fontWeight: 'bold' }}>Total Bayar</td>
+                            <td colSpan={4} style={{ textAlign: 'right', fontWeight: 'bold' }}>Total Bayar</td>
                             <td className={styles.numeric} style={{ fontWeight: 'bold' }}>{formatCurrency(trx.total_bayar)}</td>
                           </tr>
                           {trx.status_bayar !== 'lunas' && (
                             <tr>
-                              <td colSpan={3} style={{ textAlign: 'right', fontWeight: 'bold', color: 'hsl(0, 70%, 50%)' }}>Sisa Hutang</td>
+                              <td colSpan={4} style={{ textAlign: 'right', fontWeight: 'bold', color: 'hsl(0, 70%, 50%)' }}>Sisa Hutang</td>
                               <td className={styles.numeric} style={{ fontWeight: 'bold', color: 'hsl(0, 70%, 50%)' }}>{formatCurrency(trx.sisa_hutang || trx.total_bayar)}</td>
                             </tr>
                           )}

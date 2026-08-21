@@ -52,8 +52,8 @@ const StockInList = ({ items, onEditQty, onDelete }) => {
                   <td>{idx + 1}</td>
                   <td>
                     <div className={styles.productCell}>
-                      {item.img ? (
-                        <img src={item.img} alt={item.nama_barang} className={styles.productImg} />
+                      {item.foto ? (
+                        <img src={item.foto} alt={item.nama_barang} className={styles.productImg} />
                       ) : (
                         <div className={styles.productImgPlaceholder}>Img</div>
                       )}

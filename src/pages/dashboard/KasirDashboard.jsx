@@ -44,14 +44,24 @@ const KasirDashboard = () => {
 
         // Only include today's transactions
         if (dateObj >= today) {
+          const pm = (trans.paymentMethod || trans.metodePembayaran || '').toLowerCase();
+          const isHutang = pm === 'bon' || pm === 'kredit' || pm === 'hutang';
+          
+          let finalStatus = 'Lunas';
+          if (isHutang && trans.statusPembayaran !== 'lunas' && trans.paymentStatus !== 'lunas') {
+            finalStatus = 'Belum Lunas';
+          } else if (trans.statusPembayaran === 'belum_lunas' || trans.paymentStatus === 'belum_lunas') {
+            finalStatus = 'Belum Lunas';
+          }
+
           const waktu = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
           data.push({
             id: doc.id,
-            no_nota: trans.noNota || doc.id,
+            no_nota: trans.noNota || trans.id || doc.id,
             waktu,
-            pelanggan: trans.pelanggan?.nama || 'Umum',
+            pelanggan: trans.customer?.nama_perusahaan || trans.customer?.nama_pic || trans.customer?.nama || trans.pelanggan?.nama || 'Umum',
             total: trans.grandTotal || 0,
-            status: trans.statusPembayaran || 'Lunas',
+            status: finalStatus,
             rawDate: dateObj
           });
         }

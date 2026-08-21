@@ -12,16 +12,22 @@ const Header = ({ onToggleSidebar, title }) => {
   const userName = userData?.nama || 'Pengguna';
 
   useEffect(() => {
-    // Listen to low stock products for notifications
-    const unsub = onSnapshot(collection(db, 'products'), (snapshot) => {
-      let count = 0;
-      snapshot.forEach(doc => {
-        if (doc.data().stok <= 10) count++;
+    import('firebase/firestore').then(({ doc, onSnapshot: onSnap }) => {
+      const unsubSettings = onSnap(doc(db, 'settings', 'store_config'), (docSnap) => {
+        const threshold = docSnap.exists() && docSnap.data().stokMenipisThreshold 
+          ? Number(docSnap.data().stokMenipisThreshold) 
+          : 10;
+          
+        const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+          let count = 0;
+          snapshot.forEach(productDoc => {
+            if (productDoc.data().stok > 0 && productDoc.data().stok <= threshold) count++;
+          });
+          setNotifCount(count);
+        });
       });
-      setNotifCount(count);
+      return () => unsubSettings();
     });
-
-    return () => unsub();
   }, []);
 
   return (

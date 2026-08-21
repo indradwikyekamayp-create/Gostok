@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
 import CustomerSelector from './CustomerSelector';
@@ -6,9 +6,11 @@ import ProductGrid from './ProductGrid';
 import CartPanel from './CartPanel';
 import NotaPreview from './NotaPreview';
 import PelangganForm from '../pelanggan/PelangganForm';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './TransaksiJualPage.module.css';
 
 export default function TransaksiJualPage() {
+  const { showToast } = useContext(ToastContext);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [customer, setCustomer] = useState(null);
@@ -40,6 +42,32 @@ export default function TransaksiJualPage() {
     };
   }, []);
 
+  useEffect(() => {
+    // Synchronize cart with latest product data (e.g. real-time price updates)
+    setCart((prevCart) => {
+      let changed = false;
+      const newCart = prevCart.map((cartItem) => {
+        const latestProduct = products.find((p) => p.id === cartItem.id);
+        if (latestProduct) {
+          if (
+            latestProduct.harga_jual !== cartItem.harga_jual ||
+            latestProduct.nama_barang !== cartItem.nama_barang
+          ) {
+            changed = true;
+            return {
+              ...cartItem,
+              harga_jual: latestProduct.harga_jual,
+              nama_barang: latestProduct.nama_barang,
+              subtotal: (cartItem.qty || 0) * latestProduct.harga_jual,
+            };
+          }
+        }
+        return cartItem;
+      });
+      return changed ? newCart : prevCart;
+    });
+  }, [products]);
+
   const handleAddToCart = (product) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === product.id);
@@ -60,7 +88,7 @@ export default function TransaksiJualPage() {
     if (product) {
       handleAddToCart(product);
     } else {
-      alert('Produk dengan barcode ' + barcode + ' tidak ditemukan');
+      showToast('Produk dengan barcode ' + barcode + ' tidak ditemukan', 'warning');
     }
   };
 
@@ -73,8 +101,19 @@ export default function TransaksiJualPage() {
       const grandTotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
       const totalModal = cart.reduce((acc, item) => acc + (item.qty * (item.harga_modal || 0)), 0);
       
+      const now = new Date();
+      const year = now.getFullYear().toString().slice(-2);
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const noNota = `INV-${year}${month}${day}-${hours}${minutes}${seconds}`;
+      
       const newTransaction = {
-        tanggal: new Date().toISOString(),
+        noNota,
+        tanggal: now.toISOString(),
         customer,
         cart,
         paymentMethod,
@@ -98,7 +137,8 @@ export default function TransaksiJualPage() {
       }
 
       // If Piutang (Kredit), update customer total hutang
-      if (paymentMethod === 'Kredit') {
+      const pmStr = (paymentMethod || '').toLowerCase();
+      if (pmStr === 'bon' || pmStr === 'kredit') {
         const custRef = doc(db, 'customers', customer.id);
         const newHutang = (customer.total_hutang_berjalan || 0) + grandTotal;
         batch.update(custRef, { total_hutang_berjalan: newHutang });
@@ -107,9 +147,10 @@ export default function TransaksiJualPage() {
       await batch.commit();
 
       setCompletedTransaction({ ...newTransaction, id: txRef.id, displayDate: new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(new Date()) });
+      showToast('Transaksi berhasil disimpan! Nota siap dicetak.', 'success');
     } catch (err) {
       console.error('Error saving transaction:', err);
-      alert('Gagal menyimpan transaksi: ' + err.message);
+      showToast('Gagal menyimpan transaksi: ' + err.message, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -133,9 +174,10 @@ export default function TransaksiJualPage() {
       
       setCustomer({ ...newCustomer, id: custRef.id });
       setShowCustomerForm(false);
+      showToast('Pelanggan baru berhasil ditambahkan', 'success');
     } catch (err) {
       console.error(err);
-      alert('Gagal menyimpan pelanggan baru');
+      showToast('Gagal menyimpan pelanggan baru', 'error');
     }
   };
 

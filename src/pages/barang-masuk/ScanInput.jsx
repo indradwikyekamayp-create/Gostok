@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Search, ScanLine, Keyboard, CheckCircle2, AlertTriangle, Plus, Minus, Info, Save } from 'lucide-react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './ScanInput.module.css';
 
 const ScanInput = ({ onScan, onNewProduct }) => {
+  const { showToast } = useContext(ToastContext);
   const [mode, setMode] = useState('scan'); // 'scan' | 'manual'
   const [inputVal, setInputVal] = useState('');
   
@@ -54,7 +56,7 @@ const ScanInput = ({ onScan, onNewProduct }) => {
       }
     } catch (err) {
       console.error(err);
-      alert('Error searching product');
+      showToast('Terjadi kesalahan saat mencari produk', 'error');
     } finally {
       setIsSearching(false);
     }

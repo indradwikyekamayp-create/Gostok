@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, AlertCircle, ShoppingCart, PackageX, Calendar } from 'lucide-react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../hooks/useAuth';
 import SummaryCard from './SummaryCard';
@@ -28,22 +28,46 @@ const OwnerDashboard = () => {
   const navigate = useNavigate();
   const [chartMetric, setChartMetric] = useState('total');
   
-  const [transactions, setTransactions] = useState([]);
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [settings, setSettings] = useState({ stokMenipisThreshold: 10 });
 
   useEffect(() => {
-    const unsubTx = onSnapshot(collection(db, 'transactions'), (snap) => {
-      setTransactions(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
-    });
-    const unsubProd = onSnapshot(collection(db, 'products'), (snap) => {
-      setProducts(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
-    });
-    const unsubCust = onSnapshot(collection(db, 'customers'), (snap) => {
-      setCustomers(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    // 1. Fetch Products
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+      setProducts(data);
     });
 
-    return () => { unsubTx(); unsubProd(); unsubCust(); };
+    // 2. Fetch Customers
+    const unsubCustomers = onSnapshot(collection(db, 'customers'), (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+      setCustomers(data);
+    });
+
+    // 3. Fetch Transactions
+    const unsubTransactions = onSnapshot(collection(db, 'transactions'), (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+      setTransactions(data);
+    });
+
+    // 4. Fetch Settings
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
+      if (docSnap.exists()) {
+        setSettings(prev => ({ ...prev, ...docSnap.data() }));
+      }
+    });
+
+    return () => {
+      unsubProducts();
+      unsubCustomers();
+      unsubTransactions();
+      unsubSettings();
+    };
   }, []);
 
   // Compute Metrics
@@ -113,9 +137,10 @@ const OwnerDashboard = () => {
     .slice(0, 5)
     .map(c => ({ id: c.id, nama_pelanggan: c.nama_perusahaan || c.nama_pic, total_hutang: c.total_hutang_berjalan }));
 
-  const stokAmanCount = products.filter(p => p.stok > 10).length;
+  const threshold = settings.stokMenipisThreshold || 10;
+  const stokAmanCount = products.filter(p => p.stok > threshold).length;
   const stokHabisCount = products.filter(p => p.stok === 0).length;
-  const stokMenipisCount = products.filter(p => p.stok > 0 && p.stok <= 10).length;
+  const stokMenipisCount = products.filter(p => p.stok > 0 && p.stok <= threshold).length;
   
   const stockSummaryData = [
     { name: 'Stok Aman', value: stokAmanCount, color: '#3b82f6', percentage: products.length ? Math.round((stokAmanCount/products.length)*100)+'%' : '0%' },

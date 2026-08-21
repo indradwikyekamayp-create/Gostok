@@ -1,156 +1,229 @@
 .container {
-  padding: 24px;
-  background-color: hsl(220, 15%, 97%);
+  padding: 1.5rem;
+  background-color: var(--color-bg, hsl(220, 15%, 97%));
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family, 'Inter', sans-serif);
 }
 
 .backBtn {
   background: none;
   border: none;
-  color: hsl(215, 50%, 30%);
+  color: var(--color-primary, hsl(215, 50%, 30%));
   cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 16px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
   padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.backBtn:hover {
+  text-decoration: underline;
 }
 
 .customerCard {
-  background-color: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  margin-bottom: 24px;
+  background-color: var(--color-surface, #fff);
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 1.5rem;
+  border: 1px solid var(--color-border-light, #eee);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  margin-bottom: 1.5rem;
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eaeaea;
-  padding-bottom: 16px;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border-light, #f0f0f0);
+  padding-bottom: 1rem;
 }
 
 .cardHeader h1 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #1a1a1a);
+  text-transform: capitalize;
 }
 
 .badge {
-  background-color: #f0f0f0;
-  color: #555;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  background-color: var(--color-bg, #f4f6f8);
+  color: var(--color-text-secondary, #666);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border, #ccc);
+  text-transform: uppercase;
 }
 
 .editBtn {
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 6px 12px;
-  border-radius: 4px;
+  background-color: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #ccc);
+  color: var(--color-text, #333);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 0.25rem);
   cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.editBtn:hover {
+  background-color: var(--color-bg, #f4f6f8);
 }
 
 .cardBody {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .infoGrid {
   display: flex;
-  gap: 40px;
+  flex-wrap: wrap;
+  gap: 2.5rem;
 }
 
 .label {
-  font-size: 12px;
-  color: #666;
-  margin: 0 0 4px 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+  margin: 0 0 0.25rem 0;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .value {
-  font-size: 14px;
+  font-size: 0.95rem;
   font-weight: 500;
   margin: 0;
-  color: #1a1a1a;
+  color: var(--color-text, #1a1a1a);
 }
 
 .debtBox {
-  background-color: hsl(0, 70%, 95%);
-  padding: 16px 24px;
-  border-radius: 8px;
+  background-color: var(--color-bg, #f8fafc);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md, 0.5rem);
   text-align: right;
-  border: 1px solid hsl(0, 70%, 80%);
+  border: 1px solid var(--color-border-light, #e2e8f0);
+  min-width: 200px;
 }
 
 .debtBox p {
-  margin: 0 0 4px 0;
-  font-size: 12px;
-  color: hsl(0, 70%, 40%);
+  margin: 0 0 0.25rem 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #64748b);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .debtBox h2 {
   margin: 0;
-  font-size: 24px;
-  color: hsl(0, 70%, 40%);
+  font-size: 1.5rem;
+  color: var(--color-danger, hsl(0, 70%, 50%));
 }
 
 .tabs {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #eaeaea;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border-light, #eaeaea);
 }
 
 .tab, .tabActive {
   background: none;
   border: none;
-  padding: 12px 16px;
-  font-size: 16px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  color: #666;
+  color: #475569;
   border-bottom: 2px solid transparent;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: #334155;
 }
 
 .tabActive {
-  color: hsl(215, 50%, 30%);
+  color: var(--color-primary, hsl(215, 50%, 30%));
   font-weight: 600;
-  border-bottom-color: hsl(215, 50%, 30%);
+  border-bottom-color: var(--color-primary, hsl(215, 50%, 30%));
 }
 
 .tabContent {
-  background-color: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background-color: var(--color-surface, #fff);
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 1.5rem;
+  border: 1px solid var(--color-border-light, #eee);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
 .actionFooter {
-  margin-top: 24px;
+  margin-top: 1.25rem;
   display: flex;
   justify-content: flex-end;
 }
 
 .payBtn {
-  background-color: hsl(145, 55%, 42%);
+  background-color: var(--color-primary, hsl(215, 50%, 30%));
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md, 0.375rem);
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.payBtn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover, hsl(215, 50%, 25%));
 }
 
 .payBtn:disabled {
-  background-color: #ccc;
+  background-color: #e2e8f0;
+  color: #64748b;
   cursor: not-allowed;
+}
+
+.paymentsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.paymentsTable th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--color-border-light, #f0f0f0);
+  color: var(--color-text-secondary, #666);
+  font-weight: 600;
+}
+
+.paymentsTable td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border-light, #f0f0f0);
+  color: var(--color-text, #333);
+}
+
+.paymentsTable tr:last-child td {
+  border-bottom: none;
 }
 
 .riwayatEmpty {
   text-align: center;
-  padding: 40px;
-  color: #888;
+  padding: 3rem 1.5rem;
+  color: #475569;
+  background-color: var(--color-surface, #fff);
+  border-radius: var(--radius-lg, 0.5rem);
+  border: 1px dashed var(--color-border, #ccc);
 }

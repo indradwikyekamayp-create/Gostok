@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { 
   LayoutDashboard, 
   Package, 
@@ -9,14 +11,30 @@ import {
   History, 
   BarChart3, 
   LogOut,
+  Settings,
+  Key,
   X 
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROLES } from '../../constants/roles';
+import ChangePasswordModal from '../auth/ChangePasswordModal';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
   const { userData, isOwner, logout } = useAuth();
+  const [storeName, setStoreName] = useState('PT. WELINDO SUKSES BERSAMA');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().namaToko) {
+        let nama = docSnap.data().namaToko;
+        if (nama === 'AyoStock!') nama = 'PT. WELINDO SUKSES BERSAMA';
+        setStoreName(nama);
+      }
+    });
+    return () => unsub();
+  }, []);
   
   // Fetch from userData instead of user
   const userRole = userData?.role || 'kasir';
@@ -47,6 +65,7 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
   if (userRole === ROLES?.OWNER || userRole === 'owner') {
     menuItems.push({ path: '/laporan', label: 'Laporan', icon: <BarChart3 size={20} /> });
     menuItems.push({ path: '/karyawan', label: 'Karyawan', icon: <Users size={20} /> });
+    menuItems.push({ path: '/pengaturan', label: 'Pengaturan', icon: <Settings size={20} /> });
   }
 
   const handleNavClick = () => {
@@ -72,7 +91,7 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
                   POS Manajemen
                 </span>
                 <span style={{ fontSize: '0.65rem', fontWeight: '600', color: '#64748b' }}>
-                  PT. WELINDO SUKSES BERSAMA
+                  {storeName}
                 </span>
               </div>
             )}
@@ -113,16 +132,31 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
               </span>
             </div>
           </div>
-          <button 
-            className={styles.logoutButton} 
-            onClick={logout}
-            title={isCollapsed && !isMobile ? "Keluar" : ""}
-          >
-            <LogOut size={20} />
-            <span className={styles.label}>Keluar</span>
-          </button>
+          <div className={styles.footerActions}>
+            <button 
+              className={styles.passwordButton} 
+              onClick={() => setShowPasswordModal(true)}
+              title={isCollapsed && !isMobile ? "Ganti Password" : ""}
+            >
+              <Key size={20} />
+              <span className={styles.label}>Ganti Password</span>
+            </button>
+            <button 
+              className={styles.logoutButton} 
+              onClick={logout}
+              title={isCollapsed && !isMobile ? "Keluar" : ""}
+            >
+              <LogOut size={20} />
+              <span className={styles.label}>Keluar</span>
+            </button>
+          </div>
         </div>
       </aside>
+
+      <ChangePasswordModal 
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </>
   );
 };

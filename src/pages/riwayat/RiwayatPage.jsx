@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import styles from './RiwayatPage.module.css';
 import FilterBar from './FilterBar';
 import TransactionTable from './TransactionTable';
+import NotaPreview from '../transaksi-jual/NotaPreview';
 
 const RiwayatPage = () => {
+  const [storeName, setStoreName] = useState('PT. WELINDO SUKSES BERSAMA');
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
@@ -27,32 +30,53 @@ const RiwayatPage = () => {
       // Convert older transactions to match the UI shape if needed
       const normalizedData = data.map(t => ({
         id: t.id || t._id,
-        no_nota: t.id || t._id,
+        no_nota: t.noNota || t.id || t._id,
         tanggal: t.tanggal,
         pelanggan: { nama: t.customer?.nama_perusahaan || t.customer?.nama_pic || 'Umum' },
         total_bayar: t.grandTotal,
-        status_bayar: t.paymentMethod === 'Kredit' ? 'belum_lunas' : 'lunas',
-        sisa_hutang: t.paymentMethod === 'Kredit' ? t.grandTotal : 0,
+        status_bayar: (
+          ['bon', 'kredit', 'hutang'].includes((t.paymentMethod || t.metodePembayaran || '').toLowerCase())
+        ) ? 'belum_lunas' : 'lunas',
+        sisa_hutang: (
+          ['bon', 'kredit', 'hutang'].includes((t.paymentMethod || t.metodePembayaran || '').toLowerCase())
+        ) ? t.grandTotal : 0,
         items: t.cart?.map(c => ({
           id: c.id,
           nama_barang: c.nama_barang,
+          kode_barang: c.barcode || c.kode_barang || c.id || '-',
           qty: c.qty,
           harga: c.harga_jual,
           subtotal: c.subtotal
-        })) || []
+        })) || [],
+        raw: t
       }));
       setAllTransactions(normalizedData);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().namaToko) {
+        let nama = docSnap.data().namaToko;
+        if (nama === 'AyoStock!') nama = 'PT. WELINDO SUKSES BERSAMA';
+        setStoreName(nama);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      unsubSettings();
+    };
   }, []);
 
   useEffect(() => {
     let filtered = [...allTransactions];
     
     if (filters.customer) {
-      filtered = filtered.filter(t => t.pelanggan.nama.toLowerCase().includes(filters.customer.toLowerCase()));
+      const search = filters.customer.toLowerCase();
+      filtered = filtered.filter(t => 
+        t.pelanggan.nama.toLowerCase().includes(search) || 
+        t.no_nota.toLowerCase().includes(search)
+      );
     }
     if (filters.status !== 'Semua') {
       const statusMap = { 'Lunas': 'lunas', 'Belum Lunas': 'belum_lunas', 'Cicilan': 'cicil' };
@@ -78,18 +102,18 @@ const RiwayatPage = () => {
   };
 
   const handleViewDetail = (transaction) => {
-    console.log('View detail', transaction);
+    // Toggling is handled in the table component now
   };
 
   const handleReprint = (transaction) => {
-    console.log('Reprint nota', transaction);
+    setSelectedTransaction(transaction.raw);
   };
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>Riwayat Transaksi</h1>
-        <p className={styles.subtitle}>PT. WELINDO SUKSES BERSAMA</p>
+        <p className={styles.subtitle}>{storeName}</p>
       </header>
 
       <section className={styles.filterSection}>
@@ -107,6 +131,13 @@ const RiwayatPage = () => {
           onReprint={handleReprint}
         />
       </section>
+
+      {selectedTransaction && (
+        <NotaPreview 
+          transaction={selectedTransaction} 
+          onClose={() => setSelectedTransaction(null)} 
+        />
+      )}
     </div>
   );
 };

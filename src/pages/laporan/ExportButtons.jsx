@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { ToastContext } from '../../context/ToastContext';
 
 const ExportButtons = ({ data, columns, filename }) => {
+  const { showToast } = useContext(ToastContext);
+
   const handleExportExcel = () => {
     // In a real app, use xlsx library here
     console.log('Exporting Excel:', filename, columns, data);
-    alert(`File ${filename}.xlsx berhasil diexport! (Mock)`);
+    showToast(`File ${filename}.xlsx berhasil diexport! (Fitur segera hadir)`, 'success');
   };
 
   const handleExportPDF = () => {
     // In a real app, use jsPDF library here
     console.log('Exporting PDF:', filename, columns, data);
-    alert(`File ${filename}.pdf berhasil diexport! (Mock)`);
+    showToast(`File ${filename}.pdf berhasil diexport! (Fitur segera hadir)`, 'success');
   };
 
   return (

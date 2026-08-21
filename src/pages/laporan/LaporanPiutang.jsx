@@ -34,11 +34,15 @@ const LaporanPiutang = () => {
 
       snapshot.forEach(doc => {
         const data = doc.data();
-        if (data.metodePembayaran === 'BON' && data.statusPembayaran !== 'Lunas') {
+        const pm = (data.paymentMethod || data.metodePembayaran || '').toLowerCase();
+        const isHutang = pm === 'bon' || pm === 'kredit' || pm === 'hutang';
+        const isLunas = data.paymentStatus === 'lunas' || data.statusPembayaran === 'lunas';
+        
+        if (isHutang && !isLunas) {
           const hutang = data.sisaHutang !== undefined ? data.sisaHutang : (data.grandTotal || 0);
           totalPiutang += hutang;
           
-          const custName = data.namaPelanggan || data.customerName || 'Pelanggan Umum';
+          const custName = data.customer?.nama_perusahaan || data.customer?.nama_pic || data.customer?.nama || data.namaPelanggan || data.customerName || 'Pelanggan Umum';
           const dateStr = data.tanggal ? (data.tanggal.toDate ? data.tanggal.toDate().toISOString() : data.tanggal) : '';
 
           if (!customersMap[custName]) {

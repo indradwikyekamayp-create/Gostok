@@ -13,39 +13,48 @@ const LaporanStok = () => {
   });
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'products'), (snapshot) => {
-      let totalProduk = 0;
-      let stokAman = 0;
-      let stokMenipis = 0;
-      let stokHabis = 0;
-      let totalNilaiStok = 0;
-      const data = [];
+    import('firebase/firestore').then(({ doc, onSnapshot: onSnap }) => {
+      // First fetch settings
+      const unsubSettings = onSnap(doc(db, 'settings', 'store_config'), (docSnap) => {
+        const threshold = docSnap.exists() && docSnap.data().stokMenipisThreshold 
+          ? Number(docSnap.data().stokMenipisThreshold) 
+          : 10;
+        
+        // Then listen to products with the current threshold
+        const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+          let totalProduk = 0;
+          let stokAman = 0;
+          let stokMenipis = 0;
+          let stokHabis = 0;
+          let totalNilaiStok = 0;
+          const data = [];
 
-      snapshot.forEach(doc => {
-        const product = doc.data();
-        let status = 'Aman';
-        if (product.stok === 0) status = 'Habis';
-        else if (product.stok <= 10) status = 'Menipis';
-        
-        data.push({ ...product, id: doc.id, status });
-        
-        totalProduk += 1;
-        totalNilaiStok += (product.stok || 0) * (product.harga_modal || 0);
-        
-        if (product.stok === 0) {
-          stokHabis += 1;
-        } else if (product.stok <= 10) {
-          stokMenipis += 1;
-        } else {
-          stokAman += 1;
-        }
+          snapshot.forEach(doc => {
+            const product = doc.data();
+            let status = 'Aman';
+            if (product.stok === 0) status = 'Habis';
+            else if (product.stok <= threshold) status = 'Menipis';
+            
+            data.push({ ...product, id: doc.id, status });
+            
+            totalProduk += 1;
+            totalNilaiStok += (product.stok || 0) * (product.harga_modal || 0);
+            
+            if (product.stok === 0) {
+              stokHabis += 1;
+            } else if (product.stok <= threshold) {
+              stokMenipis += 1;
+            } else {
+              stokAman += 1;
+            }
+          });
+
+          setStockData(data);
+          setSummary({ totalProduk, stokAman, stokMenipis, stokHabis, totalNilaiStok, threshold });
+        });
       });
-
-      setStockData(data);
-      setSummary({ totalProduk, stokAman, stokMenipis, stokHabis, totalNilaiStok });
+      return () => unsubSettings();
     });
-
-    return () => unsub();
   }, []);
   const getStatusColor = (status) => {
     switch(status) {
@@ -76,7 +85,7 @@ const LaporanStok = () => {
           <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-danger-hover, hsl(0, 70%, 40%))' }}>{summary.stokHabis}</div>
         </div>
         <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Produk Menipis (&lt;10)</div>
+          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Produk Menipis (&le;{summary.threshold || 10})</div>
           <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-warning-hover, hsl(38, 92%, 40%))' }}>{summary.stokMenipis}</div>
         </div>
       </div>
@@ -98,8 +107,8 @@ const LaporanStok = () => {
               const statusStyle = getStatusColor(row.status);
               return (
                 <tr key={i} style={{ transition: 'background-color 150ms ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary-50, #f5f8ff)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.nama}</td>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.barcode}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.nama_barang}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.barcode || row.id}</td>
                   <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.kategori}</td>
                   <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'right', fontWeight: row.stok < 10 ? 'bold' : 'normal', color: row.stok === 0 ? 'var(--color-danger-hover, hsl(0, 70%, 40%))' : 'inherit' }}>{row.stok}</td>
                   <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.satuan}</td>

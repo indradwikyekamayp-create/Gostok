@@ -66,18 +66,191 @@
 
 .notaWrapper {
   background-color: white;
-  padding: 1rem;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 210mm; /* A4 width */
+  min-height: 297mm; /* A4 height approx */
+  box-sizing: border-box;
   border: 1px solid #cbd5e1;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  color: #1a1a1a;
+  font-family: 'Inter', sans-serif;
+  position: relative;
 }
 
-.notaPre {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
+.watermark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 350 200' width='350' height='200'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='800' font-size='20' fill='rgba(0,0,0,0.06)' transform='rotate(-35 175 100)'%3EPT WELINDO SUKSES BERSAMA%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+.invoiceHeader, .customerInfo, .invoiceTable, .summarySection, .signatureSection {
+  position: relative;
+  z-index: 1;
+}
+
+.invoiceHeader {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.companyInfo h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.companyInfo p {
+  margin: 0 0 0.25rem 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.invoiceTitle {
+  text-align: right;
+}
+
+.invoiceTitle h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.invoiceTitle p {
   margin: 0;
-  color: black;
-  white-space: pre-wrap;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.customerInfo {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.customerBox {
+  width: 45%;
+}
+
+.customerLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.customerName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.invoiceTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.invoiceTable th {
+  background-color: #f1f5f9;
+  color: #334155;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.invoiceTable td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.invoiceTable .rightAlign {
+  text-align: right;
+}
+
+.invoiceTable .centerAlign {
+  text-align: center;
+}
+
+.summarySection {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.summaryBox {
+  width: 350px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  background-color: #f8fafc;
+  border-top: 2px solid #1e293b;
+  margin-top: 0.5rem;
+}
+
+.signatureSection {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.signatureBox {
+  text-align: center;
+  width: 200px;
+}
+
+.signatureTitle {
+  font-weight: 600;
+  margin-bottom: 3rem;
+}
+
+.signatureLine {
+  padding-top: 0.5rem;
+}
+
+.poweredBy {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.15;
+  filter: grayscale(100%);
+}
+
+.poweredBy img {
+  height: 40px;
+  object-fit: contain;
 }
 
 .footer {
@@ -127,8 +300,51 @@
 
 /* Print Styles */
 @media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  
+  :global(html), :global(body) {
+    background: white;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  
+  :global(#root) {
+    display: none !important;
+  }
+  
   :global(body *) {
     visibility: hidden;
+  }
+
+  /* Neutralize modal container for printing */
+  .overlay {
+    position: relative;
+    display: block !important;
+    background: transparent;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .modal {
+    display: block !important;
+    max-width: none;
+    max-height: none;
+    width: 100vw;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .header, .footer {
+    display: none !important;
+  }
+
+  .content {
+    display: block !important;
+    overflow: visible;
+    padding: 0;
   }
   
   .notaWrapper, .notaWrapper * {
@@ -136,17 +352,34 @@
   }
   
   .notaWrapper {
-    position: absolute;
+    position: relative;
     left: 0;
     top: 0;
     width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 0 10mm;
+    box-sizing: border-box;
     border: none;
     box-shadow: none;
+    min-height: 0 !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-
-  .notaPre {
-    font-size: 12pt;
+  
+  /* Force it to not break inside important sections */
+  .signatureSection, .summarySection, .invoiceTable tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
+  
+  /* Make things a bit more compact for the physical paper */
+  .invoiceHeader { margin-bottom: 1rem; padding-bottom: 0.5rem; }
+  .customerInfo { margin-bottom: 1rem; }
+  .invoiceTable { margin-bottom: 1rem; }
+  .invoiceTable th, .invoiceTable td { padding: 0.4rem 0.5rem; }
+  .summarySection { margin-bottom: 1rem; }
+  .signatureSection { margin-top: 1rem; }
+  .signatureTitle { margin-bottom: 2rem; }
+  .poweredBy { margin-top: 1rem; }
 }

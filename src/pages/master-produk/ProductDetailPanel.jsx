@@ -63,7 +63,7 @@ const ProductDetailPanel = ({ product, onClose, onEdit, isOwner }) => {
           )}
         </div>
 
-        <button className={styles.editBtn} onClick={onEdit}>Edit Produk</button>
+        <button className={styles.editBtn} onClick={() => onEdit(product)}>Edit Produk</button>
       </div>
     </div>
   );

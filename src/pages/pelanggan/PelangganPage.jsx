@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { collection, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import styles from './PelangganPage.module.css';
 import PelangganList from './PelangganList';
 import PelangganForm from './PelangganForm';
 import { useNavigate } from 'react-router-dom';
+import { ToastContext } from '../../context/ToastContext';
 
 export default function PelangganPage() {
   const [customers, setCustomers] = useState([]);
@@ -12,6 +13,7 @@ export default function PelangganPage() {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useContext(ToastContext);
 
   useEffect(() => {
     const custRef = collection(db, 'customers');
@@ -42,7 +44,7 @@ export default function PelangganPage() {
       setShowForm(false);
     } catch (err) {
       console.error(err);
-      alert('Gagal menyimpan pelanggan');
+      showToast('Gagal menyimpan pelanggan', 'error');
     }
   };
 

@@ -17,6 +17,7 @@ import RiwayatPage from './pages/riwayat/RiwayatPage';
 import LaporanPage from './pages/laporan/LaporanPage';
 
 import KaryawanPage from './pages/karyawan/KaryawanPage';
+import SettingsPage from './pages/pengaturan/SettingsPage';
 
 // Global styles
 import './styles/reset.css';
@@ -80,6 +81,14 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole={ROLES.OWNER}>
                     <KaryawanPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pengaturan"
+                element={
+                  <ProtectedRoute requiredRole={ROLES.OWNER}>
+                    <SettingsPage />
                   </ProtectedRoute>
                 }
               />

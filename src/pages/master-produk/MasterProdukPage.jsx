@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Package, CheckCircle, AlertCircle, XCircle, Search, Filter, LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../hooks/useAuth';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './MasterProdukPage.module.css';
 import ProductGrid from './ProductGrid';
 import ProductForm from './ProductForm';
+import ProductDetailPanel from './ProductDetailPanel';
 
 const MasterProdukPage = () => {
+  const { showToast } = useContext(ToastContext);
   const [products, setProducts] = useState([]);
+  const [threshold, setThreshold] = useState(10);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
@@ -17,22 +21,33 @@ const MasterProdukPage = () => {
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const { isOwner } = useAuth();
 
   // Fetch products from Firestore
   useEffect(() => {
-    const productsRef = collection(db, 'products');
-    const unsubscribe = onSnapshot(productsRef, (snapshot) => {
-      const productsData = [];
-      snapshot.forEach((doc) => {
-        productsData.push({ ...doc.data(), id: doc.id });
+    // Fetch products
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => {
+        data.push({ id: doc.id, ...doc.data() });
       });
-      setProducts(productsData);
+      setProducts(data);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Fetch threshold settings
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().stokMenipisThreshold) {
+        setThreshold(Number(docSnap.data().stokMenipisThreshold));
+      }
+    });
+
+    return () => {
+      unsubProducts();
+      unsubSettings();
+    };
   }, []);
 
   // Filtering Logic
@@ -40,8 +55,8 @@ const MasterProdukPage = () => {
     const matchesSearch = p.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) || p.barcode.includes(searchQuery);
     
     let matchesStatus = true;
-    if (statusFilter === 'Stok Aman') matchesStatus = p.stok > 10;
-    if (statusFilter === 'Stok Menipis') matchesStatus = p.stok > 0 && p.stok <= 10;
+    if (statusFilter === 'Stok Aman') matchesStatus = p.stok > threshold;
+    if (statusFilter === 'Stok Menipis') matchesStatus = p.stok > 0 && p.stok <= threshold;
     if (statusFilter === 'Stok Habis') matchesStatus = p.stok === 0;
 
     let matchesCategory = true;
@@ -54,8 +69,8 @@ const MasterProdukPage = () => {
 
   // Calculate Stats
   const totalProducts = products.length;
-  const stokAman = products.filter(p => p.stok > 10).length;
-  const stokMenipis = products.filter(p => p.stok > 0 && p.stok <= 10).length;
+  const stokAman = products.filter(p => p.stok > threshold).length;
+  const stokMenipis = products.filter(p => p.stok > 0 && p.stok <= threshold).length;
   const stokHabis = products.filter(p => p.stok === 0).length;
 
   const handleAddProduct = () => {
@@ -84,9 +99,10 @@ const MasterProdukPage = () => {
         await setDoc(productRef, savedProduct);
       }
       setIsFormOpen(false);
+      showToast('Produk berhasil disimpan!', 'success');
     } catch (error) {
       console.error("Error saving product:", error);
-      alert("Gagal menyimpan produk: " + error.message);
+      showToast("Gagal menyimpan produk: " + error.message, 'error');
     }
   };
 
@@ -211,11 +227,26 @@ const MasterProdukPage = () => {
 
       {/* Product List/Grid */}
       <div className={styles.content}>
-        <ProductGrid 
-          products={filteredProducts} 
-          viewMode={viewMode}
-          onEdit={handleEditProduct}
-        />
+        <div className={styles.gridWrapper}>
+          <ProductGrid 
+            products={filteredProducts} 
+            viewMode={viewMode}
+            onSelect={(p) => setSelectedProduct(p)}
+            selectedBarcode={selectedProduct?.barcode}
+            onEdit={handleEditProduct}
+          />
+        </div>
+        
+        {selectedProduct && (
+          <div className={styles.panelWrapper}>
+            <ProductDetailPanel 
+              product={selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+              onEdit={handleEditProduct}
+              isOwner={isOwner}
+            />
+          </div>
+        )}
       </div>
 
       {/* Pagination */}

@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { History, Keyboard, Save } from 'lucide-react';
 import { collection, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './BarangMasukPage.module.css';
 import ScanInput from './ScanInput';
 import StockInList from './StockInList';
+import RiwayatBarangMasukModal from './RiwayatBarangMasukModal';
 
 const BarangMasukPage = () => {
+  const { showToast } = useContext(ToastContext);
   const [items, setItems] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showRiwayat, setShowRiwayat] = useState(false);
 
   const handleAddItem = (item) => {
     setItems(prev => [item, ...prev]);
@@ -27,7 +31,7 @@ const BarangMasukPage = () => {
   };
 
   const handleNewProduct = (barcode) => {
-    alert(`Produk baru terdeteksi! Barcode: ${barcode}. Buka form tambah produk.`);
+    showToast(`Produk baru ditambahkan ke daftar. Jangan lupa klik Simpan Barang Masuk.`, 'info');
   };
 
   const handleSaveStockIn = async () => {
@@ -51,15 +55,29 @@ const BarangMasukPage = () => {
           const prodRef = doc(db, 'products', item.id);
           const newStock = (item.stok || 0) + item.qty;
           batch.update(prodRef, { stok: newStock });
+        } else if (item.barcode) {
+          // This is a new product added from the scan input
+          const prodRef = doc(db, 'products', item.barcode);
+          batch.set(prodRef, {
+            barcode: item.barcode,
+            nama_barang: item.nama_barang,
+            satuan: item.satuan,
+            stok: item.qty,
+            kategori: 'Lainnya',
+            asal: 'Lokal',
+            harga_jual: 0,
+            harga_modal: 0,
+            has_multi_satuan: false
+          });
         }
       }
       
       await batch.commit();
-      alert('Barang masuk berhasil disimpan!');
+      showToast('Barang masuk berhasil disimpan!', 'success');
       setItems([]);
     } catch (err) {
       console.error(err);
-      alert('Gagal menyimpan data barang masuk: ' + err.message);
+      showToast('Gagal menyimpan data barang masuk: ' + err.message, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -73,7 +91,7 @@ const BarangMasukPage = () => {
           <p className={styles.subtitle}>Catat produk yang masuk ke gudang</p>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.btnSecondary}>
+          <button className={styles.btnSecondary} onClick={() => setShowRiwayat(true)}>
             <History size={18} />
             Riwayat Barang Masuk
           </button>
@@ -102,6 +120,10 @@ const BarangMasukPage = () => {
           />
         </section>
       </div>
+
+      {showRiwayat && (
+        <RiwayatBarangMasukModal onClose={() => setShowRiwayat(false)} />
+      )}
     </div>
   );
 };

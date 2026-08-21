@@ -88,10 +88,11 @@ const ProductForm = ({ product, onSave, onCancel, isOwner }) => {
             onChange={(e) => {
               const file = e.target.files[0];
               if (file) {
-                // For preview purposes, we use URL.createObjectURL.
-                // In a real app, this would be uploaded to a server.
-                const imageUrl = URL.createObjectURL(file);
-                setFormData(prev => ({ ...prev, foto: imageUrl }));
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setFormData(prev => ({ ...prev, foto: reader.result }));
+                };
+                reader.readAsDataURL(file);
               }
             }}
             style={{ fontSize: '0.875rem' }}

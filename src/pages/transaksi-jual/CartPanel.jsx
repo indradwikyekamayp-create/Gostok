@@ -28,6 +28,31 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
     );
   };
 
+  const handleQtyInput = (id, value) => {
+    const newQty = parseInt(value) || ''; // Allow empty string while typing
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          return { ...item, qty: newQty, subtotal: (newQty || 0) * item.harga_jual };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleQtyBlur = (id) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          // If empty or less than 1, fallback to 1
+          const finalQty = Math.max(1, item.qty || 1);
+          return { ...item, qty: finalQty, subtotal: finalQty * item.harga_jual };
+        }
+        return item;
+      })
+    );
+  };
+
   const handleRemoveItem = (id) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
@@ -38,7 +63,7 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
     }
   };
 
-  const totalItem = cart.reduce((sum, item) => sum + item.qty, 0);
+  const totalItem = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
   const totalHarga = cart.reduce((sum, item) => sum + item.subtotal, 0);
   const diskon = 0; // Placeholder for now
   const grandTotal = totalHarga - diskon;
@@ -76,7 +101,14 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
                 <div className={styles.colQty}>
                   <div className={styles.qtyControl}>
                     <button className={styles.qtyBtn} onClick={() => handleQtyChange(item.id, -1)}><Minus size={14} /></button>
-                    <span className={styles.qtyValue}>{item.qty}</span>
+                    <input 
+                      type="number"
+                      className={styles.qtyValue} 
+                      value={item.qty}
+                      onChange={(e) => handleQtyInput(item.id, e.target.value)}
+                      onBlur={() => handleQtyBlur(item.id)}
+                      min="1"
+                    />
                     <button className={styles.qtyBtn} onClick={() => handleQtyChange(item.id, 1)}><Plus size={14} /></button>
                   </div>
                 </div>

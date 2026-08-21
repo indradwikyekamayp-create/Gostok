@@ -243,6 +243,21 @@
 /* === Main Content === */
 .content {
   flex: 1;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.gridWrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.panelWrapper {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 1.5rem;
 }
 
 /* === Pagination === */

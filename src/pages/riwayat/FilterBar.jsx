@@ -56,10 +56,10 @@ const FilterBar = ({ filters, onFilterChange }) => {
         </div>
         
         <div className={styles.formGroup}>
-          <label>Pelanggan</label>
+          <label>No Nota / Pelanggan</label>
           <input 
             type="text" 
-            placeholder="Cari nama pelanggan..." 
+            placeholder="Cari nama atau no nota..." 
             value={localFilters.customer} 
             onChange={(e) => handleChange('customer', e.target.value)} 
             className={styles.input}

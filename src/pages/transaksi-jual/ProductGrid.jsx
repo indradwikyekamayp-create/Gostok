@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Search, ScanBarcode, List, Grid, Image as ImageIcon, Plus, Keyboard } from 'lucide-react';
 import Card from '../../components/common/Card';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './ProductGrid.module.css';
 
 const formatRupiah = (number) => {
@@ -13,6 +14,7 @@ const formatRupiah = (number) => {
 };
 
 export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
+  const { showToast } = useContext(ToastContext);
   const barcodeInputRef = useRef(null);
   const [activeFilter, setActiveFilter] = useState('daftar');
   const [viewMode, setViewMode] = useState('grid');
@@ -41,7 +43,7 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
   };
 
   const handleLoadMore = () => {
-    alert('Memuat lebih banyak produk... (Mock)');
+    showToast('Memuat lebih banyak produk... (Fitur segera hadir)', 'info');
   };
 
   const filteredProducts = products.filter((product) => {
@@ -140,9 +142,9 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
         {filteredProducts.map((product) => (
           <div key={product.id} className={styles.productCard}>
             <div className={styles.productImageWrapper}>
-              {product.image ? (
+              {product.foto ? (
                 <img 
-                  src={product.image} 
+                  src={product.foto} 
                   alt={product.nama_barang} 
                   className={styles.productImage}
                   onError={(e) => {
@@ -153,7 +155,7 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
               ) : null}
               <div 
                 className={styles.imagePlaceholder} 
-                style={{ display: product.image ? 'none' : 'flex' }}
+                style={{ display: product.foto ? 'none' : 'flex' }}
               >
                 <ImageIcon size={32} color="#cbd5e1" />
               </div>

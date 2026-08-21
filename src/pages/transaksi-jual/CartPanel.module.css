@@ -115,10 +115,24 @@
 }
 
 .qtyValue {
-  width: 32px;
+  width: 40px;
   text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--color-text);
+}
+
+.qtyValue::-webkit-outer-spin-button,
+.qtyValue::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qtyValue[type=number] {
+  -moz-appearance: textfield;
 }
 
 .removeBtn {

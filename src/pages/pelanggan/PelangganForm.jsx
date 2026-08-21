@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { X } from 'lucide-react';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './PelangganForm.module.css';
 
 export default function PelangganForm({ customer, onSave, onCancel }) {
+  const { showToast } = useContext(ToastContext);
   const [formData, setFormData] = useState({
     nama_perusahaan: customer?.nama_perusahaan || '',
     nama_pic: customer?.nama_pic || '',
@@ -13,7 +16,7 @@ export default function PelangganForm({ customer, onSave, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nama_perusahaan) {
-      alert('Nama perusahaan wajib diisi');
+      showToast('Nama perusahaan wajib diisi', 'warning');
       return;
     }
     onSave(formData);

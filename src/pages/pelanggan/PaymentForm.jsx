@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './PaymentForm.module.css';
 
 export default function PaymentForm({ selectedNotas, onClose, onSave }) {
+  const { showToast } = useContext(ToastContext);
   const [jumlahBayar, setJumlahBayar] = useState('');
   const [metode, setMetode] = useState('Cash');
   const [isManual, setIsManual] = useState(false);
@@ -43,10 +45,16 @@ export default function PaymentForm({ selectedNotas, onClose, onSave }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isComplete) {
-      alert('Jumlah bayar tidak sama dengan total yang dialokasikan.');
+      showToast('Jumlah bayar tidak sama dengan total yang dialokasikan.', 'warning');
       return;
     }
-    onSave();
+    
+    // Pass payment data back
+    onSave({
+      jumlahBayar: amount,
+      metode,
+      allocations
+    });
   };
 
   const formatRp = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);

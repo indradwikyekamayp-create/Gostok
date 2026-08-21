@@ -6,14 +6,20 @@ import { db } from '../../firebase';
 import Card from '../../components/common/Card';
 import styles from './RecentActivity.module.css';
 
-const formatTimeAgo = (dateStr) => {
+const formatTime = (dateStr) => {
   const dateObj = typeof dateStr === 'string' ? new Date(dateStr) : dateStr?.toDate ? dateStr.toDate() : new Date();
-  const diffMs = Date.now() - dateObj.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `${diffMins} menit lalu`;
-  const diffHrs = Math.floor(diffMins / 60);
-  if (diffHrs < 24) return `${diffHrs} jam lalu`;
-  return `${Math.floor(diffHrs / 24)} hari lalu`;
+  
+  const day = dateObj.getDate();
+  const monthNames = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+  const month = monthNames[dateObj.getMonth()];
+  const year = dateObj.getFullYear();
+  const hours = dateObj.getHours().toString().padStart(2, '0');
+  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+  
+  return `${day} ${month} ${year}, ${hours}:${minutes} WIB`;
 };
 
 const RecentActivity = () => {
@@ -33,8 +39,8 @@ const RecentActivity = () => {
         data.push({
           id: doc.id,
           title: `Penjualan ${t.noNota || doc.id}`,
-          subtitle: `Pelanggan: ${t.pelanggan?.nama || 'Umum'}`,
-          time: formatTimeAgo(dateObj),
+          subtitle: `Pelanggan: ${t.customer?.nama_perusahaan || t.customer?.nama_pic || t.customer?.nama || t.pelanggan?.nama || 'Umum'}`,
+          time: formatTime(dateObj),
           icon: ShoppingCart,
           color: 'success',
           rawDate: dateObj
