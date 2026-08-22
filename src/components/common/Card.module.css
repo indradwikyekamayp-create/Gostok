@@ -1,15 +1,15 @@
 .card {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   transition: box-shadow var(--transition-fast) ease, transform var(--transition-fast) ease;
 }
 
 .padding-none { padding: 0; }
 .padding-sm { padding: var(--space-3); }
 .padding-md { padding: var(--space-4); }
-.padding-lg { padding: var(--space-6); }
+.padding-lg { padding: 1.5rem; }
 
 .hoverable {
   cursor: pointer;

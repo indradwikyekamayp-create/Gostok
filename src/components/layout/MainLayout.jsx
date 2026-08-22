@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import MobileBottomNav from './MobileBottomNav';
 import styles from './MainLayout.module.css';
 
 const MainLayout = ({ title = 'AyoStock!' }) => {
@@ -43,21 +44,23 @@ const MainLayout = ({ title = 'AyoStock!' }) => {
 
   return (
     <div className={styles.layout}>
-      <Sidebar 
-        isCollapsed={isSidebarCollapsed} 
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-        isMobile={isMobile}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+      {!isMobile && (
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed} 
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+          isMobile={isMobile}
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+      )}
       <div className={`${styles.mainContent} ${isSidebarCollapsed && !isMobile ? styles.contentExpanded : ''} ${isMobile ? styles.contentMobile : ''}`}>
-        <Header onToggleSidebar={handleToggleSidebar} title={title} />
-        <main className={styles.content}>
+        <Header onToggleSidebar={handleToggleSidebar} title={title} isMobile={isMobile} />
+        <main className={`${styles.content} ${isMobile ? styles.mobilePadding : ''}`}>
           <Outlet />
         </main>
       </div>
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 };
-
 
 export default MainLayout;

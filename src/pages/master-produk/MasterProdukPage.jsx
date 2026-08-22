@@ -17,6 +17,8 @@ const MasterProdukPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [categoryFilter, setCategoryFilter] = useState('Semua Kategori');
+  const [sortBy, setSortBy] = useState('Terbaru');
+  const [showFilters, setShowFilters] = useState(true);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -65,6 +67,21 @@ const MasterProdukPage = () => {
     }
     
     return matchesSearch && matchesStatus && matchesCategory;
+  });
+
+  filteredProducts.sort((a, b) => {
+    if (sortBy === 'A-Z') {
+      return (a.nama_barang || '').localeCompare(b.nama_barang || '');
+    } else if (sortBy === 'Z-A') {
+      return (b.nama_barang || '').localeCompare(a.nama_barang || '');
+    } else if (sortBy === 'Stok Terbanyak') {
+      return (b.stok || 0) - (a.stok || 0);
+    } else if (sortBy === 'Stok Terdikit') {
+      return (a.stok || 0) - (b.stok || 0);
+    } else {
+      // Terbaru (assuming newer have higher timestamps, but if missing, just return 0)
+      return (b.createdAt?.toMillis ? b.createdAt.toMillis() : 0) - (a.createdAt?.toMillis ? a.createdAt.toMillis() : 0);
+    }
   });
 
   // Calculate Stats
@@ -169,13 +186,24 @@ const MasterProdukPage = () => {
         </div>
         
         <div className={styles.toolbarRight}>
-          <button className={styles.outlineBtn}>
+          <button 
+            className={`${styles.outlineBtn} ${showFilters ? styles.active : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+            style={{ backgroundColor: showFilters ? '#e2e8f0' : 'white' }}
+          >
             <Filter size={16} /> Filter
           </button>
-          <select className={styles.outlineBtn} style={{ appearance: 'auto' }}>
-            <option>Urutkan: Terbaru</option>
-            <option>Urutkan: A-Z</option>
-            <option>Urutkan: Stok Terbanyak</option>
+          <select 
+            className={styles.outlineBtn} 
+            style={{ appearance: 'auto' }}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="Terbaru">Urutkan: Terbaru</option>
+            <option value="A-Z">Urutkan: A-Z</option>
+            <option value="Z-A">Urutkan: Z-A</option>
+            <option value="Stok Terbanyak">Urutkan: Stok Terbanyak</option>
+            <option value="Stok Terdikit">Urutkan: Stok Terdikit</option>
           </select>
           <div className={styles.viewToggle}>
             <button 
@@ -197,33 +225,35 @@ const MasterProdukPage = () => {
       </div>
 
       {/* Pills Filter */}
-      <div className={styles.pillsContainer}>
-        <div className={styles.pillsGroup}>
-          {['Semua', 'Stok Aman', 'Stok Menipis', 'Stok Habis'].map(f => (
-            <button 
-              key={f} 
-              className={`${styles.pill} ${statusFilter === f ? styles.active : ''}`}
-              onClick={() => setStatusFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        
-        <div className={styles.pillsGroupSeparator}></div>
+      {showFilters && (
+        <div className={styles.pillsContainer}>
+          <div className={styles.pillsGroup}>
+            {['Semua', 'Stok Aman', 'Stok Menipis', 'Stok Habis'].map(f => (
+              <button 
+                key={f} 
+                className={`${styles.pill} ${statusFilter === f ? styles.active : ''}`}
+                onClick={() => setStatusFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          
+          <div className={styles.pillsGroupSeparator}></div>
 
-        <div className={styles.pillsGroup}>
-          {['Semua Kategori', 'Makanan & Minuman', 'Kesehatan', 'Kebutuhan Rumah Tangga', 'Lainnya'].map(c => (
-            <button 
-              key={c} 
-              className={`${styles.pill} ${categoryFilter === c ? styles.active : ''}`}
-              onClick={() => setCategoryFilter(c)}
-            >
-              {c}
-            </button>
-          ))}
+          <div className={styles.pillsGroup}>
+            {['Semua Kategori', 'Makanan & Minuman', 'Kesehatan', 'Kebutuhan Rumah Tangga', 'Lainnya'].map(c => (
+              <button 
+                key={c} 
+                className={`${styles.pill} ${categoryFilter === c ? styles.active : ''}`}
+                onClick={() => setCategoryFilter(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Product List/Grid */}
       <div className={styles.content}>
@@ -234,6 +264,7 @@ const MasterProdukPage = () => {
             onSelect={(p) => setSelectedProduct(p)}
             selectedBarcode={selectedProduct?.barcode}
             onEdit={handleEditProduct}
+            threshold={threshold}
           />
         </div>
         

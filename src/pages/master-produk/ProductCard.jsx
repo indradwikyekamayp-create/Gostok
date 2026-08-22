@@ -2,11 +2,11 @@ import React from 'react';
 import { MoreVertical, Eye, Edit2, Image as ImageIcon } from 'lucide-react';
 import styles from './ProductCard.module.css';
 
-const ProductCard = ({ product, onClick, onEdit, isSelected, viewMode = 'grid' }) => {
+const ProductCard = ({ product, onClick, onEdit, isSelected, viewMode = 'grid', threshold = 10 }) => {
   // Determine stock color
   let stockColor = 'var(--color-success, hsl(145, 55%, 42%))'; // green
   if (product.stok === 0) stockColor = 'var(--color-danger, hsl(0, 70%, 50%))'; // red
-  else if (product.stok <= 10) stockColor = 'var(--color-warning, hsl(38, 92%, 50%))'; // orange
+  else if (product.stok <= threshold) stockColor = 'var(--color-warning, hsl(38, 92%, 50%))'; // orange
 
   // Calculate stock progress bar width (max 100%, assuming 100 is "full" for display purposes)
   const stockPercentage = Math.min(100, (product.stok / 100) * 100);

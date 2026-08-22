@@ -1,15 +1,18 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './components/layout';
 import { ProtectedRoute } from './components/layout';
 import { ROLES } from './constants/roles';
+import OpeningAnimation from './components/OpeningAnimation';
 
 // Pages
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import MasterProdukPage from './pages/master-produk/MasterProdukPage';
 import BarangMasukPage from './pages/barang-masuk/BarangMasukPage';
+import KerugianPage from './pages/kerugian/KerugianPage';
 import TransaksiJualPage from './pages/transaksi-jual/TransaksiJualPage';
 import PelangganPage from './pages/pelanggan/PelangganPage';
 import PelangganDetail from './pages/pelanggan/PelangganDetail';
@@ -27,13 +30,22 @@ import './styles/animations.css';
 import './styles/print.css';
 
 function App() {
+  const [showAnimation, setShowAnimation] = useState(true);
+
+  const handleAnimationComplete = () => {
+    setShowAnimation(false);
+  };
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <Routes>
-            {/* Public route */}
-            <Route path="/login" element={<LoginPage />} />
+    <>
+      {showAnimation && <OpeningAnimation onComplete={handleAnimationComplete} />}
+      <div style={{ display: showAnimation ? 'none' : 'block' }}>
+        <BrowserRouter>
+          <AuthProvider>
+            <ToastProvider>
+              <Routes>
+                {/* Public route */}
+                <Route path="/login" element={<LoginPage />} />
 
             {/* Protected routes — wrapped in MainLayout */}
             <Route
@@ -63,6 +75,14 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole={ROLES.ADMIN}>
                     <BarangMasukPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/kerugian"
+                element={
+                  <ProtectedRoute requiredRole={ROLES.ADMIN}>
+                    <KerugianPage />
                   </ProtectedRoute>
                 }
               />
@@ -100,6 +120,8 @@ function App() {
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
+    </div>
+    </>
   );
 }
 

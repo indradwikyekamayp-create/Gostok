@@ -1,0 +1,18 @@
+﻿.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease; }
+.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 400px; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.closeBtn { background: none; border: none; cursor: pointer; color: #64748b; padding: 0.25rem; border-radius: 50%; display: flex; }
+.closeBtn:hover { background: #f1f5f9; color: #334155; }
+.scannerContainer { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.viewfinder { position: relative; width: 250px; height: 250px; background: #f8fafc; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.cornerTopLeft, .cornerTopRight, .cornerBottomLeft, .cornerBottomRight { position: absolute; width: 40px; height: 40px; border-color: #3b82f6; border-style: solid; }
+.cornerTopLeft { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 8px; }
+.cornerTopRight { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 8px; }
+.cornerBottomLeft { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 8px; }
+.cornerBottomRight { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 8px; }
+.laser { position: absolute; left: 10%; right: 10%; height: 2px; background: #ef4444; box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.5); animation: scan 2s linear infinite; }
+.successIcon { display: flex; flex-direction: column; align-items: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.instruction { color: #64748b; font-size: 0.875rem; margin: 0; text-align: center; }
+@keyframes scan { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }

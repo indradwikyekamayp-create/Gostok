@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductCard from './ProductCard';
 
-const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = 'grid' }) => {
+const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = 'grid', threshold = 10 }) => {
   if (!products || products.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary, #666)' }}>
@@ -33,6 +33,7 @@ const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = '
           onEdit={onEdit}
           isSelected={selectedBarcode === product.barcode}
           viewMode={viewMode}
+          threshold={threshold}
         />
       ))}
     </div>

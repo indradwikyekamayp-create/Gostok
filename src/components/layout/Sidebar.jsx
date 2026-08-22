@@ -13,7 +13,8 @@ import {
   LogOut,
   Settings,
   Key,
-  X 
+  X,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROLES } from '../../constants/roles';
@@ -60,6 +61,7 @@ const Sidebar = ({ isCollapsed, onToggle, isMobile, setMobileMenuOpen }) => {
     // Sisipkan menu Admin/Owner di indeks ke-1
     menuItems.splice(1, 0, { path: '/master-produk', label: 'Master Produk', icon: <Package size={20} /> });
     menuItems.splice(2, 0, { path: '/barang-masuk', label: 'Barang Masuk', icon: <PackagePlus size={20} /> });
+    menuItems.splice(3, 0, { path: '/kerugian', label: 'Kerugian', icon: <Trash2 size={20} /> });
   }
 
   if (userRole === ROLES?.OWNER || userRole === 'owner') {

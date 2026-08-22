@@ -165,13 +165,20 @@ const OwnerDashboard = () => {
       
       <div className={styles.summaryGrid}>
         {isOwner && (
-          <SummaryCard 
-            title="Omzet Hari Ini"
-            value={formatRupiah(omzetHariIni)}
-            icon={TrendingUp}
-            color="primary"
-            tooltip="Total kotor penjualan hari ini (Cash + Transfer + BON)."
-          />
+          <div className={styles.heroCard}>
+            <h3>Omzet Hari Ini <AlertCircle size={14} style={{ opacity: 0.8 }} /></h3>
+            <div className={styles.amount}>{formatRupiah(omzetHariIni || 0)}</div>
+            <div className={styles.subtitle}>
+              0% dari kemarin
+            </div>
+            <div className={styles.heroIcon}>
+              <TrendingUp size={24} />
+            </div>
+            {/* Soft wave decoration */}
+            <svg className={styles.heroWave} viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#ffffff" fillOpacity="1" d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,176C672,171,768,181,864,197.3C960,213,1056,235,1152,218.7C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+          </div>
         )}
         <SummaryCard 
           title="Piutang Berjalan"

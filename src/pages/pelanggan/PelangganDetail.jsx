@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import styles from './PelangganDetail.module.css';
 import NotaListWithCheckbox from './NotaListWithCheckbox';
 import PaymentForm from './PaymentForm';
+import PaymentReceiptPreview from './PaymentReceiptPreview';
 import PelangganForm from './PelangganForm';
 
 export default function PelangganDetail() {
@@ -22,6 +23,7 @@ export default function PelangganDetail() {
   const [selectedNotas, setSelectedNotas] = useState([]);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [receiptPayment, setReceiptPayment] = useState(null);
 
   useEffect(() => {
     // 1. Fetch Customer
@@ -141,6 +143,15 @@ export default function PelangganDetail() {
       showToast('Pembayaran berhasil dicatat!', 'success');
       setShowPaymentForm(false);
       setSelectedNotas([]);
+      
+      // Auto open receipt for the new payment
+      setReceiptPayment({
+        id: paymentRef.id,
+        tanggal: new Date().toISOString(),
+        metode: paymentData.metode,
+        jumlahBayar: paymentData.jumlahBayar,
+        allocations: paymentData.allocations
+      });
     } catch (err) {
       console.error(err);
       showToast('Gagal mencatat pembayaran: ' + err.message, 'error');
@@ -231,6 +242,7 @@ export default function PelangganDetail() {
                     <th style={{textAlign: 'left', padding: '0.75rem'}}>Metode</th>
                     <th style={{textAlign: 'right', padding: '0.75rem'}}>Nominal Dibayar</th>
                     <th style={{textAlign: 'left', padding: '0.75rem'}}>Rincian Alokasi (Cicilan)</th>
+                    <th style={{textAlign: 'center', padding: '0.75rem'}}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -274,6 +286,22 @@ export default function PelangganDetail() {
                           </div>
                         ) : '-'}
                       </td>
+                      <td style={{padding: '0.75rem', textAlign: 'center'}}>
+                        <button 
+                          onClick={() => setReceiptPayment(p)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: 'var(--color-primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          🖨️ Cetak Struk
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -294,8 +322,21 @@ export default function PelangganDetail() {
       {showEditForm && (
         <PelangganForm 
           customer={customer}
-          onSave={() => setShowEditForm(false)}
+          onSave={async (data) => {
+            const customerRef = doc(db, 'customers', id);
+            await setDoc(customerRef, data, { merge: true });
+            setShowEditForm(false);
+          }}
           onCancel={() => setShowEditForm(false)}
+        />
+      )}
+
+      {receiptPayment && (
+        <PaymentReceiptPreview 
+          payment={receiptPayment}
+          customer={customer}
+          notas={notas}
+          onClose={() => setReceiptPayment(null)}
         />
       )}
     </div>

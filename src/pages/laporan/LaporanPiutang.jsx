@@ -50,12 +50,20 @@ const LaporanPiutang = () => {
               nama: custName,
               jumlahNota: 0,
               totalHutang: 0,
-              notaTertua: dateStr
+              notaTertua: dateStr,
+              notas: []
             };
           }
           
           customersMap[custName].jumlahNota += 1;
           customersMap[custName].totalHutang += hutang;
+          customersMap[custName].notas.push({
+            noNota: data.noNota || doc.id,
+            tanggal: dateStr,
+            sisaHutang: hutang,
+            totalNota: data.grandTotal || 0,
+            status: data.statusPembayaran || (hutang > 0 ? 'Cicilan' : 'Lunas')
+          });
           
           if (dateStr && (!customersMap[custName].notaTertua || new Date(dateStr) < new Date(customersMap[custName].notaTertua))) {
             customersMap[custName].notaTertua = dateStr;
@@ -74,6 +82,12 @@ const LaporanPiutang = () => {
 
     return () => unsub();
   }, []);
+
+  const [expandedCustomer, setExpandedCustomer] = useState(null);
+
+  const toggleExpand = (nama) => {
+    setExpandedCustomer(expandedCustomer === nama ? null : nama);
+  };
 
   return (
     <div>
@@ -97,7 +111,7 @@ const LaporanPiutang = () => {
         </div>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflowX: 'auto', backgroundColor: '#fff', borderRadius: '0.5rem', border: '1px solid #eee' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
             <tr>
@@ -109,19 +123,65 @@ const LaporanPiutang = () => {
           </thead>
           <tbody>
             {piutangData.length > 0 ? piutangData.map((row, i) => (
-              <tr key={i} style={{ cursor: 'pointer', transition: 'background-color 150ms ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary-50, #f5f8ff)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', fontWeight: '500', color: 'var(--color-primary, hsl(215, 50%, 30%))' }}>{row.nama}</td>
-                <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>
-                  <span style={{ backgroundColor: 'var(--color-bg, #f0f0f0)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-full, 0.75rem)', fontSize: '0.75rem', fontWeight: 'bold'}}>{row.jumlahNota}</span>
-                </td>
-                <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{formatDate(row.notaTertua)}</td>
-                <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'right', fontWeight: 'bold', color: 'var(--color-danger-hover, hsl(0, 70%, 40%))' }}>
-                  {formatCurrency(row.totalHutang)}
-                </td>
-              </tr>
+              <React.Fragment key={i}>
+                <tr 
+                  onClick={() => toggleExpand(row.nama)}
+                  style={{ cursor: 'pointer', transition: 'background-color 150ms ease', backgroundColor: expandedCustomer === row.nama ? 'var(--color-primary-50, #f5f8ff)' : 'transparent' }} 
+                  onMouseOver={(e) => { if (expandedCustomer !== row.nama) e.currentTarget.style.backgroundColor = 'var(--color-primary-50, #f5f8ff)' }} 
+                  onMouseOut={(e) => { if (expandedCustomer !== row.nama) e.currentTarget.style.backgroundColor = 'transparent' }}
+                >
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: expandedCustomer === row.nama ? 'none' : '1px solid var(--color-border-light, #eee)', fontWeight: '500', color: 'var(--color-primary, hsl(215, 50%, 30%))' }}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                      <span style={{ transform: expandedCustomer === row.nama ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s', display: 'inline-block' }}>▶</span>
+                      {row.nama}
+                    </div>
+                  </td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: expandedCustomer === row.nama ? 'none' : '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>
+                    <span style={{ backgroundColor: 'var(--color-bg, #f0f0f0)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-full, 0.75rem)', fontSize: '0.75rem', fontWeight: 'bold'}}>{row.jumlahNota}</span>
+                  </td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: expandedCustomer === row.nama ? 'none' : '1px solid var(--color-border-light, #eee)' }}>{formatDate(row.notaTertua)}</td>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: expandedCustomer === row.nama ? 'none' : '1px solid var(--color-border-light, #eee)', textAlign: 'right', fontWeight: 'bold', color: 'var(--color-danger-hover, hsl(0, 70%, 40%))' }}>
+                    {formatCurrency(row.totalHutang)}
+                  </td>
+                </tr>
+                {expandedCustomer === row.nama && (
+                  <tr>
+                    <td colSpan="4" style={{ padding: '0', borderBottom: '1px solid var(--color-border-light, #eee)' }}>
+                      <div style={{ padding: '1rem', backgroundColor: 'var(--color-primary-50, #f5f8ff)' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8125rem', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.375rem', overflow: 'hidden' }}>
+                          <thead style={{ backgroundColor: '#f8fafc' }}>
+                            <tr>
+                              <th style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e2e8f0' }}>No Nota</th>
+                              <th style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Tanggal Transaksi</th>
+                              <th style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>Total Belanja</th>
+                              <th style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>Sisa Hutang</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {row.notas.map((nota, j) => (
+                              <tr key={j}>
+                                <td style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #f1f5f9', fontWeight: '500' }}>{nota.noNota}</td>
+                                <td style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #f1f5f9' }}>{formatDate(nota.tanggal)}</td>
+                                <td style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#64748b' }}>{formatCurrency(nota.totalNota)}</td>
+                                <td style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', fontWeight: 'bold', color: 'var(--color-warning-hover, hsl(38, 92%, 40%))' }}>
+                                  {nota.sisaHutang <= 0 ? (
+                                    <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--color-success-hover, hsl(145, 55%, 35%))', color: 'white', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>LUNAS</span>
+                                  ) : (
+                                    formatCurrency(nota.sisaHutang)
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             )) : (
               <tr>
-                <td colSpan="4" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>Belum ada data piutang</td>
+                <td colSpan="4" style={{ padding: '1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>Belum ada data piutang</td>
               </tr>
             )}
           </tbody>
