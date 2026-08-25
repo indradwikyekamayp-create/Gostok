@@ -11,7 +11,7 @@ const formatRupiah = (number) => {
   }).format(number);
 };
 
-export default function NotaPreview({ transaction, onClose }) {
+export default function NotaPreview({ transaction, onClose, autoPrint = false }) {
   const [settings, setSettings] = useState({
     namaToko: 'PT. WELINDO SUKSES BERSAMA',
     teleponToko: '0812-3456-7890'
@@ -21,10 +21,13 @@ export default function NotaPreview({ transaction, onClose }) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     
-    // Auto-trigger print when nota is opened
-    const printTimer = setTimeout(() => {
-      window.print();
-    }, 500);
+    // Auto-trigger print when nota is opened if requested
+    let printTimer;
+    if (autoPrint) {
+      printTimer = setTimeout(() => {
+        window.print();
+      }, 500);
+    }
     
     // Fetch store config
     import('firebase/firestore').then(({ doc, onSnapshot }) => {

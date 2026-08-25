@@ -8,70 +8,81 @@ service cloud.firestore {
     }
 
     // Helper: get user role from users collection
+    // Pastikan kita menangani kasus di mana dokumen user belum ada (misalnya saat pertama kali registrasi sebelum diset owner)
     function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role 
+        : null;
     }
 
-    // Helper: check if user is owner
+    // Helper roles
     function isOwner() {
       return isAuth() && getUserRole() == 'owner';
     }
 
-    // Helper: check if user is kasir
+    function isAdmin() {
+      return isAuth() && (getUserRole() == 'admin' || getUserRole() == 'owner');
+    }
+
     function isKasir() {
-      return isAuth() && getUserRole() == 'kasir';
+      return isAuth() && (getUserRole() == 'kasir' || getUserRole() == 'admin' || getUserRole() == 'owner');
     }
 
-    // === PRODUCTS ===
-    // Kasir: bisa baca dan create (produk baru dari scan)
-    // Owner: full CRUD
-    match /products/{barcode} {
-      allow read: if isAuth();
-      allow create: if isAuth();
-      allow update, delete: if isOwner();
-    }
-
-    // === STOCK_IN ===
-    // Kasir & Owner: bisa create dan baca
-    match /stock_in/{docId} {
-      allow read, create: if isAuth();
-      allow update, delete: if isOwner();
-    }
-
-    // === SALES_TRANSACTIONS ===
-    // Kasir & Owner: bisa create dan baca
-    // Hanya Owner yang bisa update (misal ubah status bayar manual)
-    match /sales_transactions/{docId} {
-      allow read, create: if isAuth();
-      allow update: if isAuth();
-      allow delete: if isOwner();
-    }
-
-    // === CUSTOMERS ===
-    // Kasir & Owner: full CRUD
-    match /customers/{docId} {
-      allow read, write: if isAuth();
-    }
-
-    // === PAYMENTS ===
-    // Kasir & Owner: bisa create dan baca
-    match /payments/{docId} {
-      allow read, create: if isAuth();
-      allow update, delete: if isOwner();
-    }
-
-    // === USERS ===
-    // User bisa baca profil sendiri
-    // Owner bisa baca/tulis semua user
+    // === USERS (ROLE MANAGEMENT) ===
+    // Sangat penting: Mencegah perubahan role secara ilegal
     match /users/{uid} {
+      // User bisa melihat data mereka sendiri, owner bisa melihat semuanya
       allow read: if isAuth() && (request.auth.uid == uid || isOwner());
+      
+      // HANYA Owner yang bisa membuat, mengedit, atau menghapus user.
+      // Ini mencegah serangan "perubahan role otomatis" atau eskalasi hak istimewa.
       allow write: if isOwner();
     }
 
-    // === COUNTERS ===
-    // Authenticated users bisa baca dan update (untuk nota counter)
+    // === PRODUCTS (MASTER PRODUK) ===
+    match /products/{docId} {
+      // Kasir butuh read untuk transaksi, Admin/Owner bisa kelola data
+      allow read: if isKasir();
+      allow create, update: if isAdmin();
+      // Hanya owner yang boleh hapus permanen untuk mencegah kehilangan data besar
+      allow delete: if isOwner();
+    }
+
+    // === TRANSACTIONS (PENJUALAN) ===
+    match /transactions/{docId} {
+      // Semua staff (Kasir, Admin, Owner) bisa membuat transaksi penjualan dan membaca riwayat
+      allow read, create: if isKasir();
+      // Update (misal pelunasan hutang) bisa dilakukan oleh kasir/admin
+      allow update: if isKasir();
+      // Penghapusan histori transaksi HANYA boleh oleh owner untuk mencegah fraud/kecurangan
+      allow delete: if isOwner();
+    }
+
+    // === CUSTOMERS (PELANGGAN) ===
+    match /customers/{docId} {
+      // Semua kasir butuh akses penuh untuk mengelola pelanggan saat transaksi
+      allow read, write: if isKasir();
+    }
+
+    // === LOSSES (KERUGIAN) ===
+    match /losses/{docId} {
+      // Kasir mungkin tidak perlu akses ini, hanya Admin & Owner
+      allow read, create, update: if isAdmin();
+      allow delete: if isOwner();
+    }
+
+    // === SETTINGS (PENGATURAN TOKO) ===
+    match /settings/{docId} {
+      // Semua staff butuh membaca pengaturan (seperti threshold stok, nama toko)
+      allow read: if isKasir();
+      // Hanya Owner yang bisa mengubah pengaturan toko
+      allow write: if isOwner();
+    }
+
+    // === COUNTERS (PENOMORAN OTOMATIS) ===
     match /counters/{docId} {
-      allow read, write: if isAuth();
+      // Semua staff butuh akses update untuk nomor nota/invoice berurutan
+      allow read, write: if isKasir();
     }
   }
 }

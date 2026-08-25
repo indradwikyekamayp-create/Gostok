@@ -49,7 +49,34 @@
   flex-shrink: 0;
 }
 
-.colProduct { flex: 2; min-width: 0; }
+.colProduct {
+  flex: 2;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.productThumbnail {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.thumbnailPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 .colPrice { flex: 1; text-align: right; }
 .colQty { flex: 1; text-align: center; display: flex; justify-content: center; }
 .colSubtotal { flex: 1; text-align: right; font-weight: 600; }

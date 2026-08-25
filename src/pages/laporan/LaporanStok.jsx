@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import ExportButtons from './ExportButtons';
+import { Package, AlertOctagon, AlertTriangle } from 'lucide-react';
 
 const LaporanStok = () => {
   const [stockData, setStockData] = useState([]);
@@ -56,18 +57,18 @@ const LaporanStok = () => {
       return () => unsubSettings();
     });
   }, []);
-  const getStatusColor = (status) => {
+  const getStatusStyle = (status) => {
     switch(status) {
-      case 'Habis': return { bg: 'hsl(0, 70%, 90%)', color: 'hsl(0, 70%, 40%)' };
-      case 'Menipis': return { bg: 'hsl(38, 92%, 90%)', color: 'hsl(38, 92%, 40%)' };
-      case 'Aman': return { bg: 'hsl(145, 55%, 90%)', color: 'hsl(145, 55%, 35%)' };
-      default: return { bg: '#eee', color: '#333' };
+      case 'Habis': return { bg: '#fee2e2', color: '#dc2626' };
+      case 'Menipis': return { bg: '#ffedd5', color: '#ea580c' };
+      case 'Aman': return { bg: '#dcfce7', color: '#16a34a' };
+      default: return { bg: '#f1f5f9', color: '#64748b' };
     }
   };
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 style={{ fontSize: '1.125rem', margin: 0, color: 'var(--color-text, #333)' }}>Laporan Stok Barang</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0, color: '#0f172a' }}>Laporan Stok Barang</h3>
         <ExportButtons 
           data={stockData} 
           columns={['Nama Barang', 'Barcode', 'Kategori', 'Stok', 'Satuan', 'Status']}
@@ -75,65 +76,84 @@ const LaporanStok = () => {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Total Produk</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-primary, hsl(215, 50%, 30%))' }}>{summary.totalProduk}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ width: '48px', height: '48px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Package size={24} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Produk</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.totalProduk}</div>
+          </div>
         </div>
-        <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Produk Stok Habis (0)</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-danger-hover, hsl(0, 70%, 40%))' }}>{summary.stokHabis}</div>
+
+        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ width: '48px', height: '48px', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <AlertOctagon size={24} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Produk Stok Habis (0)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.stokHabis}</div>
+          </div>
         </div>
-        <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-surface, #fff)', borderRadius: 'var(--radius-lg, 0.5rem)', border: '1px solid var(--color-border-light, #eee)', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary, #666)', marginBottom: '0.25rem' }}>Produk Menipis (&le;{summary.threshold || 10})</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-warning-hover, hsl(38, 92%, 40%))' }}>{summary.stokMenipis}</div>
+
+        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div style={{ width: '48px', height: '48px', backgroundColor: '#ffedd5', color: '#ea580c', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <AlertTriangle size={24} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Produk Menipis (&le;{summary.threshold || 10})</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.stokMenipis}</div>
+          </div>
         </div>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-          <thead>
-            <tr>
-              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Nama Barang</th>
-              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Barcode</th>
-              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Kategori</th>
-              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'right' }}>Stok</th>
-              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)' }}>Satuan</th>
-              <th style={{ padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg, #f9fafb)', fontWeight: '600', color: 'var(--color-text, #333)', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stockData.length > 0 ? stockData.map((row, i) => {
-              const statusStyle = getStatusColor(row.status);
-              return (
-                <tr key={i} style={{ transition: 'background-color 150ms ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-primary-50, #f5f8ff)'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.nama_barang}</td>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.barcode || row.id}</td>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.kategori}</td>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'right', fontWeight: row.stok < 10 ? 'bold' : 'normal', color: row.stok === 0 ? 'var(--color-danger-hover, hsl(0, 70%, 40%))' : 'inherit' }}>{row.stok}</td>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)' }}>{row.satuan}</td>
-                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>
-                    <span style={{ 
-                      backgroundColor: statusStyle.bg, 
-                      color: statusStyle.color,
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: 'var(--radius-full, 0.75rem)',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      display: 'inline-block'
-                    }}>
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              );
-            }) : (
-              <tr>
-                <td colSpan="6" style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border-light, #eee)', textAlign: 'center' }}>Belum ada data stok</td>
+      <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                <th style={{ padding: '1rem', fontWeight: '600', color: '#64748b', fontSize: '0.75rem' }}>Nama Barang</th>
+                <th style={{ padding: '1rem', fontWeight: '600', color: '#64748b', fontSize: '0.75rem' }}>Barcode</th>
+                <th style={{ padding: '1rem', fontWeight: '600', color: '#64748b', fontSize: '0.75rem' }}>Kategori</th>
+                <th style={{ padding: '1rem', fontWeight: '600', color: '#64748b', fontSize: '0.75rem', textAlign: 'center' }}>Stok</th>
+                <th style={{ padding: '1rem', fontWeight: '600', color: '#64748b', fontSize: '0.75rem', textAlign: 'center' }}>Satuan</th>
+                <th style={{ padding: '1rem', fontWeight: '600', color: '#64748b', fontSize: '0.75rem', textAlign: 'center' }}>Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {stockData.length > 0 ? stockData.map((row, i) => {
+                const statusStyle = getStatusStyle(row.status);
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background-color 150ms ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td style={{ padding: '0.75rem 1rem', color: '#0f172a', fontWeight: '500' }}>{row.nama_barang}</td>
+                    <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>{row.barcode || row.id}</td>
+                    <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>{row.kategori}</td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: '#0f172a', fontWeight: '500' }}>{row.stok}</td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: '#475569' }}>{row.satuan}</td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                      <span style={{ 
+                        backgroundColor: statusStyle.bg, 
+                        color: statusStyle.color,
+                        padding: '0.25rem 0.625rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        display: 'inline-block'
+                      }}>
+                        {row.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              }) : (
+                <tr>
+                  <td colSpan="6" style={{ padding: '2rem 1rem', textAlign: 'center', color: '#64748b' }}>Belum ada data stok</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

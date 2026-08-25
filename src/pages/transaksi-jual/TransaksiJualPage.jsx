@@ -229,7 +229,7 @@ export default function TransaksiJualPage() {
       {completedTransaction && (
         <NotaPreview 
           transaction={completedTransaction} 
-          onClose={handleCloseNota} 
+          onClose={handleCloseNota}
         />
       )}
 

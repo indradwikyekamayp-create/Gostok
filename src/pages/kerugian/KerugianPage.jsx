@@ -3,7 +3,8 @@ import { Trash2, History, AlertTriangle, Plus, Minus, Search, Keyboard } from 'l
 import { collection, doc, writeBatch, query, where, getDocs, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ToastContext } from '../../context/ToastContext';
-import styles from './KerugianPage.module.css'; // Reusing copied styles
+import styles from './KerugianPage.module.css';
+import scanStyles from '../barang-masuk/ScanInput.module.css';
 import Card from '../../components/common/Card';
 import Table from '../../components/common/Table';
 
@@ -208,106 +209,91 @@ const KerugianPage = () => {
         {/* Left Side: Scan / Input */}
         <section className={styles.scanSection}>
           
-          <div style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '0.5rem', padding: '0.25rem', marginBottom: '1.5rem' }}>
-            <button 
-              onClick={() => setInputMode('scan')}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem', border: 'none', borderRadius: '0.375rem', backgroundColor: inputMode === 'scan' ? 'white' : 'transparent', color: inputMode === 'scan' ? '#0f172a' : '#64748b', fontWeight: inputMode === 'scan' ? '600' : '500', boxShadow: inputMode === 'scan' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              <Search size={16} /> Mode Scanner
-            </button>
-            <button 
-              onClick={() => setInputMode('manual')}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem', border: 'none', borderRadius: '0.375rem', backgroundColor: inputMode === 'manual' ? 'white' : 'transparent', color: inputMode === 'manual' ? '#0f172a' : '#64748b', fontWeight: inputMode === 'manual' ? '600' : '500', boxShadow: inputMode === 'manual' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              <Keyboard size={16} /> Input Manual
-            </button>
-          </div>
-          
-          {/* Scan Animation Section */}
-          {inputMode === 'scan' && (
-            <div style={{ marginBottom: '1.5rem', padding: '2rem', backgroundColor: '#f8fafc', borderRadius: '0.75rem', border: '2px dashed #cbd5e1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'relative', width: '120px', height: '80px', marginBottom: '1rem' }}>
-                {/* Barcode lines simulation */}
-                <div style={{ display: 'flex', height: '100%', gap: '4px', justifyContent: 'center' }}>
-                  <div style={{ width: '6px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '2px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '8px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '4px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '10px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '3px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '6px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '2px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '7px', height: '100%', backgroundColor: '#334155' }}></div>
-                  <div style={{ width: '4px', height: '100%', backgroundColor: '#334155' }}></div>
-                </div>
-                {/* Scanning laser animation using CSS injection */}
-                <style>{`
-                  @keyframes scanLaser {
-                    0% { top: 0; opacity: 0; }
-                    10% { opacity: 1; }
-                    90% { opacity: 1; }
-                    100% { top: 100%; opacity: 0; }
-                  }
-                  .laser-line {
-                    position: absolute;
-                    left: -10%;
-                    right: -10%;
-                    height: 2px;
-                    background-color: #ef4444;
-                    box-shadow: 0 0 8px #ef4444;
-                    animation: scanLaser 1.5s infinite linear;
-                  }
-                `}</style>
-                <div className="laser-line"></div>
+          <div className={scanStyles.scanTop} style={{ marginBottom: '1.5rem' }}>
+            <div className={scanStyles.modeToggleArea}>
+              <span className={scanStyles.modeLabel}>Mode Scanner</span>
+              <div className={scanStyles.toggleGroup}>
+                <button 
+                  className={`${scanStyles.toggleBtn} ${inputMode === 'scan' ? scanStyles.active : ''}`}
+                  onClick={() => setInputMode('scan')}
+                >
+                  <Search size={18} />
+                  Mode Scanner
+                </button>
+                <button 
+                  className={`${scanStyles.toggleBtn} ${inputMode === 'manual' ? scanStyles.active : ''}`}
+                  onClick={() => setInputMode('manual')}
+                >
+                  <Keyboard size={18} />
+                  Input Manual
+                </button>
               </div>
-              <p style={{ margin: 0, fontWeight: '600', color: '#475569', fontSize: '1.125rem' }}>Siap Scan Barcode</p>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: '#94a3b8' }}>Arahkan scanner ke produk</p>
             </div>
-          )}
 
-          <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#475569', marginBottom: '0.5rem' }}>
-                {inputMode === 'scan' ? 'Hasil Scan (Atau Ketik Barcode)' : 'Cari Nama Produk'}
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
-                    autoFocus
-                    placeholder={inputMode === 'scan' ? 'Menunggu hasil scan...' : 'Ketik nama produk disini...'}
-                    value={searchInput}
-                    onChange={handleInputChange}
-                    style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1', fontSize: '1rem', outline: 'none', backgroundColor: inputMode === 'scan' ? '#f8fafc' : 'white' }}
-                  />
-                  <button 
-                    type="submit"
-                    style={{ padding: '0 1rem', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '0.375rem', cursor: 'pointer' }}
-                  >
-                    <Search size={20} color="#475569" />
-                  </button>
+            <div className={scanStyles.scanInputArea}>
+              {inputMode === 'manual' ? (
+                <div style={{ position: 'relative' }}>
+                  <form className={scanStyles.scanBarContainer} onSubmit={handleSearch}>
+                    <Search className={scanStyles.scanIcon} size={20} />
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Ketik nama produk atau barcode..."
+                      value={searchInput}
+                      onChange={handleInputChange}
+                      className={scanStyles.scanInput}
+                    />
+                    <button type="submit" className={scanStyles.cariBtn}>
+                      Cari
+                    </button>
+                  </form>
+                  <p className={scanStyles.scanHint} style={{ marginTop: '0.5rem' }}>Ketik kode produk atau nama secara manual lalu tekan Cari</p>
+                  
+                  {/* Auto-suggest dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', backgroundColor: 'white', border: '1px solid #cbd5e1', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 10, overflow: 'hidden' }}>
+                      {suggestions.map(s => (
+                        <div 
+                          key={s.id}
+                          onClick={() => addProductToWaste(s)}
+                          style={{ padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between' }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                        >
+                          <span style={{ fontWeight: 500, color: '#0f172a' }}>{s.nama_barang}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Stok: {s.stok}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                {/* Auto-suggest dropdown */}
-                {inputMode === 'manual' && showSuggestions && suggestions.length > 0 && (
-                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', backgroundColor: 'white', border: '1px solid #cbd5e1', borderRadius: '0.375rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 10, overflow: 'hidden' }}>
-                    {suggestions.map(s => (
-                      <div 
-                        key={s.id}
-                        onClick={() => addProductToWaste(s)}
-                        style={{ padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between' }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                      >
-                        <span style={{ fontWeight: 500, color: '#0f172a' }}>{s.nama_barang}</span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Stok: {s.stok}</span>
-                      </div>
-                    ))}
+              ) : (
+                <div className={scanStyles.scanAnimationBox}>
+                  <div className={scanStyles.barcodeGraphic}>
+                    {[1,2,3,4,5,6,7,8,9,10,11,12].map(i => <div key={i} className={scanStyles.bar}></div>)}
+                    <div className={scanStyles.laser}></div>
                   </div>
-                )}
-              </div>
+                  <p className={scanStyles.scanText}>Siap Melakukan Scan...</p>
+                  <p className={scanStyles.scanSubtext}>Arahkan barcode produk ke scanner Anda</p>
+                  
+                  <form onSubmit={handleSearch}>
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onChange={handleInputChange}
+                      className={scanStyles.hiddenInput}
+                      autoFocus
+                      onBlur={(e) => {
+                        if (inputMode === 'scan') {
+                          setTimeout(() => e.target.focus(), 100);
+                        }
+                      }}
+                    />
+                  </form>
+                </div>
+              )}
             </div>
-          </form>
+          </div>
 
           <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#fff7ed', borderRadius: '0.5rem', border: '1px solid #fed7aa' }}>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>

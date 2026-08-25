@@ -95,6 +95,23 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
             cart.map((item) => (
               <div key={item.id} className={styles.cartItem}>
                 <div className={styles.colProduct}>
+                  {item.foto ? (
+                    <img 
+                      src={item.foto} 
+                      alt={item.nama_barang} 
+                      className={styles.productThumbnail}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className={styles.thumbnailPlaceholder}
+                    style={{ display: item.foto ? 'none' : 'flex' }}
+                  >
+                    <span style={{ fontSize: '10px', color: '#94a3b8' }}>-</span>
+                  </div>
                   <div className={styles.itemName}>{item.nama_barang}</div>
                 </div>
                 <div className={styles.colPrice}>{formatRupiah(item.harga_jual)}</div>

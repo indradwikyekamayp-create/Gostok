@@ -1,52 +1,68 @@
 import React, { useContext } from 'react';
 import { ToastContext } from '../../context/ToastContext';
+import { FileSpreadsheet, FileText } from 'lucide-react';
 
 const ExportButtons = ({ data, columns, filename }) => {
   const { showToast } = useContext(ToastContext);
 
   const handleExportExcel = () => {
-    // In a real app, use xlsx library here
     console.log('Exporting Excel:', filename, columns, data);
     showToast(`File ${filename}.xlsx berhasil diexport! (Fitur segera hadir)`, 'success');
   };
 
   const handleExportPDF = () => {
-    // In a real app, use jsPDF library here
     console.log('Exporting PDF:', filename, columns, data);
     showToast(`File ${filename}.pdf berhasil diexport! (Fitur segera hadir)`, 'success');
   };
 
+  const btnStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.375rem',
+    backgroundColor: '#fff',
+    border: '1px solid #e2e8f0',
+    padding: '0.375rem 0.875rem',
+    borderRadius: '0.5rem',
+    cursor: 'pointer',
+    fontWeight: '500',
+    fontSize: '0.8125rem',
+    transition: 'all 0.2s ease',
+    color: '#334155',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+  };
+
+  const handleHover = (e, color) => {
+    e.currentTarget.style.borderColor = color;
+    e.currentTarget.style.backgroundColor = '#f8fafc';
+  };
+
+  const handleMouseOut = (e) => {
+    e.currentTarget.style.borderColor = '#e2e8f0';
+    e.currentTarget.style.backgroundColor = '#fff';
+  };
+
   return (
-    <div style={{ display: 'flex', gap: '10px' }}>
+    <div style={{ display: 'flex', gap: '0.5rem' }}>
       <button 
+        style={btnStyle}
+        onMouseOver={(e) => handleHover(e, '#10b981')}
+        onMouseOut={handleMouseOut}
         onClick={handleExportExcel}
-        style={{
-          backgroundColor: '#217346',
-          color: 'white',
-          border: 'none',
-          padding: '8px 16px',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: '500',
-          fontSize: '13px'
-        }}
+        title="Export to Excel"
       >
-        Export Excel
+        <FileSpreadsheet size={16} color="#10b981" />
+        <span>Export Excel</span>
       </button>
+      
       <button 
+        style={btnStyle}
+        onMouseOver={(e) => handleHover(e, '#ef4444')}
+        onMouseOut={handleMouseOut}
         onClick={handleExportPDF}
-        style={{
-          backgroundColor: '#da251d',
-          color: 'white',
-          border: 'none',
-          padding: '8px 16px',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: '500',
-          fontSize: '13px'
-        }}
+        title="Export to PDF"
       >
-        Export PDF
+        <FileText size={16} color="#ef4444" />
+        <span>Export PDF</span>
       </button>
     </div>
   );
