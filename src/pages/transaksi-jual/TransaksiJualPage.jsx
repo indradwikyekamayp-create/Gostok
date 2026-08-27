@@ -9,7 +9,10 @@ import PelangganForm from '../pelanggan/PelangganForm';
 import { ToastContext } from '../../context/ToastContext';
 import styles from './TransaksiJualPage.module.css';
 
-export default function TransaksiJualPage() {
+import useIsMobile from '../../hooks/useIsMobile';
+import TransaksiJualMobile from './TransaksiJualMobile';
+
+function TransaksiJualDesktop() {
   const { showToast } = useContext(ToastContext);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -241,4 +244,9 @@ export default function TransaksiJualPage() {
       )}
     </div>
   );
+}
+
+export default function TransaksiJualPage() {
+  const isMobile = useIsMobile();
+  return isMobile ? <TransaksiJualMobile /> : <TransaksiJualDesktop />;
 }

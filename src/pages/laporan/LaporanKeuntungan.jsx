@@ -5,6 +5,7 @@ import { db } from '../../firebase';
 import ExportButtons from './ExportButtons';
 import { Lock, Wallet, BarChart2, PieChart, Info, Search, MoreVertical, Trophy, ArrowUpRight, ArrowDownRight, FileText } from 'lucide-react';
 import NotaPreview from '../transaksi-jual/NotaPreview';
+import styles from './LaporanPage.module.css';
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('id-ID', {
@@ -12,7 +13,7 @@ const formatCurrency = (amount) => {
     currency: 'IDR',
     minimumFractionDigits: 0
   }).format(amount);
-};
+}
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -221,7 +222,7 @@ const LaporanKeuntungan = ({ dateRange }) => {
       </div>
 
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className={styles.grid4}>
         <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
           <div style={{ width: '48px', height: '48px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Lock size={24} />
@@ -268,7 +269,7 @@ const LaporanKeuntungan = ({ dateRange }) => {
       </div>
 
       {/* Grid Layout for Charts & Insights */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div className={styles.grid2_1}>
         
         {/* Chart Column */}
         <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -374,8 +375,8 @@ const LaporanKeuntungan = ({ dateRange }) => {
       <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         
         {/* Table Toolbar */}
-        <div style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className={styles.tableToolbar}>
+          <div className={styles.pillsWrapper}>
             {['Semua', 'Profit Tertinggi', 'Margin Tertinggi', 'Rugi / Laba (-)', 'Transaksi Terbanyak'].map(tab => {
               const isActive = activeTab === tab.toLowerCase();
               return (
@@ -399,7 +400,7 @@ const LaporanKeuntungan = ({ dateRange }) => {
               )
             })}
           </div>
-          <div style={{ position: 'relative' }}>
+          <div className={styles.searchInputWrapper} style={{ position: 'relative' }}>
             <Search size={14} color="#94a3b8" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
               type="text" 

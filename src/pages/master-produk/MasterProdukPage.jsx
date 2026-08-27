@@ -1,128 +1,42 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Package, CheckCircle, AlertCircle, XCircle, Search, Filter, LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { useAuth } from '../../hooks/useAuth';
+import ProductGrid from './ProductGrid';
+import ProductDetailPanel from './ProductDetailPanel';
+import ProductForm from './ProductForm';
 import { ToastContext } from '../../context/ToastContext';
 import styles from './MasterProdukPage.module.css';
-import ProductGrid from './ProductGrid';
-import ProductForm from './ProductForm';
-import ProductDetailPanel from './ProductDetailPanel';
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  LayoutGrid, 
+  List as ListIcon,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  AlertCircle,
+  CheckCircle,
+  XCircle
+} from 'lucide-react';
 
-const MasterProdukPage = () => {
-  const { showToast } = useContext(ToastContext);
-  const [products, setProducts] = useState([]);
-  const [threshold, setThreshold] = useState(10);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Semua');
-  const [categoryFilter, setCategoryFilter] = useState('Semua Kategori');
-  const [sortBy, setSortBy] = useState('Terbaru');
-  const [showFilters, setShowFilters] = useState(true);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-  
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+import useIsMobile from '../../hooks/useIsMobile';
+import MasterProdukMobile from './MasterProdukMobile';
 
-  const { isOwner } = useAuth();
-
-  // Fetch products from Firestore
-  useEffect(() => {
-    // Fetch products
-    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
-      const data = [];
-      snapshot.forEach(doc => {
-        data.push({ id: doc.id, ...doc.data() });
-      });
-      setProducts(data);
-      setLoading(false);
-    });
-
-    // Fetch threshold settings
-    const unsubSettings = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().stokMenipisThreshold) {
-        setThreshold(Number(docSnap.data().stokMenipisThreshold));
-      }
-    });
-
-    return () => {
-      unsubProducts();
-      unsubSettings();
-    };
-  }, []);
-
-  // Filtering Logic
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) || p.barcode.includes(searchQuery);
-    
-    let matchesStatus = true;
-    if (statusFilter === 'Stok Aman') matchesStatus = p.stok > threshold;
-    if (statusFilter === 'Stok Menipis') matchesStatus = p.stok > 0 && p.stok <= threshold;
-    if (statusFilter === 'Stok Habis') matchesStatus = p.stok === 0;
-
-    let matchesCategory = true;
-    if (categoryFilter !== 'Semua Kategori') {
-      matchesCategory = p.kategori === categoryFilter;
-    }
-    
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
-
-  filteredProducts.sort((a, b) => {
-    if (sortBy === 'A-Z') {
-      return (a.nama_barang || '').localeCompare(b.nama_barang || '');
-    } else if (sortBy === 'Z-A') {
-      return (b.nama_barang || '').localeCompare(a.nama_barang || '');
-    } else if (sortBy === 'Stok Terbanyak') {
-      return (b.stok || 0) - (a.stok || 0);
-    } else if (sortBy === 'Stok Terdikit') {
-      return (a.stok || 0) - (b.stok || 0);
-    } else {
-      // Terbaru (assuming newer have higher timestamps, but if missing, just return 0)
-      return (b.createdAt?.toMillis ? b.createdAt.toMillis() : 0) - (a.createdAt?.toMillis ? a.createdAt.toMillis() : 0);
-    }
-  });
-
-  // Calculate Stats
-  const totalProducts = products.length;
-  const stokAman = products.filter(p => p.stok > threshold).length;
-  const stokMenipis = products.filter(p => p.stok > 0 && p.stok <= threshold).length;
-  const stokHabis = products.filter(p => p.stok === 0).length;
-
-  const handleAddProduct = () => {
-    setEditingProduct(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEditProduct = (product) => {
-    setEditingProduct(product);
-    setIsFormOpen(true);
-  };
-
-  const handleSaveProduct = async (savedProduct) => {
-    try {
-      // Remove temporary object URL if it exists so we don't save blob URLs to Firestore
-      if (savedProduct.foto && savedProduct.foto.startsWith('blob:')) {
-        savedProduct.foto = null; 
-        // In a complete app, you'd upload this file to Firebase Storage here and save the download URL
-      }
-
-      if (editingProduct) {
-        const productRef = doc(db, 'products', editingProduct.id || editingProduct.barcode);
-        await updateDoc(productRef, savedProduct);
-      } else {
-        const productRef = doc(db, 'products', savedProduct.barcode);
-        await setDoc(productRef, savedProduct);
-      }
-      setIsFormOpen(false);
-      showToast('Produk berhasil disimpan!', 'success');
-    } catch (error) {
-      console.error("Error saving product:", error);
-      showToast("Gagal menyimpan produk: " + error.message, 'error');
-    }
-  };
-
+function MasterProdukDesktop({ 
+  products, filteredProducts, totalProducts, stokAman, stokMenipis, stokHabis,
+  searchQuery, setSearchQuery,
+  statusFilter, setStatusFilter,
+  categoryFilter, setCategoryFilter,
+  sortBy, setSortBy,
+  viewMode, setViewMode,
+  handleAddProduct, handleEditProduct, handleSaveProduct,
+  isFormOpen, setIsFormOpen,
+  editingProduct,
+  isOwner, threshold,
+  selectedProduct, setSelectedProduct,
+  showFilters, setShowFilters
+}) {
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -172,7 +86,7 @@ const MasterProdukPage = () => {
         </div>
       </div>
 
-      {/* Controls Bar (Search, Filter, Sort, View Toggle) */}
+      {/* Controls Bar */}
       <div className={styles.controlsBar}>
         <div className={styles.searchWrapper}>
           <Search className={styles.searchIcon} size={18} />
@@ -317,6 +231,156 @@ const MasterProdukPage = () => {
       )}
     </div>
   );
+}
+
+const MasterProdukPage = () => {
+  const isMobile = useIsMobile();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Semua');
+  const [categoryFilter, setCategoryFilter] = useState('Semua Kategori');
+  const [sortBy, setSortBy] = useState('Terbaru');
+  const [viewMode, setViewMode] = useState('grid');
+  
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const { showToast } = useContext(ToastContext);
+  const [isOwner, setIsOwner] = useState(false);
+  const [threshold, setThreshold] = useState(10);
+
+  useEffect(() => {
+    // Determine if user is owner
+    const userRole = localStorage.getItem('userRole');
+    if (userRole === 'owner') {
+      setIsOwner(true);
+    }
+    
+    // Listen to threshold setting
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().stockThreshold) {
+        setThreshold(docSnap.data().stockThreshold);
+      }
+    });
+
+    const productsRef = collection(db, 'products');
+    const unsubscribe = onSnapshot(productsRef, (snapshot) => {
+      const productsData = [];
+      snapshot.forEach((doc) => {
+        productsData.push({ id: doc.id, ...doc.data() });
+      });
+      setProducts(productsData);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+      unsubSettings();
+    };
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    let result = products;
+
+    // Search
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        (p.nama_barang && p.nama_barang.toLowerCase().includes(lowerQuery)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(lowerQuery))
+      );
+    }
+
+    // Status Filter
+    if (statusFilter !== 'Semua') {
+      result = result.filter(p => {
+        const qty = Number(p.stok || p.stok_tersedia || 0);
+        if (statusFilter === 'Stok Aman') return qty > threshold;
+        if (statusFilter === 'Stok Menipis') return qty > 0 && qty <= threshold;
+        if (statusFilter === 'Stok Habis') return qty <= 0;
+        return true;
+      });
+    }
+
+    // Category Filter
+    if (categoryFilter !== 'Semua Kategori') {
+      result = result.filter(p => p.kategori === categoryFilter);
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case 'A-Z':
+        result.sort((a, b) => a.nama_barang.localeCompare(b.nama_barang));
+        break;
+      case 'Z-A':
+        result.sort((a, b) => b.nama_barang.localeCompare(a.nama_barang));
+        break;
+      case 'Stok Terbanyak':
+        result.sort((a, b) => Number(b.stok || b.stok_tersedia || 0) - Number(a.stok || a.stok_tersedia || 0));
+        break;
+      case 'Stok Terdikit':
+        result.sort((a, b) => Number(a.stok || a.stok_tersedia || 0) - Number(b.stok || b.stok_tersedia || 0));
+        break;
+      case 'Terbaru':
+      default:
+        // Assuming no createdAt field right now, just default order
+        break;
+    }
+
+    return result;
+  }, [products, searchQuery, statusFilter, categoryFilter, sortBy, threshold]);
+
+  const totalProducts = products.length;
+  const stokAman = products.filter(p => Number(p.stok || p.stok_tersedia || 0) > threshold).length;
+  const stokMenipis = products.filter(p => Number(p.stok || p.stok_tersedia || 0) > 0 && Number(p.stok || p.stok_tersedia || 0) <= threshold).length;
+  const stokHabis = products.filter(p => Number(p.stok || p.stok_tersedia || 0) <= 0).length;
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveProduct = async (savedProduct) => {
+    try {
+      if (editingProduct) {
+        const productRef = doc(db, 'products', editingProduct.id || editingProduct.barcode);
+        await updateDoc(productRef, savedProduct);
+      } else {
+        const productRef = doc(db, 'products', savedProduct.barcode);
+        await setDoc(productRef, savedProduct);
+      }
+      setIsFormOpen(false);
+      showToast('Produk berhasil disimpan!', 'success');
+    } catch (error) {
+      console.error("Error saving product:", error);
+      showToast("Gagal menyimpan produk: " + error.message, 'error');
+    }
+  };
+
+  const commonProps = {
+    products, filteredProducts, totalProducts, stokAman, stokMenipis, stokHabis,
+    searchQuery, setSearchQuery,
+    statusFilter, setStatusFilter,
+    categoryFilter, setCategoryFilter,
+    sortBy, setSortBy,
+    viewMode, setViewMode,
+    handleAddProduct, handleEditProduct, handleSaveProduct,
+    isFormOpen, setIsFormOpen,
+    editingProduct,
+    isOwner, threshold,
+    selectedProduct, setSelectedProduct,
+    showFilters, setShowFilters
+  };
+
+  return isMobile ? <MasterProdukMobile {...commonProps} /> : <MasterProdukDesktop {...commonProps} />;
 };
 
 export default MasterProdukPage;

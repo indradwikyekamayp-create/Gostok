@@ -5,6 +5,7 @@ import { db } from '../../firebase';
 import ExportButtons from './ExportButtons';
 import { Banknote, ShoppingCart, BarChart2, Tag, TrendingUp, TrendingDown, MoreVertical } from 'lucide-react';
 import NotaPreview from '../transaksi-jual/NotaPreview';
+import styles from './LaporanPage.module.css';
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('id-ID', {
@@ -24,6 +25,10 @@ const LaporanPenjualan = ({ dateRange }) => {
     totalItem: 0
   });
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'transactions'), (snapshot) => {
@@ -93,7 +98,7 @@ const LaporanPenjualan = ({ dateRange }) => {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className={styles.grid4}>
         {/* Card 1 */}
         <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
           <div style={{ width: '48px', height: '48px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -144,7 +149,7 @@ const LaporanPenjualan = ({ dateRange }) => {
       </div>
 
       {/* 2 Column Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div className={styles.grid2_1}>
         
         {/* Chart Column */}
         <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -267,7 +272,7 @@ const LaporanPenjualan = ({ dateRange }) => {
               </tr>
             </thead>
             <tbody>
-              {transactions.length > 0 ? transactions.slice(0, 5).map((row, i) => (
+              {transactions.length > 0 ? transactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((row, i) => (
                 <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
                   <td style={{ padding: '0.75rem', color: '#0f172a' }}>
                     {row.tanggal ? (row.tanggal.toDate ? row.tanggal.toDate() : new Date(row.tanggal)).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
@@ -301,15 +306,33 @@ const LaporanPenjualan = ({ dateRange }) => {
         </div>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', fontSize: '0.75rem', color: '#64748b' }}>
-          <div>Menampilkan {transactions.length > 0 ? 1 : 0} - {Math.min(5, transactions.length)} dari {transactions.length} transaksi</div>
+          <div>
+            Menampilkan {transactions.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, transactions.length)} dari {transactions.length} transaksi
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <button style={{ border: '1px solid #cbd5e1', background: 'white', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', cursor: 'pointer' }}>&lt;</button>
-            <button style={{ border: 'none', background: '#1d4ed8', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', cursor: 'pointer', fontWeight: '500' }}>1</button>
-            <button style={{ border: 'none', background: 'transparent', padding: '0.25rem 0.5rem', cursor: 'pointer' }}>2</button>
-            <button style={{ border: '1px solid #cbd5e1', background: 'white', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', cursor: 'pointer' }}>&gt;</button>
-            <select style={{ marginLeft: '0.5rem', border: '1px solid #cbd5e1', background: 'white', padding: '0.25rem', borderRadius: '0.25rem', outline: 'none' }}>
-              <option>5 / halaman</option>
-              <option>10 / halaman</option>
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              style={{ border: '1px solid #cbd5e1', background: 'white', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
+            >&lt;</button>
+            
+            <span style={{ margin: '0 0.5rem', fontWeight: '500' }}>Halaman {currentPage} dari {Math.max(1, Math.ceil(transactions.length / itemsPerPage))}</span>
+
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(Math.ceil(transactions.length / itemsPerPage), p + 1))}
+              disabled={currentPage >= Math.ceil(transactions.length / itemsPerPage)}
+              style={{ border: '1px solid #cbd5e1', background: 'white', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', cursor: currentPage >= Math.ceil(transactions.length / itemsPerPage) ? 'not-allowed' : 'pointer', opacity: currentPage >= Math.ceil(transactions.length / itemsPerPage) ? 0.5 : 1 }}
+            >&gt;</button>
+            
+            <select 
+              value={itemsPerPage}
+              onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+              style={{ marginLeft: '0.5rem', border: '1px solid #cbd5e1', background: 'white', padding: '0.25rem', borderRadius: '0.25rem', outline: 'none' }}
+            >
+              <option value={5}>5 / halaman</option>
+              <option value={10}>10 / halaman</option>
+              <option value={20}>20 / halaman</option>
+              <option value={50}>50 / halaman</option>
             </select>
           </div>
         </div>

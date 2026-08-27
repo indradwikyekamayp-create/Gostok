@@ -3,6 +3,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import ExportButtons from './ExportButtons';
 import { Package, AlertOctagon, AlertTriangle } from 'lucide-react';
+import styles from './LaporanPage.module.css';
 
 const LaporanStok = () => {
   const [stockData, setStockData] = useState([]);
@@ -67,7 +68,7 @@ const LaporanStok = () => {
   };
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className={styles.tableToolbar} style={{ marginBottom: '1.5rem', border: 'none', padding: 0 }}>
         <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0, color: '#0f172a' }}>Laporan Stok Barang</h3>
         <ExportButtons 
           data={stockData} 
@@ -76,7 +77,7 @@ const LaporanStok = () => {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className={styles.grid3}>
         <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
           <div style={{ width: '48px', height: '48px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Package size={24} />

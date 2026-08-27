@@ -53,29 +53,37 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
   const notifCount = lowStockItems.length;
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} style={isMobile ? { borderBottom: '1px solid #f1f5f9', backgroundColor: '#fff', padding: '0.5rem 1rem', position: 'sticky', top: 0, zIndex: 50 } : {}}>
       <div className={styles.left}>
+        {/* On mobile, we hide the hamburger menu as requested */}
         {!isMobile && (
           <button 
             className={styles.menuButton} 
             onClick={onToggleSidebar}
             aria-label="Toggle Sidebar"
           >
-            <Menu size={20} />
+            <Menu size={24} />
           </button>
         )}
-        <h1 className={styles.title}>{title}</h1>
+        
+        {isMobile ? (
+          <img src="/logo/AyoStock!.png" alt="AyoStock" style={{ height: '60px', objectFit: 'contain', marginLeft: '-4px' }} />
+        ) : (
+          <h1 className={styles.title}>{title}</h1>
+        )}
       </div>
       
       <div className={styles.right}>
         <div className={styles.actions}>
-          <button 
-            className={styles.iconButton} 
-            title="Lacak Struk Pembayaran"
-            onClick={() => setShowSearchModal(true)}
-          >
-            <ReceiptText size={20} />
-          </button>
+          {!isMobile && (
+            <button 
+              className={styles.iconButton} 
+              title="Lacak Struk Pembayaran"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <ReceiptText size={20} />
+            </button>
+          )}
 
           <div style={{ position: 'relative' }} ref={notifRef}>
             <button 
@@ -84,8 +92,8 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
               onClick={() => setShowNotifDropdown(!showNotifDropdown)}
             >
               <div className={styles.bellWrapper}>
-                <Bell size={20} />
-                {notifCount > 0 && <span className={styles.badge}>{notifCount > 99 ? '99+' : notifCount}</span>}
+                <Bell size={24} color={isMobile ? '#0f172a' : 'currentColor'} />
+                {notifCount > 0 && <span className={styles.badge} style={isMobile ? { backgroundColor: '#ef4444', border: '2px solid #f8fafc' } : {}}>{notifCount > 99 ? '99+' : notifCount}</span>}
               </div>
             </button>
             
@@ -119,13 +127,16 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
               </div>
             )}
           </div>
-          <button className={styles.profileDropdown}>
-            <div style={{ backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <User size={14} color="#475569" />
-            </div>
-            <span className={styles.watermark} style={{ fontWeight: '500', color: '#334155', fontSize: '0.875rem' }}>{userName}</span>
-            <ChevronDown size={14} className={styles.chevron} />
-          </button>
+          
+          {!isMobile && (
+            <button className={styles.profileDropdown}>
+              <div style={{ backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <User size={14} color="#475569" />
+              </div>
+              <span className={styles.watermark} style={{ fontWeight: '500', color: '#334155', fontSize: '0.875rem' }}>{userName}</span>
+              <ChevronDown size={14} className={styles.chevron} />
+            </button>
+          )}
         </div>
       </div>
 

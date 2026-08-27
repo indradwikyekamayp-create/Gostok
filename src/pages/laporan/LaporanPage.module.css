@@ -106,4 +106,71 @@
     flex-direction: column;
     align-items: flex-start;
   }
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* Responsive grid utilities for Laporan subpages */
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.grid2_1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tableToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 1rem;
+}
+
+.pillsWrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .grid4, .grid3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid4, .grid3, .grid2_1 {
+    grid-template-columns: 1fr;
+  }
+  .tableToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pillsWrapper {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.25rem;
+  }
+  .searchInputWrapper {
+    width: 100%;
+  }
+  .searchInputWrapper input {
+    width: 100% !important;
+  }
 }

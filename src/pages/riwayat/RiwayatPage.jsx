@@ -6,12 +6,59 @@ import FilterBar from './FilterBar';
 import TransactionTable from './TransactionTable';
 import NotaPreview from '../transaksi-jual/NotaPreview';
 
-const RiwayatPage = () => {
+import useIsMobile from '../../hooks/useIsMobile';
+import RiwayatMobile from './RiwayatMobile';
+
+function RiwayatDesktop({ transactions, loading, filters, onFilterChange, storeName }) {
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  const handleViewDetail = (transaction) => {
+    // Toggling is handled in the table component now
+  };
+
+  const handleReprint = (transaction) => {
+    setSelectedTransaction(transaction.raw);
+  };
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Riwayat Transaksi</h1>
+        <p className={styles.subtitle}>{storeName}</p>
+      </header>
+
+      <section className={styles.filterSection}>
+        <FilterBar 
+          filters={filters} 
+          onFilterChange={onFilterChange} 
+        />
+      </section>
+
+      <section className={styles.tableSection}>
+        <TransactionTable 
+          transactions={transactions} 
+          loading={loading}
+          onViewDetail={handleViewDetail}
+          onReprint={handleReprint}
+        />
+      </section>
+
+      {selectedTransaction && (
+        <NotaPreview 
+          transaction={selectedTransaction} 
+          onClose={() => setSelectedTransaction(null)} 
+        />
+      )}
+    </div>
+  );
+}
+
+export default function RiwayatPage() {
+  const isMobile = useIsMobile();
   const [storeName, setStoreName] = useState('PT. WELINDO SUKSES BERSAMA');
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
@@ -101,45 +148,13 @@ const RiwayatPage = () => {
     setFilters(newFilters);
   };
 
-  const handleViewDetail = (transaction) => {
-    // Toggling is handled in the table component now
+  const commonProps = {
+    transactions,
+    loading,
+    filters,
+    onFilterChange: handleFilterChange,
+    storeName
   };
 
-  const handleReprint = (transaction) => {
-    setSelectedTransaction(transaction.raw);
-  };
-
-  return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Riwayat Transaksi</h1>
-        <p className={styles.subtitle}>{storeName}</p>
-      </header>
-
-      <section className={styles.filterSection}>
-        <FilterBar 
-          filters={filters} 
-          onFilterChange={handleFilterChange} 
-        />
-      </section>
-
-      <section className={styles.tableSection}>
-        <TransactionTable 
-          transactions={transactions} 
-          loading={loading}
-          onViewDetail={handleViewDetail}
-          onReprint={handleReprint}
-        />
-      </section>
-
-      {selectedTransaction && (
-        <NotaPreview 
-          transaction={selectedTransaction} 
-          onClose={() => setSelectedTransaction(null)} 
-        />
-      )}
-    </div>
-  );
-};
-
-export default RiwayatPage;
+  return isMobile ? <RiwayatMobile {...commonProps} /> : <RiwayatDesktop {...commonProps} />;
+}

@@ -5,8 +5,12 @@ import LaporanStok from './LaporanStok';
 import LaporanPiutang from './LaporanPiutang';
 import LaporanKeuntungan from './LaporanKeuntungan';
 import DateRangePicker from '../../components/common/DateRangePicker';
+import useIsMobile from '../../hooks/useIsMobile';
+import LaporanPageMobile from './LaporanPageMobile';
 
 const LaporanPage = () => {
+  const isMobile = useIsMobile();
+
   const [activeTab, setActiveTab] = useState('penjualan');
   const [dateRange, setDateRange] = useState({
     startDate: '',
@@ -16,6 +20,10 @@ const LaporanPage = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
+
+  if (isMobile) {
+    return <LaporanPageMobile />;
+  }
 
   return (
     <div className={styles.container}>
