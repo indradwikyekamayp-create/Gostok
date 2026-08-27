@@ -1,0 +1,24 @@
+{
+  "name": "GoStok (AyoStock)",
+  "short_name": "GoStok",
+  "description": "Aplikasi POS Distributor",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2b4a7a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo/AyoStock-favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo/AyoStock-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
