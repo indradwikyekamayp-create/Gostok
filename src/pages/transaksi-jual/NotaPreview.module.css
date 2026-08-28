@@ -175,6 +175,8 @@
 }
 
 .itemsTable th, .itemsTable td {
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
   padding: 6px 8px; /* Slightly bigger padding */
   font-size: 11px;
 }
@@ -402,4 +404,15 @@
   white-space: nowrap;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
+}
+
+.emptyRow td {
+  border-left: none !important;
+  border-right: none !important;
+}
+.emptyRow td:first-child {
+  border-left: 1px solid #000 !important;
+}
+.emptyRow td:last-child {
+  border-right: 1px solid #000 !important;
 }

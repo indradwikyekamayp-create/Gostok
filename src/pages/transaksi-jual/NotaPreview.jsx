@@ -252,7 +252,7 @@ export default function NotaPreview({ transaction, onClose, autoPrint = false })
                   
                   {/* Empty rows to ensure min height */}
                   {Array.from({ length: emptyRows }).map((_, idx) => (
-                    <tr key={`empty-${idx}`}>
+                    <tr key={`empty-${idx}`} className={styles.emptyRow}>
                       <td>&nbsp;</td>
                       <td></td>
                       <td></td>
