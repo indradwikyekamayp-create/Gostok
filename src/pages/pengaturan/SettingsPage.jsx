@@ -9,9 +9,13 @@ const DEFAULT_SETTINGS = {
   namaToko: 'PT. WELINDO SUKSES BERSAMA',
   alamatToko: '',
   teleponToko: '',
+  emailToko: '',
   stokMenipisThreshold: 10,
   maxHutangPelanggan: 10000000,
   ukuranKertas: 'A4',
+  bankNama: '',
+  bankRekening: '',
+  bankAtasNama: ''
 };
 
 export default function SettingsPage() {
@@ -110,6 +114,47 @@ export default function SettingsPage() {
           </div>
         </section>
 
+        {/* REKENING BANK */}
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}>🏦 Rekening Bank (Untuk Nota A4)</h2>
+          </div>
+          <div className={styles.grid2}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Bank (Contoh: BCA, Mandiri)</label>
+              <input 
+                type="text" 
+                name="bankNama"
+                value={settings.bankNama} 
+                onChange={handleChange}
+                className={styles.formInput}
+                placeholder="BCA"
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Nomor Rekening</label>
+              <input 
+                type="text" 
+                name="bankRekening"
+                value={settings.bankRekening} 
+                onChange={handleChange}
+                className={styles.formInput}
+                placeholder="1234567890"
+              />
+            </div>
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Atas Nama (A/N)</label>
+            <input 
+              type="text" 
+              name="bankAtasNama"
+              value={settings.bankAtasNama} 
+              onChange={handleChange}
+              className={styles.formInput}
+              placeholder="PT. Welindo Sukses Bersama"
+            />
+          </div>
+        </section>
         {/* PENGATURAN INVENTORI & KEUANGAN */}
         <section className={styles.card}>
           <div className={styles.cardHeader}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import CustomerSelector from './CustomerSelector';
 import ProductGrid from './ProductGrid';
@@ -7,6 +7,7 @@ import CartPanel from './CartPanel';
 import NotaPreview from './NotaPreview';
 import PelangganForm from '../pelanggan/PelangganForm';
 import { ToastContext } from '../../context/ToastContext';
+import { AuthContext } from '../../context/AuthContext';
 import styles from './TransaksiJualPage.module.css';
 
 import useIsMobile from '../../hooks/useIsMobile';
@@ -14,6 +15,7 @@ import TransaksiJualMobile from './TransaksiJualMobile';
 
 function TransaksiJualDesktop() {
   const { showToast } = useContext(ToastContext);
+  const { user, userData } = useContext(AuthContext);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [customer, setCustomer] = useState(null);
@@ -72,22 +74,30 @@ function TransaksiJualDesktop() {
   }, [products]);
 
   const handleAddToCart = (product) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.id === product.id
+    if (product.stok <= 0) {
+      showToast('Stok produk habis', 'error');
+      return;
+    }
+    
+    setCart(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        if (existing.qty >= product.stok) {
+          showToast('Maksimal stok tercapai', 'warning');
+          return prev;
+        }
+        return prev.map(item => 
+          item.id === product.id 
             ? { ...item, qty: item.qty + 1, subtotal: (item.qty + 1) * item.harga_jual }
             : item
         );
-      } else {
-        return [...prevCart, { ...product, qty: 1, subtotal: product.harga_jual }];
       }
+      return [...prev, { ...product, qty: 1, subtotal: product.harga_jual }];
     });
   };
 
   const handleScanBarcode = (barcode) => {
-    const product = products.find((p) => p.barcode === barcode || p.kode_barang === barcode);
+    const product = products.find(p => p.barcode === barcode || p.kode_barang === barcode);
     if (product) {
       handleAddToCart(product);
     } else {
@@ -95,7 +105,7 @@ function TransaksiJualDesktop() {
     }
   };
 
-  const handleSaveTransaction = async (paymentMethod, catatan) => {
+  const handleSaveTransaction = async (paymentMethod, catatan, jatuhTempoDate) => {
     if (!customer || cart.length === 0 || !paymentMethod) return;
     
     setIsSaving(true);
@@ -114,6 +124,10 @@ function TransaksiJualDesktop() {
       
       const noNota = `INV-${year}${month}${day}-${hours}${minutes}${seconds}`;
       
+      // Fetch current store config for immutability
+      const storeConfigSnap = await getDoc(doc(db, 'settings', 'store_config'));
+      const store_config = storeConfigSnap.exists() ? storeConfigSnap.data() : null;
+
       const newTransaction = {
         noNota,
         tanggal: now.toISOString(),
@@ -121,9 +135,16 @@ function TransaksiJualDesktop() {
         cart,
         paymentMethod,
         catatan,
+        jatuhTempo: jatuhTempoDate || null,
         grandTotal,
         totalModal,
-        keuntungan: grandTotal - totalModal
+        keuntungan: grandTotal - totalModal,
+        kasir: {
+          uid: user?.uid || 'unknown',
+          nama: userData?.nama || user?.displayName || user?.email || 'Admin',
+          role: userData?.role || 'Admin'
+        },
+        store_config
       };
       
       const batch = writeBatch(db);

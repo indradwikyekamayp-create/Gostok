@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ToastContext } from '../../context/ToastContext';
+import { AuthContext } from '../../context/AuthContext';
 import { Search, ScanBarcode, Plus, Minus, ShoppingBag, ShoppingCart, X, ChevronRight, User, UserPlus } from 'lucide-react';
 import NotaPreview from './NotaPreview';
 import PelangganForm from '../pelanggan/PelangganForm';
@@ -17,6 +18,7 @@ const formatRupiah = (value) => {
 
 export default function TransaksiJualMobile() {
   const { showToast } = useContext(ToastContext);
+  const { user, userData } = useContext(AuthContext);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   
@@ -30,6 +32,7 @@ export default function TransaksiJualMobile() {
   const [showCartSheet, setShowCartSheet] = useState(false);
   const [showCustomerSheet, setShowCustomerSheet] = useState(false);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [jatuhTempo, setJatuhTempo] = useState('');
 
   useEffect(() => {
     const custRef = collection(db, 'customers');
@@ -144,7 +147,14 @@ export default function TransaksiJualMobile() {
   const totalCartAmount = cart.reduce((acc, item) => acc + item.subtotal, 0);
   const totalCartQty = cart.reduce((acc, item) => acc + item.qty, 0);
 
-  const handleSaveTransaction = async (paymentMethod = 'Tunai') => {
+  const handleSaveTransaction = async (paymentMethod = 'Tunai', jatuhTempoDate = null) => {
+    let finalJatuhTempo = jatuhTempoDate;
+    if ((paymentMethod.toLowerCase() === 'bon' || paymentMethod.toLowerCase() === 'kredit') && !finalJatuhTempo) {
+      const jt = new Date();
+      jt.setDate(jt.getDate() + 14);
+      finalJatuhTempo = jt.toISOString();
+    }
+    
     if (cart.length === 0) {
       showToast('Keranjang masih kosong', 'warning');
       return;
@@ -167,6 +177,9 @@ export default function TransaksiJualMobile() {
       
       const noNota = `INV-${year}${month}${day}-${hours}${minutes}${seconds}`;
       
+      const storeConfigSnap = await getDoc(doc(db, 'settings', 'store_config'));
+      const store_config = storeConfigSnap.exists() ? storeConfigSnap.data() : null;
+
       const newTransaction = {
         noNota,
         tanggal: now.toISOString(),
@@ -174,9 +187,16 @@ export default function TransaksiJualMobile() {
         cart,
         paymentMethod,
         catatan: '',
+        jatuhTempo: finalJatuhTempo || null,
         grandTotal,
         totalModal,
-        keuntungan: grandTotal - totalModal
+        keuntungan: grandTotal - totalModal,
+        kasir: {
+          uid: user?.uid || 'unknown',
+          nama: userData?.nama || user?.displayName || user?.email || 'Admin',
+          role: userData?.role || 'Admin'
+        },
+        store_config
       };
       
       const batch = writeBatch(db);
@@ -468,6 +488,16 @@ export default function TransaksiJualMobile() {
             </div>
           </div>
 
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#475569', marginBottom: '0.5rem' }}>Tgl Jatuh Tempo (Hanya untuk Bon/Hutang)</label>
+            <input 
+              type="date" 
+              value={jatuhTempo}
+              onChange={(e) => setJatuhTempo(e.target.value)}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', fontSize: '0.9375rem', outline: 'none' }}
+            />
+          </div>
+
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
             <button 
@@ -478,7 +508,7 @@ export default function TransaksiJualMobile() {
               <X size={20} />
             </button>
             <button 
-               onClick={() => handleSaveTransaction('Bon')}
+               onClick={() => handleSaveTransaction('Bon', jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
                disabled={isSaving}
                style={{ flex: 1, padding: '1rem', borderRadius: '1rem', backgroundColor: '#fff', border: '1px solid #cbd5e1', color: '#475569', fontWeight: 700, fontSize: '0.9375rem' }}
             >

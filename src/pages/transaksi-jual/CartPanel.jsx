@@ -15,6 +15,7 @@ const formatRupiah = (number) => {
 export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer }) {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [catatan, setCatatan] = useState('');
+  const [jatuhTempo, setJatuhTempo] = useState('');
 
   const handleQtyChange = (id, delta) => {
     setCart((prev) =>
@@ -189,19 +190,38 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
           </button>
           <button 
             className={`${styles.paymentBtn} ${paymentMethod === 'bon' ? styles.activePayment : ''}`}
-            onClick={() => setPaymentMethod('bon')}
+            onClick={() => {
+              setPaymentMethod('bon');
+              if (!jatuhTempo) {
+                const jt = new Date();
+                jt.setDate(jt.getDate() + 14);
+                setJatuhTempo(jt.toISOString().split('T')[0]);
+              }
+            }}
           >
             <Receipt size={24} className={styles.paymentIcon} />
             <span>BON</span>
           </button>
         </div>
+        
+        {paymentMethod === 'bon' && (
+          <div style={{ marginTop: '1rem' }}>
+            <label className={styles.sectionLabel}>Tanggal Jatuh Tempo</label>
+            <input 
+              type="date" 
+              className={styles.notesInput} 
+              value={jatuhTempo}
+              onChange={(e) => setJatuhTempo(e.target.value)}
+            />
+          </div>
+        )}
       </div>
 
       <div className={styles.actionSection}>
         <button 
           className={styles.saveBtn} 
-          onClick={() => onSave(paymentMethod, catatan)}
           disabled={cart.length === 0 || !hasCustomer || !paymentMethod || isSaving}
+          onClick={() => onSave(paymentMethod, catatan, jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
         >
           <Receipt size={20} />
           {isSaving ? 'Menyimpan...' 
