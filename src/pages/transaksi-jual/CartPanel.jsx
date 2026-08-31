@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Minus, Plus, Banknote, CreditCard, Receipt } from 'lucide-react';
 import Card from '../../components/common/Card';
+import { useToast } from '../../context/ToastContext';
 import styles from './CartPanel.module.css';
 
 const formatRupiah = (number) => {
@@ -16,12 +17,17 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
   const [paymentMethod, setPaymentMethod] = useState('');
   const [catatan, setCatatan] = useState('');
   const [jatuhTempo, setJatuhTempo] = useState('');
+  const { showToast } = useToast();
 
   const handleQtyChange = (id, delta) => {
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const newQty = Math.max(1, item.qty + delta);
+          let newQty = Math.max(1, item.qty + delta);
+          if (newQty > (item.stok || 0)) {
+            showToast(`Stok tidak cukup (Sisa: ${item.stok || 0})`, 'error');
+            newQty = item.stok || 0;
+          }
           return { ...item, qty: newQty, subtotal: newQty * item.harga_jual };
         }
         return item;
@@ -30,11 +36,20 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
   };
 
   const handleQtyInput = (id, value) => {
-    const newQty = parseInt(value) || ''; // Allow empty string while typing
+    let newQty = parseInt(value);
+    if (isNaN(newQty)) {
+      newQty = ''; // Allow empty string while typing
+    }
+    
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          return { ...item, qty: newQty, subtotal: (newQty || 0) * item.harga_jual };
+          let finalQty = newQty;
+          if (typeof newQty === 'number' && newQty > (item.stok || 0)) {
+            showToast(`Stok tidak cukup (Sisa: ${item.stok || 0})`, 'error');
+            finalQty = item.stok || 0;
+          }
+          return { ...item, qty: finalQty, subtotal: (finalQty || 0) * item.harga_jual };
         }
         return item;
       })
@@ -46,7 +61,10 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
       prev.map((item) => {
         if (item.id === id) {
           // If empty or less than 1, fallback to 1
-          const finalQty = Math.max(1, item.qty || 1);
+          let finalQty = Math.max(1, item.qty || 1);
+          if (finalQty > (item.stok || 0)) {
+            finalQty = item.stok || 0;
+          }
           return { ...item, qty: finalQty, subtotal: finalQty * item.harga_jual };
         }
         return item;
@@ -113,9 +131,19 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
                   >
                     <span style={{ fontSize: '10px', color: '#94a3b8' }}>-</span>
                   </div>
-                  <div className={styles.itemName}>{item.nama_barang}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className={styles.itemName}>{item.nama_barang}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>Kode: {item.kode_barang || item.barcode || '-'}</div>
+                  </div>
                 </div>
-                <div className={styles.colPrice}>{formatRupiah(item.harga_jual)}</div>
+                <div className={styles.colPrice}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ color: (!item.harga_jual || item.harga_jual === 0) ? '#ef4444' : undefined }}>{formatRupiah(item.harga_jual)}</span>
+                    {(!item.harga_jual || item.harga_jual === 0) && (
+                      <span style={{ fontSize: '0.6rem', backgroundColor: '#fee2e2', color: '#ef4444', padding: '0.1rem 0.25rem', borderRadius: '0.25rem', fontWeight: 700, alignSelf: 'flex-start' }}>BELUM DISET</span>
+                    )}
+                  </div>
+                </div>
                 <div className={styles.colQty}>
                   <div className={styles.qtyControl}>
                     <button className={styles.qtyBtn} onClick={() => handleQtyChange(item.id, -1)}><Minus size={14} /></button>
@@ -189,9 +217,9 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
             <span>TRANSFER</span>
           </button>
           <button 
-            className={`${styles.paymentBtn} ${paymentMethod === 'bon' ? styles.activePayment : ''}`}
+            className={`${styles.paymentBtn} ${paymentMethod === 'hutang' ? styles.activePayment : ''}`}
             onClick={() => {
-              setPaymentMethod('bon');
+              setPaymentMethod('hutang');
               if (!jatuhTempo) {
                 const jt = new Date();
                 jt.setDate(jt.getDate() + 14);
@@ -200,11 +228,11 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
             }}
           >
             <Receipt size={24} className={styles.paymentIcon} />
-            <span>BON</span>
+            <span>HUTANG</span>
           </button>
         </div>
         
-        {paymentMethod === 'bon' && (
+        {paymentMethod === 'hutang' && (
           <div style={{ marginTop: '1rem' }}>
             <label className={styles.sectionLabel}>Tanggal Jatuh Tempo</label>
             <input 

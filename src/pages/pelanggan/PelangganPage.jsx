@@ -49,13 +49,13 @@ export default function PelangganPage() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} flutter-page`}>
       <header className={styles.header}>
         <div className={styles.headerTitle}>
           <h1>Daftar Pelanggan</h1>
           <p>Kelola data pelanggan dan pantau hutang piutang.</p>
         </div>
-        <button className={styles.addButton} onClick={() => setShowForm(true)}>
+        <button className={`${styles.addButton} flutter-ripple`} onClick={() => setShowForm(true)}>
           + Tambah Pelanggan
         </button>
       </header>

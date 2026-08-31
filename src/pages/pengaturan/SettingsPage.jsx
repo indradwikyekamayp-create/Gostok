@@ -13,6 +13,8 @@ const DEFAULT_SETTINGS = {
   stokMenipisThreshold: 10,
   maxHutangPelanggan: 10000000,
   ukuranKertas: 'A4',
+  ukuranFontNota: 'normal',
+  ukuranFontAplikasi: 'normal',
   bankNama: '',
   bankRekening: '',
   bankAtasNama: ''
@@ -63,7 +65,7 @@ export default function SettingsPage() {
   if (loading) return <div className={styles.loadingState}>Memuat pengaturan...</div>;
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} flutter-page`}>
       <header className={styles.header}>
         <h1 className={styles.title}>Pengaturan Aplikasi</h1>
         <p className={styles.subtitle}>Sesuaikan parameter dan profil toko untuk keseluruhan aplikasi.</p>
@@ -190,39 +192,91 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* PRINTER SETTING */}
+        {/* TAMPILAN APLIKASI */}
         <section className={styles.card}>
           <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}><Printer size={20} /> Pengaturan Cetak</h2>
+            <h2 className={styles.cardTitle}>📱 Tampilan Aplikasi</h2>
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Ukuran Kertas Nota</label>
+            <label className={styles.formLabel}>Ukuran Font Seluruh Aplikasi</label>
             <select 
-              name="ukuranKertas" 
-              value={settings.ukuranKertas}
+              name="ukuranFontAplikasi"
+              value={settings.ukuranFontAplikasi || 'normal'} 
               onChange={handleChange}
               className={styles.formInput}
             >
-              <option value="A4">A4 (Printer Biasa)</option>
-              <option value="58mm">Thermal 58mm (Kecil)</option>
-              <option value="80mm">Thermal 80mm (Besar/Standar)</option>
+              <option value="small">Kecil (Small)</option>
+              <option value="normal">Sedang (Normal)</option>
+              <option value="large">Besar (Large)</option>
             </select>
-            <span className={styles.formHint}>Menyesuaikan layout dan lebar struk nota ketika dicetak.</span>
+            <span className={styles.formHint}>Akan membesarkan atau mengecilkan semua teks dan menu di dalam aplikasi (bukan nota).</span>
           </div>
         </section>
 
-        <div className={styles.actions}>
-          <button 
-            className={styles.saveBtn} 
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            <Save size={18} />
-            {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
-          </button>
-        </div>
+        {/* PRINTER SETTING */}
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}><Printer size={20} /> Pengaturan Cetak Nota</h2>
+          </div>
+          
+          <div className={styles.grid2}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Ukuran Kertas Nota</label>
+              <select 
+                name="ukuranKertas"
+                value={settings.ukuranKertas} 
+                onChange={handleChange}
+                className={styles.formInput}
+              >
+                <option value="A4">A4 (Printer Biasa)</option>
+                <option value="80mm">Thermal 80mm</option>
+                <option value="58mm">Thermal 58mm</option>
+              </select>
+              <span className={styles.formHint}>Menyesuaikan layout dan lebar struk nota ketika dicetak.</span>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Ukuran Font Struk</label>
+              <select 
+                name="ukuranFontNota"
+                value={settings.ukuranFontNota || 'normal'} 
+                onChange={handleChange}
+                className={styles.formInput}
+              >
+                <option value="small">Kecil (Small)</option>
+                <option value="normal">Sedang (Normal)</option>
+                <option value="large">Besar (Large)</option>
+              </select>
+              <span className={styles.formHint}>Ubah ukuran tulisan cetak jika nota terlihat terlalu kecil/besar.</span>
+            </div>
+          </div>
+        </section>
 
       </div>
+
+      <div className={styles.actionArea}>
+        <button 
+          className={`${styles.saveBtn} ${styles.desktopOnlyBtn} flutter-ripple`}
+          onClick={handleSave}
+          disabled={isSaving}
+        >
+          <Save size={18} />
+          {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
+        </button>
+      </div>
+
+      {/* Floating Bottom Bar (Mobile/Flutter Style) */}
+      <div className={styles.floatingBottomBar}>
+        <button 
+          className={`${styles.floatingBtnPrimary} flutter-ripple`}
+          onClick={handleSave}
+          disabled={isSaving}
+        >
+          <Save size={20} />
+          {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
+        </button>
+      </div>
+
     </div>
   );
 }

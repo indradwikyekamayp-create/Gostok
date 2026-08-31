@@ -33,6 +33,13 @@ export default function TransaksiJualMobile() {
   const [showCustomerSheet, setShowCustomerSheet] = useState(false);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [jatuhTempo, setJatuhTempo] = useState('');
+  const [isHutangMode, setIsHutangMode] = useState(false);
+
+  useEffect(() => {
+    if (!showCartSheet) {
+      setIsHutangMode(false);
+    }
+  }, [showCartSheet]);
 
   useEffect(() => {
     const custRef = collection(db, 'customers');
@@ -100,8 +107,15 @@ export default function TransaksiJualMobile() {
   };
 
   const handleAddToCart = (product) => {
+    const existingItem = cart.find(item => item.id === product.id);
+    const currentQty = existingItem ? existingItem.qty : 0;
+    
+    if (currentQty + 1 > (product.stok || 0)) {
+      showToast(`Stok ${product.nama_barang} tidak cukup (Sisa: ${product.stok || 0})`, 'error');
+      return;
+    }
+
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
       if (existingItem) {
         return prevCart.map((item) =>
           item.id === product.id
@@ -117,11 +131,17 @@ export default function TransaksiJualMobile() {
   const handleSetQty = (product, newQty) => {
     let qty = parseInt(newQty);
     if (isNaN(qty)) return; // biarkan kosong saat mengetik
+
+    if (qty > (product.stok || 0)) {
+      showToast(`Stok ${product.nama_barang} tidak cukup (Sisa: ${product.stok || 0})`, 'error');
+      qty = product.stok || 0;
+    }
+
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
       if (qty <= 0) {
         return prev.filter(item => item.id !== product.id);
       }
+      const existing = prev.find(item => item.id === product.id);
       if (existing) {
         return prev.map(item => item.id === product.id ? { ...item, qty, subtotal: qty * item.harga_jual } : item);
       }
@@ -149,7 +169,7 @@ export default function TransaksiJualMobile() {
 
   const handleSaveTransaction = async (paymentMethod = 'Tunai', jatuhTempoDate = null) => {
     let finalJatuhTempo = jatuhTempoDate;
-    if ((paymentMethod.toLowerCase() === 'bon' || paymentMethod.toLowerCase() === 'kredit') && !finalJatuhTempo) {
+    if ((paymentMethod.toLowerCase() === 'bon' || paymentMethod.toLowerCase() === 'kredit' || paymentMethod.toLowerCase() === 'hutang') && !finalJatuhTempo) {
       const jt = new Date();
       jt.setDate(jt.getDate() + 14);
       finalJatuhTempo = jt.toISOString();
@@ -159,7 +179,13 @@ export default function TransaksiJualMobile() {
       showToast('Keranjang masih kosong', 'warning');
       return;
     }
-    const selectedCustomer = customer || { id: 'umum', nama_perusahaan: 'Pelanggan Umum', nama_pic: 'Umum' };
+    
+    if (!customer) {
+      showToast('Silakan pilih pelanggan terlebih dahulu!', 'warning');
+      return;
+    }
+    
+    const selectedCustomer = customer;
     
     setIsSaving(true);
     
@@ -210,7 +236,7 @@ export default function TransaksiJualMobile() {
         batch.update(prodRef, { stok: newStock });
       }
 
-      if (paymentMethod.toLowerCase() === 'bon' || paymentMethod.toLowerCase() === 'kredit') {
+      if (paymentMethod.toLowerCase() === 'bon' || paymentMethod.toLowerCase() === 'kredit' || paymentMethod.toLowerCase() === 'hutang') {
         if (selectedCustomer.id !== 'umum') {
           const custRef = doc(db, 'customers', selectedCustomer.id);
           const newHutang = (selectedCustomer.total_hutang_berjalan || 0) + grandTotal;
@@ -286,8 +312,8 @@ export default function TransaksiJualMobile() {
            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem 0.75rem', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.75rem' }}
         >
           <User size={16} color="#64748b" />
-          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: customer ? '#0f172a' : '#94a3b8', flex: 1 }}>
-            {customer ? (customer.nama_perusahaan || customer.nama_pic) : 'Pilih Pelanggan (Opsional)'}
+          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: customer ? '#0f172a' : '#ef4444', flex: 1 }}>
+            {customer ? (customer.nama_perusahaan || customer.nama_pic) : 'Pilih Pelanggan (Wajib)'}
           </span>
           <ChevronRight size={16} color="#cbd5e1" />
         </div>
@@ -319,7 +345,7 @@ export default function TransaksiJualMobile() {
       </div>
 
       {/* Product Grid */}
-      <div style={{ padding: '0 1rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+      <div style={{ padding: '0 1rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
         {filteredProducts.map(product => {
           const qty = getQtyInCart(product.id);
           return (
@@ -338,15 +364,25 @@ export default function TransaksiJualMobile() {
               <div style={{ padding: '0.75rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.3, marginBottom: '0.25rem' }}>{product.nama_barang}</div>
+                  <div style={{ fontSize: '0.6875rem', color: '#64748b', marginBottom: '0.125rem' }}>Kode: {product.kode_barang || product.barcode || '-'}</div>
                   <div style={{ fontSize: '0.6875rem', color: '#64748b' }}>Sisa: {product.stok || 0}</div>
                 </div>
-                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 800, color: '#16a34a' }}>{formatRupiah(product.harga_jual)}</div>
+                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: '0.8125rem', fontWeight: 800, color: (!product.harga_jual || product.harga_jual === 0) ? '#ef4444' : '#16a34a' }}>
+                      {formatRupiah(product.harga_jual)}
+                    </div>
+                    {(!product.harga_jual || product.harga_jual === 0) && (
+                      <span style={{ fontSize: '0.5rem', backgroundColor: '#fee2e2', color: '#ef4444', padding: '0.15rem 0.3rem', borderRadius: '0.25rem', fontWeight: 800 }}>
+                        BELUM DISET
+                      </span>
+                    )}
+                  </div>
                   
                   {qty > 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                       <button onClick={() => handleRemoveFromCart(product.id)} style={{ width: 28, height: 28, borderRadius: '0.5rem', backgroundColor: '#fee2e2', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
-                         <Minus size={14} strokeWidth={3} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem' }}>
+                       <button onClick={() => handleRemoveFromCart(product.id)} style={{ width: 24, height: 24, borderRadius: '0.5rem', backgroundColor: '#fee2e2', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                         <Minus size={12} strokeWidth={3} />
                        </button>
                        <input 
                          type="number"
@@ -358,13 +394,13 @@ export default function TransaksiJualMobile() {
                          }}
                          style={{ width: '36px', textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: 0 }}
                        />
-                       <button onClick={() => handleAddToCart(product)} style={{ width: 28, height: 28, borderRadius: '0.5rem', backgroundColor: '#dcfce7', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a' }}>
-                         <Plus size={14} strokeWidth={3} />
+                       <button onClick={() => handleAddToCart(product)} style={{ width: 24, height: 24, borderRadius: '0.5rem', backgroundColor: '#dcfce7', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a' }}>
+                         <Plus size={12} strokeWidth={3} />
                        </button>
                     </div>
                   ) : (
-                    <button className="flutter-ripple" onClick={() => handleAddToCart(product)} style={{ width: 32, height: 32, borderRadius: '0.5rem', backgroundColor: '#3b82f6', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <Plus size={18} strokeWidth={3} />
+                    <button className="flutter-ripple" onClick={() => handleAddToCart(product)} style={{ width: '100%', padding: '0.4rem', borderRadius: '0.5rem', backgroundColor: '#3b82f6', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.75rem', fontWeight: 600 }}>
+                      <Plus size={14} strokeWidth={3} style={{ marginRight: '2px' }} /> Tambah
                     </button>
                   )}
                 </div>
@@ -438,10 +474,17 @@ export default function TransaksiJualMobile() {
                       {item.nama_barang}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
-                      Kode: {item.kode_barang || '-'}
+                      Kode: {item.kode_barang || item.barcode || '-'}
                     </div>
-                    <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#16a34a' }}>
-                      {formatRupiah(item.harga_jual)}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: (!item.harga_jual || item.harga_jual === 0) ? '#ef4444' : '#16a34a' }}>
+                        {formatRupiah(item.harga_jual)}
+                      </div>
+                      {(!item.harga_jual || item.harga_jual === 0) && (
+                        <span style={{ fontSize: '0.5rem', backgroundColor: '#fee2e2', color: '#ef4444', padding: '0.15rem 0.3rem', borderRadius: '0.25rem', fontWeight: 800 }}>
+                          BELUM DISET
+                        </span>
+                      )}
                     </div>
                   </div>
                   
@@ -488,40 +531,64 @@ export default function TransaksiJualMobile() {
             </div>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#475569', marginBottom: '0.5rem' }}>Tgl Jatuh Tempo (Hanya untuk Bon/Hutang)</label>
-            <input 
-              type="date" 
-              value={jatuhTempo}
-              onChange={(e) => setJatuhTempo(e.target.value)}
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', fontSize: '0.9375rem', outline: 'none' }}
-            />
-          </div>
+          {isHutangMode && (
+            <div className="flutter-fade" style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#475569', marginBottom: '0.5rem' }}>Tanggal Jatuh Tempo Hutang</label>
+              <input 
+                type="date" 
+                value={jatuhTempo}
+                onChange={(e) => setJatuhTempo(e.target.value)}
+                style={{ width: '100%', padding: '0.875rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', fontSize: '0.9375rem', outline: 'none' }}
+              />
+            </div>
+          )}
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-            <button 
-               className="flutter-ripple"
-               onClick={() => setShowCartSheet(false)}
-               style={{ padding: '1rem', borderRadius: '1rem', backgroundColor: '#fff', border: '1px solid #cbd5e1', color: '#475569', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <X size={20} />
-            </button>
-            <button 
-               onClick={() => handleSaveTransaction('Bon', jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
-               disabled={isSaving}
-               style={{ flex: 1, padding: '1rem', borderRadius: '1rem', backgroundColor: '#fff', border: '1px solid #cbd5e1', color: '#475569', fontWeight: 700, fontSize: '0.9375rem' }}
-            >
-              Catat Bon
-            </button>
-            <button 
-               className="flutter-ripple"
-               onClick={() => handleSaveTransaction('Tunai')}
-               disabled={isSaving}
-               style={{ flex: 1.5, padding: '1rem', borderRadius: '1rem', backgroundColor: '#16a34a', border: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9375rem' }}
-            >
-              {isSaving ? 'Memproses...' : 'Tunai'}
-            </button>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+            {isHutangMode ? (
+              <>
+                <button 
+                   className="flutter-ripple"
+                   onClick={() => setIsHutangMode(false)}
+                   style={{ flex: 1, padding: '1rem', borderRadius: '1rem', backgroundColor: '#fff', border: '1px solid #cbd5e1', color: '#475569', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  Batal
+                </button>
+                <button 
+                   className="flutter-ripple"
+                   onClick={() => handleSaveTransaction('Hutang', jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
+                   disabled={isSaving || !customer}
+                   style={{ flex: 2, padding: '1rem', borderRadius: '1rem', backgroundColor: (!customer || isSaving) ? '#cbd5e1' : '#1d4ed8', border: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9375rem' }}
+                >
+                  {isSaving ? 'Memproses...' : 'Simpan Hutang'}
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                   className="flutter-ripple"
+                   onClick={() => setShowCartSheet(false)}
+                   style={{ padding: '1rem', borderRadius: '1rem', backgroundColor: '#fff', border: '1px solid #cbd5e1', color: '#475569', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <X size={20} />
+                </button>
+                <button 
+                   onClick={() => setIsHutangMode(true)}
+                   disabled={!customer}
+                   style={{ flex: 1, padding: '1rem', borderRadius: '1rem', backgroundColor: '#fff', border: '1px solid #cbd5e1', color: !customer ? '#94a3b8' : '#475569', fontWeight: 700, fontSize: '0.9375rem', opacity: !customer ? 0.6 : 1 }}
+                >
+                  Hutang
+                </button>
+                <button 
+                   className="flutter-ripple"
+                   onClick={() => handleSaveTransaction('Tunai')}
+                   disabled={isSaving || !customer}
+                   style={{ flex: 1.5, padding: '1rem', borderRadius: '1rem', backgroundColor: (!customer || isSaving) ? '#cbd5e1' : '#16a34a', border: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9375rem' }}
+                >
+                  {isSaving ? 'Memproses...' : 'Tunai'}
+                </button>
+              </>
+            )}
           </div>
 
         </div>
@@ -546,14 +613,6 @@ export default function TransaksiJualMobile() {
             >
               <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserPlus size={20} color="#1d4ed8" /></div>
               <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1d4ed8' }}>+ Tambahkan Pelanggan Baru</div>
-            </div>
-            
-            <div 
-              onClick={() => { setCustomer(null); setShowCustomerSheet(false); }}
-              style={{ padding: '1rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem' }}
-            >
-              <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={20} color="#64748b" /></div>
-              <div style={{ fontSize: '0.9375rem', fontWeight: customer === null ? 700 : 500, color: customer === null ? '#1d4ed8' : '#0f172a' }}>Pelanggan Umum (Tanpa Nama)</div>
             </div>
             
             {customers.map(c => (

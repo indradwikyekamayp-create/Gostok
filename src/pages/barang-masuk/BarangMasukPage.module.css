@@ -116,3 +116,127 @@
   flex-direction: column;
   min-height: 0; /* allows inner scrolling */
 }
+
+@media (max-width: 768px) {
+  .container {
+    height: auto;
+    min-height: 100vh;
+    padding: 1rem;
+    gap: 1rem;
+    padding-bottom: 12rem; /* space for MobileBottomNav + floatingBottomBar */
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .titleArea {
+    align-items: flex-start;
+  }
+  
+  .headerActions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .btnSecondary, .btnPrimary {
+    flex: 1;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
+  .scanSection {
+    padding: 1rem;
+  }
+  
+  .contentArea {
+    flex: auto;
+    min-height: auto;
+  }
+
+  .listSection {
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
+/* Desktop Only Button Hide */
+@media (max-width: 768px) {
+  .desktopOnlyBtn {
+    display: none !important;
+  }
+
+  /* Floating Bottom Bar (Mobile/Flutter Style) */
+  .floatingBottomBar {
+    position: fixed;
+    bottom: 80px; /* Position above MobileBottomNav */
+    left: 0;
+    right: 0;
+    background-color: var(--color-surface, #fff);
+    padding: 1rem 1.5rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-border, #e2e8f0);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 40; /* Lower than MobileBottomNav's z-index 50 so floating + button stays on top */
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .floatingSummary {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .floatingCount {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #64748b);
+    font-weight: 600;
+  }
+
+  .floatingTotal {
+    font-size: 1.125rem;
+    color: var(--color-text, #0f172a);
+    font-weight: 800;
+  }
+
+  .floatingBtnPrimary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background-color: var(--color-primary, hsl(215, 50%, 30%));
+    color: #fff;
+    border: none;
+    border-radius: 9999px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .floatingBtnPrimary:hover {
+    background-color: var(--color-primary-hover, hsl(215, 50%, 25%));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3);
+  }
+
+  .floatingBtnPrimary:active {
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 769px) {
+  .floatingBottomBar {
+    display: none !important;
+  }
+}

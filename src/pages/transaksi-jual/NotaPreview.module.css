@@ -63,20 +63,22 @@
 
 .notaWrapper {
   background-color: white;
-  width: 100%;
-  max-width: 297mm; /* A4 Landscape width */
-  min-height: 210mm; /* A4 Landscape height */
+  width: 297mm;
+  min-width: 297mm;
+  min-height: 210mm;
   box-sizing: border-box;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
   color: #000;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
   zoom: 0.7; /* Scale down for screen preview */
 }
 
 .invoiceOutline {
-  border: 4px double #000;
+  border: 2px solid #000;
   margin: 10mm;
+  height: calc(100% - 20mm);
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -84,17 +86,37 @@
   position: relative;
 }
 
+.invoiceHeaderTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 30px;
+}
+.titleLine {
+  flex: 1;
+  height: 1px;
+  background-color: #000;
+}
+.titleDot {
+  margin: 0 15px;
+  font-size: 16px;
+}
+.titleText {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 5px;
+}
+
 /* Top Section */
 .topSection {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
+  padding: 0 30px 15px 30px;
 }
 
 .topLeft {
   display: flex;
-  align-items: flex-start;
-  gap: 15px;
+  flex-direction: column;
 }
 
 .logoCircle {
@@ -124,66 +146,47 @@
 }
 
 .topRight {
-  border: 1px solid #000;
-  padding: 5px 10px;
   align-self: flex-start;
+  min-width: 200px;
 }
 
 .detailsBox {
   border-collapse: collapse;
-  font-size: 11px;
 }
 .detailsBox td {
-  padding: 2px 5px;
+  padding: 3px 5px;
   white-space: nowrap;
 }
 
-/* Center Left (Customer & Invoice Title) */
-.customerSection {
-  padding: 0 10px 10px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
-}
-
 .kepadaBox {
-  width: 60%;
-}
-
-.kepadaBox table {
-  border-collapse: collapse;
-  font-size: 12px;
-}
-.kepadaBox td {
-  padding: 2px;
-}
-
-.invoiceBigTitle {
-  font-size: 24px;
-  font-weight: 900;
-  letter-spacing: 4px;
-  text-decoration: underline;
-  padding-top: 10px;
-  padding-right: 20px;
+  width: 100%;
 }
 
 /* Table Section */
 .itemsTable {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
 }
 
 .itemsTable th, .itemsTable td {
   border-left: 1px solid #000;
-  border-right: 1px solid #000;
-  padding: 6px 8px; /* Slightly bigger padding */
-  font-size: 11px;
+  padding: 6px 4px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.itemsTable th:first-child, .itemsTable td:first-child {
+  border-left: 2px solid #000;
+}
+.itemsTable th:last-child, .itemsTable td:last-child {
+  border-right: 2px solid #000;
 }
 
 .itemsTable th {
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+  background-color: #e5e7eb;
   font-weight: bold;
   text-align: center;
 }
@@ -203,10 +206,9 @@
 }
 
 .grandTotalRow td {
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
   font-weight: bold;
-  font-size: 12px;
 }
 
 .grandTotalLabel {
@@ -223,6 +225,7 @@
   display: flex;
   justify-content: space-between;
   padding: 10px;
+  margin-top: auto;
 }
 
 .bottomLeft {
@@ -230,7 +233,6 @@
 }
 .bottomLeft table {
   border-collapse: collapse;
-  font-size: 11px;
 }
 .bottomLeft td {
   padding: 2px 4px;
@@ -248,7 +250,6 @@
   border: 1px solid #000;
   border-radius: 8px;
   padding: 10px;
-  font-size: 10px;
   text-align: center;
   width: 100%;
   white-space: nowrap;
@@ -407,12 +408,42 @@
 }
 
 .emptyRow td {
-  border-left: none !important;
-  border-right: none !important;
+  height: 25px; /* ensure empty rows have some height */
 }
-.emptyRow td:first-child {
-  border-left: 1px solid #000 !important;
+@media (max-width: 768px) {
+  .notaWrapper {
+    zoom: 0.3;
+    min-height: fit-content;
+  }
+  .modal {
+    width: fit-content;
+    max-width: 95%;
+    margin: 10px;
+    height: fit-content;
+    max-height: 95vh;
+  }
+  .content {
+    padding: 10px;
+    justify-content: center;
+  }
+  .header {
+    padding: 1rem;
+  }
+  .footer {
+    padding: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btnSecondary, .btnPrimary {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    flex: 1;
+    justify-content: center;
+  }
 }
-.emptyRow td:last-child {
-  border-right: 1px solid #000 !important;
+
+@media (max-width: 380px) {
+  .notaWrapper {
+    zoom: 0.26;
+  }
 }

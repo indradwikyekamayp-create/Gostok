@@ -131,3 +131,89 @@
   color: var(--color-text-secondary, #666);
   font-size: 1rem;
 }
+
+/* Action Area */
+.actionArea {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  max-width: 800px;
+}
+
+@media (min-width: 769px) {
+  .floatingBottomBar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    padding-bottom: 120px; /* space for MobileBottomNav + floating button */
+  }
+
+  .desktopOnlyBtn {
+    display: none !important;
+  }
+
+  /* Stack grid inputs vertically on mobile */
+  .grid2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Make cards look more like Flutter sections */
+  .card {
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .cardTitle {
+    font-size: 1rem;
+  }
+
+  /* Floating Bottom Bar */
+  .floatingBottomBar {
+    position: fixed;
+    bottom: 80px; /* Above the MobileBottomNav */
+    left: 0;
+    right: 0;
+    background-color: var(--color-surface, #fff);
+    padding: 1rem 1.5rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-border, #e2e8f0);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 40; /* Lower than MobileBottomNav z-index */
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .floatingBtnPrimary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background-color: var(--color-primary, hsl(215, 50%, 30%));
+    color: #fff;
+    border: none;
+    border-radius: 9999px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .floatingBtnPrimary:hover {
+    background-color: var(--color-primary-hover, hsl(215, 50%, 25%));
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

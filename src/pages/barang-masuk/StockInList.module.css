@@ -207,3 +207,99 @@
 .linkBtn:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .headerRight {
+    width: 100%;
+  }
+  .filterBtn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .tableContainer {
+    padding: 1rem;
+    background: #f8fafc;
+    overflow-y: visible;
+  }
+
+  /* Make table into modern list cards */
+  .table thead { display: none; }
+  .table tbody { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.75rem; 
+  }
+  
+  .table tr {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem !important;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
+    animation: fadeInSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .table td { 
+    display: block; 
+    padding: 0 !important; 
+    border: none !important; 
+    background: none !important;
+  }
+  
+  /* Hide unnecessary mobile columns */
+  .table td:nth-child(1),
+  .table td:nth-child(3),
+  .table td:nth-child(4),
+  .table td:nth-child(6),
+  .table td:nth-child(7) { 
+    display: none !important; 
+  }
+  
+  /* Product Name & Img */
+  .productCell {
+    margin-bottom: 0.75rem;
+  }
+  .productName {
+    font-size: 1rem;
+  }
+
+  /* Qty */
+  .qtyText {
+    font-size: 1.125rem;
+    color: #16a34a;
+  }
+  
+  .table td:nth-child(5)::before {
+    content: 'Qty Masuk: ';
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  /* Action Buttons */
+  .table td:nth-child(8) {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+  .actionCell {
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+  }
+}

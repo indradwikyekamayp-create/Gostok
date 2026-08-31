@@ -341,7 +341,7 @@ const OwnerDashboardMobile = () => {
                 <span style={{ fontSize: '0.625rem', fontWeight: 600, color: '#334155', textAlign: 'center', lineHeight: 1.2 }}>Karyawan</span>
               </div>
 
-              <div className="flutter-ripple flutter-fade" onClick={() => navigate('/settings')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', borderRadius: '0.75rem' }}>
+              <div className="flutter-ripple flutter-fade" onClick={() => navigate('/pengaturan')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', borderRadius: '0.75rem' }}>
                 <div style={{ width: 44, height: 44, borderRadius: '1rem', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
                   <Settings size={20} strokeWidth={2} />
                 </div>

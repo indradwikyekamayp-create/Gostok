@@ -106,8 +106,10 @@
   animation: flutterSlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-.flutter-page {
-  animation: flutterFadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+@media (max-width: 768px) {
+  .flutter-page {
+    animation: flutterFadeUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
 }
 
 .flutter-fade {

@@ -84,22 +84,22 @@ const BarangMasukPage = () => {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} flutter-page`}>
       <header className={styles.header}>
         <div className={styles.titleArea}>
           <h1>Barang Masuk</h1>
           <p className={styles.subtitle}>Catat produk yang masuk ke gudang</p>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.btnSecondary} onClick={() => setShowRiwayat(true)}>
+          <button className={`${styles.btnSecondary} flutter-ripple`} onClick={() => setShowRiwayat(true)}>
             <History size={18} />
             Riwayat Barang Masuk
           </button>
           <button 
-            className={styles.btnPrimary} 
+            className={`${styles.btnPrimary} ${styles.desktopOnlyBtn} flutter-ripple`} 
             onClick={handleSaveStockIn}
             disabled={isSaving || items.length === 0}
-            style={{ opacity: (isSaving || items.length === 0) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ opacity: (isSaving || items.length === 0) ? 0.5 : 1 }}
           >
             <Save size={18} />
             {isSaving ? 'Menyimpan...' : 'Simpan Barang Masuk'}
@@ -123,6 +123,24 @@ const BarangMasukPage = () => {
 
       {showRiwayat && (
         <RiwayatBarangMasukModal onClose={() => setShowRiwayat(false)} />
+      )}
+
+      {/* Floating Bottom Bar (Mobile/Flutter Style) */}
+      {items.length > 0 && (
+        <div className={styles.floatingBottomBar}>
+          <div className={styles.floatingSummary}>
+            <span className={styles.floatingCount}>{items.length} Macam Barang</span>
+            <span className={styles.floatingTotal}>{items.reduce((s, i) => s + i.qty, 0)} Total Qty</span>
+          </div>
+          <button 
+            className={`${styles.floatingBtnPrimary} flutter-ripple`} 
+            onClick={handleSaveStockIn}
+            disabled={isSaving}
+          >
+            <Save size={20} />
+            {isSaving ? 'Menyimpan...' : 'Simpan Barang Masuk'}
+          </button>
+        </div>
       )}
     </div>
   );

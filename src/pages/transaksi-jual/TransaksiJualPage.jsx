@@ -162,7 +162,7 @@ function TransaksiJualDesktop() {
 
       // If Piutang (Kredit), update customer total hutang
       const pmStr = (paymentMethod || '').toLowerCase();
-      if (pmStr === 'bon' || pmStr === 'kredit') {
+      if (pmStr === 'bon' || pmStr === 'kredit' || pmStr === 'hutang') {
         const custRef = doc(db, 'customers', customer.id);
         const newHutang = (customer.total_hutang_berjalan || 0) + grandTotal;
         batch.update(custRef, { total_hutang_berjalan: newHutang });

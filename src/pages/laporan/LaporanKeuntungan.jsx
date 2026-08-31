@@ -31,6 +31,10 @@ const LaporanKeuntungan = ({ dateRange }) => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [expandedRowId, setExpandedRowId] = useState(null);
   
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  
   const [summary, setSummary] = useState({
     totalOmzet: 0,
     totalModal: 0,
@@ -167,6 +171,11 @@ const LaporanKeuntungan = ({ dateRange }) => {
     return () => unsub();
   }, []);
 
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeTab, itemsPerPage]);
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -211,6 +220,11 @@ const LaporanKeuntungan = ({ dateRange }) => {
     return new Date(b.tanggal || 0) - new Date(a.tanggal || 0); // default sort (semua)
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProfitData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredProfitData.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
@@ -223,47 +237,47 @@ const LaporanKeuntungan = ({ dateRange }) => {
 
       {/* Summary Cards */}
       <div className={styles.grid4}>
-        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className={styles.summaryCard} style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div className={styles.summaryCardIcon} style={{ width: '48px', height: '48px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Lock size={24} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Omzet</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalOmzet)}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 12.5% dari periode sebelumnya</div>
+            <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalOmzet)}</div>
+            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 12.5% dari periode sebelumnya</div>
           </div>
         </div>
 
-        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className={styles.summaryCard} style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div className={styles.summaryCardIcon} style={{ width: '48px', height: '48px', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Wallet size={24} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Modal (HPP)</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalModal)}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9660;</span> 4.8% dari periode sebelumnya</div>
+            <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalModal)}</div>
+            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9660;</span> 4.8% dari periode sebelumnya</div>
           </div>
         </div>
 
-        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className={styles.summaryCard} style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div className={styles.summaryCardIcon} style={{ width: '48px', height: '48px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <BarChart2 size={24} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Laba Kotor</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalKeuntungan)}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 18.2% dari periode sebelumnya</div>
+            <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalKeuntungan)}</div>
+            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 18.2% dari periode sebelumnya</div>
           </div>
         </div>
 
-        <div style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-          <div style={{ width: '48px', height: '48px', backgroundColor: '#f3e8ff', color: '#9333ea', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className={styles.summaryCard} style={{ padding: '1.25rem', backgroundColor: '#fff', borderRadius: '0.75rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <div className={styles.summaryCardIcon} style={{ width: '48px', height: '48px', backgroundColor: '#f3e8ff', color: '#9333ea', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <PieChart size={24} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Rata-rata Margin</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.margin}%</div>
-            <div style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: '500' }}>Sangat Baik</div>
+            <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.margin}%</div>
+            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: '500' }}>Sangat Baik</div>
           </div>
         </div>
       </div>
@@ -420,7 +434,7 @@ const LaporanKeuntungan = ({ dateRange }) => {
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.75rem' }}>
+          <table className={styles.responsiveTable} style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.75rem' }}>
             <thead>
               <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                 <th style={{ padding: '1rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Daftar Transaksi</th>
@@ -438,29 +452,30 @@ const LaporanKeuntungan = ({ dateRange }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredProfitData.length > 0 ? filteredProfitData.slice(0, 8).map((row, i) => (
+              {paginatedData.length > 0 ? paginatedData.map((row, i) => (
                 <React.Fragment key={i}>
                   <tr style={{ borderBottom: '1px solid #f1f5f9', backgroundColor: expandedRowId === row.id ? '#f8fafc' : 'transparent', transition: 'background-color 150ms ease' }}>
                     <td 
+                      data-label="No. Nota"
                       onClick={() => setExpandedRowId(expandedRowId === row.id ? null : row.id)}
                       style={{ padding: '0.75rem 1.5rem', color: '#3b82f6', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
                     >
                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
                       {row.noNota}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>
+                    <td data-label="Tanggal" style={{ padding: '0.75rem 1rem', color: '#475569' }}>
                       {row.tanggal ? (row.tanggal.toDate ? row.tanggal.toDate() : new Date(row.tanggal)).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', color: '#475569' }}>{row.customer?.nama_perusahaan || row.customer?.nama_pic || 'Umum'}</td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#0f172a' }}>{formatCurrency(row.omzet)}</td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#475569' }}>{formatCurrency(row.modal)}</td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: '600', color: row.keuntungan >= 0 ? '#10b981' : '#ef4444' }}>
+                    <td data-label="Pelanggan" style={{ padding: '0.75rem 1rem', color: '#475569' }}>{row.customer?.nama_perusahaan || row.customer?.nama_pic || 'Umum'}</td>
+                    <td data-label="Omzet" style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#0f172a' }}>{formatCurrency(row.omzet)}</td>
+                    <td data-label="Modal (HPP)" style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#475569' }}>{formatCurrency(row.modal)}</td>
+                    <td data-label="Laba Kotor" style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: '600', color: row.keuntungan >= 0 ? '#10b981' : '#ef4444' }}>
                       {row.keuntungan > 0 ? '+' : ''}{formatCurrency(row.keuntungan)}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: '600', color: row.margin >= 0 ? '#10b981' : '#ef4444' }}>
+                    <td data-label="Margin" style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: '600', color: row.margin >= 0 ? '#10b981' : '#ef4444' }}>
                       {row.margin}%
                     </td>
-                    <td style={{ padding: '0.75rem 1.5rem', textAlign: 'center' }}>
+                    <td data-label="Aksi" style={{ padding: '0.75rem 1.5rem', textAlign: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                         <button onClick={() => setSelectedTransaction(row)} style={{ border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontSize: '0.6875rem', cursor: 'pointer', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
                           Detail
@@ -476,7 +491,7 @@ const LaporanKeuntungan = ({ dateRange }) => {
                       <td colSpan="8" style={{ padding: '1rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                         <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                           <h5 style={{ margin: '0 0 1rem 0', fontSize: '1rem', color: '#1e293b' }}>Detail Produk</h5>
-                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+                          <table className={styles.responsiveTable} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
                             <thead>
                               <tr>
                                 <th style={{ textAlign: 'left', padding: '0.5rem', borderBottom: '2px solid #e2e8f0', color: '#64748b' }}>Barang</th>
@@ -493,11 +508,11 @@ const LaporanKeuntungan = ({ dateRange }) => {
                                 const untungItem = hargaJual - hargaModal;
                                 return (
                                   <tr key={idx}>
-                                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', color: '#0f172a', fontWeight: '500' }}>{item.nama_barang}</td>
-                                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'center', color: '#475569' }}>{item.qty || item.quantity || 1}</td>
-                                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#0f172a' }}>{formatCurrency(hargaJual)}</td>
-                                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#475569' }}>{formatCurrency(hargaModal)}</td>
-                                    <td style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', fontWeight: '600', color: untungItem >= 0 ? '#10b981' : '#ef4444' }}>
+                                    <td data-label="Barang" style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', color: '#0f172a', fontWeight: '500' }}>{item.nama_barang}</td>
+                                    <td data-label="Qty" style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'center', color: '#475569' }}>{item.qty || item.quantity || 1}</td>
+                                    <td data-label="Harga Jual" style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#0f172a' }}>{formatCurrency(hargaJual)}</td>
+                                    <td data-label="Modal" style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#475569' }}>{formatCurrency(hargaModal)}</td>
+                                    <td data-label="Profit" style={{ padding: '0.75rem 0.5rem', borderBottom: '1px solid #f1f5f9', textAlign: 'right', fontWeight: '600', color: untungItem >= 0 ? '#10b981' : '#ef4444' }}>
                                       {untungItem > 0 ? '+' : ''}{formatCurrency(untungItem)}
                                     </td>
                                   </tr>
@@ -519,21 +534,35 @@ const LaporanKeuntungan = ({ dateRange }) => {
           </table>
         </div>
         
-        {/* Pagination mock */}
+        {/* Pagination */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid #f1f5f9' }}>
           <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-            Menampilkan {Math.min(profitData.length, 8)} dari {profitData.length} transaksi
+            Menampilkan {paginatedData.length} dari {filteredProfitData.length} transaksi
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
-              <button style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: '0.25rem', backgroundColor: '#fff', color: '#64748b', cursor: 'pointer' }}>&lt;</button>
-              <button style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #1d4ed8', borderRadius: '0.25rem', backgroundColor: '#1d4ed8', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>1</button>
-              <button style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: '0.25rem', backgroundColor: '#fff', color: '#64748b', cursor: 'pointer' }}>&gt;</button>
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: '0.25rem', backgroundColor: '#fff', color: currentPage === 1 ? '#cbd5e1' : '#64748b', cursor: currentPage === 1 ? 'default' : 'pointer' }}
+              >&lt;</button>
+              <button style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #1d4ed8', borderRadius: '0.25rem', backgroundColor: '#1d4ed8', color: '#fff', fontWeight: 'bold', cursor: 'default' }}>
+                {currentPage}
+              </button>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: '0.25rem', backgroundColor: '#fff', color: (currentPage === totalPages || totalPages === 0) ? '#cbd5e1' : '#64748b', cursor: (currentPage === totalPages || totalPages === 0) ? 'default' : 'pointer' }}
+              >&gt;</button>
             </div>
-            <select style={{ padding: '0.25rem 0.5rem', border: '1px solid #e2e8f0', borderRadius: '0.25rem', fontSize: '0.75rem', color: '#475569', outline: 'none' }}>
-              <option>10 / halaman</option>
-              <option>20 / halaman</option>
-              <option>50 / halaman</option>
+            <select 
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              style={{ padding: '0.25rem 0.5rem', border: '1px solid #e2e8f0', borderRadius: '0.25rem', fontSize: '0.75rem', color: '#475569', outline: 'none' }}
+            >
+              <option value={10}>10 / halaman</option>
+              <option value={20}>20 / halaman</option>
+              <option value={50}>50 / halaman</option>
             </select>
           </div>
         </div>

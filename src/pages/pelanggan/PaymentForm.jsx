@@ -112,9 +112,9 @@ export default function PaymentForm({ selectedNotas, onClose, onSave }) {
                   const alloc = allocations[n.id] || 0;
                   return (
                     <tr key={n.id}>
-                      <td>{n.no_nota}</td>
-                      <td>{formatRp(n.sisa_hutang)}</td>
-                      <td>
+                      <td data-label="No Nota" style={{ fontWeight: 700, color: '#1e3a8a' }}>{n.no_nota}</td>
+                      <td data-label="Sisa Hutang" style={{ fontWeight: 600, color: '#ef4444' }}>{formatRp(n.sisa_hutang)}</td>
+                      <td data-label="Dialokasikan">
                         {isManual ? (
                           <input 
                             type="number" 
@@ -124,10 +124,10 @@ export default function PaymentForm({ selectedNotas, onClose, onSave }) {
                             className={styles.allocInput}
                           />
                         ) : (
-                          formatRp(alloc)
+                          <span style={{ fontWeight: 800, color: '#16a34a' }}>{formatRp(alloc)}</span>
                         )}
                       </td>
-                      <td>{formatRp(n.sisa_hutang - alloc)}</td>
+                      <td data-label="Sisa Setelah Bayar" style={{ fontWeight: 600 }}>{formatRp(n.sisa_hutang - alloc)}</td>
                     </tr>
                   )
                 })}

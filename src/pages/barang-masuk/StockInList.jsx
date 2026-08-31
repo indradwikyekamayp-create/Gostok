@@ -10,8 +10,14 @@ const StockInList = ({ items, onEditQty, onDelete }) => {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <h2 className={styles.title}>Barang Masuk Hari Ini</h2>
-          <p className={styles.subtitle}>{items.length} transaksi • {totalQty} item masuk</p>
+          <h2 className={styles.title}>
+            {items.length > 0 ? 'Keranjang Barang Masuk' : 'Daftar Barang Masuk'}
+          </h2>
+          <p className={styles.subtitle}>
+            {items.length > 0 
+              ? `Belum disimpan • ${items.length} macam barang` 
+              : `${items.length} transaksi • ${totalQty} item masuk`}
+          </p>
         </div>
         <div className={styles.headerRight}>
           <button className={styles.filterBtn}>

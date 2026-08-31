@@ -211,9 +211,19 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
             </div>
             <div className={styles.productInfo}>
               <h3 className={styles.productName}>{product.nama_barang}</h3>
-              <p className={styles.productStock}>Stok: {product.stok || Math.floor(Math.random() * 100) + 10}</p>
+              <p className={styles.productStock} style={{ marginBottom: '0.15rem' }}>Kode: {product.kode_barang || product.barcode || '-'}</p>
+              <p className={styles.productStock}>Stok: {product.stok || 0}</p>
               <div className={styles.productFooter}>
-                <span className={styles.productPrice}>{formatRupiah(product.harga_jual)}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className={styles.productPrice} style={{ color: (!product.harga_jual || product.harga_jual === 0) ? '#ef4444' : undefined }}>
+                    {formatRupiah(product.harga_jual)}
+                  </span>
+                  {(!product.harga_jual || product.harga_jual === 0) && (
+                    <span style={{ fontSize: '0.65rem', backgroundColor: '#fee2e2', color: '#ef4444', padding: '0.125rem 0.35rem', borderRadius: '0.25rem', fontWeight: 800, alignSelf: 'flex-start' }}>
+                      BELUM DISET
+                    </span>
+                  )}
+                </div>
                 <button 
                   className={styles.addBtn}
                   onClick={() => onAddToCart(product)}

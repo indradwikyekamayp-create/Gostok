@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './components/layout';
@@ -22,6 +22,9 @@ import LaporanPage from './pages/laporan/LaporanPage';
 import KaryawanPage from './pages/karyawan/KaryawanPage';
 import SettingsPage from './pages/pengaturan/SettingsPage';
 
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
+
 // Global styles
 import './styles/reset.css';
 import './styles/variables.css';
@@ -31,6 +34,27 @@ import './styles/print.css';
 
 function App() {
   const [showAnimation, setShowAnimation] = useState(true);
+
+  useEffect(() => {
+    // Listener untuk pengaturan aplikasi global (seperti ukuran font)
+    const docRef = doc(db, 'settings', 'store_config');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const fontSize = data.ukuranFontAplikasi || 'normal';
+        
+        let rootFontSize = '16px'; // normal default
+        if (fontSize === 'small') rootFontSize = '14px';
+        if (fontSize === 'large') rootFontSize = '18px';
+        
+        // Menerapkan font size ke elemen root HTML
+        // Ini akan membesarkan/mengecilkan seluruh UI yang memakai satuan 'rem' atau scaling
+        document.documentElement.style.fontSize = rootFontSize;
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleAnimationComplete = () => {
     setShowAnimation(false);

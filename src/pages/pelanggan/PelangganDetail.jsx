@@ -20,6 +20,7 @@ export default function PelangganDetail() {
   const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState('nota');
+  const [notaFilter, setNotaFilter] = useState('semua');
   const [selectedNotas, setSelectedNotas] = useState([]);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -159,7 +160,7 @@ export default function PelangganDetail() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} flutter-page`}>
       <button className={styles.backBtn} onClick={() => navigate('/pelanggan')}>
         <ArrowLeft size={16} /> Kembali ke Daftar
       </button>
@@ -211,101 +212,143 @@ export default function PelangganDetail() {
       </div>
 
       <div className={styles.tabContent}>
-        {activeTab === 'nota' && (
-          <div>
-            <NotaListWithCheckbox 
-              notas={notas}
-              selectedIds={selectedNotas}
-              onToggle={handleToggleNota}
-              onSelectAll={handleSelectAll}
-            />
-            
-            <div className={styles.actionFooter}>
-              <button 
-                className={styles.payBtn}
-                disabled={selectedNotas.length === 0}
-                onClick={() => setShowPaymentForm(true)}
-              >
-                Catat Pembayaran ({selectedNotas.length} Nota)
-              </button>
+        {activeTab === 'nota' && (() => {
+          const filteredNotas = notas.filter(n => {
+            if (notaFilter === 'lunas') return n.sisa_hutang <= 0;
+            if (notaFilter === 'belum_lunas') return n.sisa_hutang > 0;
+            return true;
+          });
+
+          return (
+            <div>
+              <div className={styles.filterContainer}>
+                <button 
+                  className={notaFilter === 'semua' ? styles.filterBtnActive : styles.filterBtn}
+                  onClick={() => setNotaFilter('semua')}
+                >
+                  Semua
+                </button>
+                <button 
+                  className={notaFilter === 'belum_lunas' ? styles.filterBtnActive : styles.filterBtn}
+                  onClick={() => setNotaFilter('belum_lunas')}
+                >
+                  Belum Lunas
+                </button>
+                <button 
+                  className={notaFilter === 'lunas' ? styles.filterBtnActive : styles.filterBtn}
+                  onClick={() => setNotaFilter('lunas')}
+                >
+                  Lunas
+                </button>
+              </div>
+              
+              <NotaListWithCheckbox 
+                notas={filteredNotas}
+                selectedIds={selectedNotas}
+                onToggle={handleToggleNota}
+                onSelectAll={handleSelectAll}
+              />
+              
+              <div className={`${styles.actionFooter} ${styles.desktopOnlyBtn}`}>
+                <button 
+                  className={styles.payBtn}
+                  disabled={selectedNotas.length === 0}
+                  onClick={() => setShowPaymentForm(true)}
+                >
+                  Catat Pembayaran ({selectedNotas.length} Nota)
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {activeTab === 'riwayat' && (
           <div className={payments.length === 0 ? styles.riwayatEmpty : ''}>
             {payments.length === 0 ? 'Belum ada riwayat pembayaran.' : (
-              <table className={styles.paymentsTable}>
-                <thead>
-                  <tr>
-                    <th style={{textAlign: 'left', padding: '0.75rem'}}>Waktu Pembayaran</th>
-                    <th style={{textAlign: 'left', padding: '0.75rem'}}>Metode</th>
-                    <th style={{textAlign: 'right', padding: '0.75rem'}}>Nominal Dibayar</th>
-                    <th style={{textAlign: 'left', padding: '0.75rem'}}>Rincian Alokasi (Cicilan)</th>
-                    <th style={{textAlign: 'center', padding: '0.75rem'}}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map(p => (
-                    <tr key={p.id} style={{borderBottom: '1px solid #eee'}}>
-                      <td style={{padding: '0.75rem'}}>
-                        {new Intl.DateTimeFormat('id-ID', {
-                          day: '2-digit', month: 'long', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit'
-                        }).format(new Date(p.tanggal))}
-                      </td>
-                      <td style={{padding: '0.75rem', textTransform: 'uppercase'}}>{p.metode}</td>
-                      <td style={{padding: '0.75rem', textAlign: 'right', fontWeight: 'bold', color: 'var(--color-success-hover)'}}>
-                        {formatRp(p.jumlahBayar)}
-                      </td>
-                      <td style={{padding: '0.75rem'}}>
-                        {p.allocations ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {Object.entries(p.allocations).map(([notaId, amount]) => {
-                              if (amount <= 0) return null;
-                              const notaData = notas.find(n => n.id === notaId);
-                              const notaLabel = notaData ? notaData.no_nota : notaId;
-                              const isLunas = notaData && notaData.sisa_hutang <= 0;
-                              return (
-                                <div key={notaId} style={{ fontSize: '0.85rem', color: '#333', backgroundColor: '#f8fafc', padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem', alignItems: 'center' }}>
-                                    <span style={{ fontWeight: '600', color: 'var(--color-primary)' }}>{notaLabel}</span>
-                                    {isLunas ? (
-                                      <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--color-success-hover, hsl(145, 55%, 35%))', color: 'white', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>LUNAS</span>
-                                    ) : (
-                                      <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--color-warning-hover, hsl(38, 92%, 40%))', color: 'white', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>SISA: {formatRp(notaData ? notaData.sisa_hutang : 0)}</span>
-                                    )}
-                                  </div>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.8rem' }}>
-                                    <span>Total Nota: {formatRp(notaData ? notaData.total_bayar : 0)}</span>
-                                    <span>Dibayar: <strong style={{ color: 'var(--color-success-hover)' }}>{formatRp(amount)}</strong></span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : '-'}
-                      </td>
-                      <td style={{padding: '0.75rem', textAlign: 'center'}}>
-                        <button 
-                          onClick={() => setReceiptPayment(p)}
-                          style={{
-                            padding: '0.5rem 1rem',
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.875rem'
-                          }}
-                        >
-                          🖨️ Cetak Struk
-                        </button>
-                      </td>
+              <div className={styles.riwayatContainer}>
+                <table className={styles.riwayatTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.desktopOnly}>Waktu Pembayaran</th>
+                      <th className={styles.desktopOnly}>Metode</th>
+                      <th className={styles.desktopOnly} style={{textAlign: 'right'}}>Nominal Dibayar</th>
+                      <th>Detail Alokasi</th>
+                      <th style={{textAlign: 'center'}}>Aksi</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {payments.map(p => (
+                      <tr key={p.id} className={styles.riwayatRow}>
+                        <td className={styles.desktopOnly}>
+                          <span className={styles.riwayatWaktu}>
+                            {new Intl.DateTimeFormat('id-ID', {
+                              day: '2-digit', month: 'long', year: 'numeric',
+                              hour: '2-digit', minute: '2-digit'
+                            }).format(new Date(p.tanggal))}
+                          </span>
+                        </td>
+                        <td className={styles.desktopOnly}>
+                          <span className={styles.riwayatMetode}>{p.metode}</span>
+                        </td>
+                        <td className={styles.desktopOnly}>
+                          <div className={styles.riwayatNominal}>{formatRp(p.jumlahBayar)}</div>
+                        </td>
+                        
+                        {/* Mobile merged header column */}
+                        <td className={styles.mobileOnlyHeader}>
+                           <div>
+                             <div className={styles.riwayatWaktu}>
+                               {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(p.tanggal))}
+                             </div>
+                             <div className={styles.riwayatMetode}>{p.metode}</div>
+                           </div>
+                           <div className={styles.riwayatNominalContainer}>
+                             <div className={styles.riwayatNominalLabel}>TOTAL DIBAYAR</div>
+                             <div className={styles.riwayatNominal}>{formatRp(p.jumlahBayar)}</div>
+                           </div>
+                        </td>
+
+                        <td className={styles.riwayatAlokasi}>
+                          {p.allocations ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {Object.entries(p.allocations).map(([notaId, amount]) => {
+                                if (amount <= 0) return null;
+                                const notaData = notas.find(n => n.id === notaId);
+                                const notaLabel = notaData ? notaData.no_nota : notaId;
+                                const isLunas = notaData && notaData.sisa_hutang <= 0;
+                                return (
+                                  <div key={notaId} style={{ fontSize: '0.8125rem', color: '#334155', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                      <span style={{ fontWeight: '700', color: '#1e3a8a' }}>{notaLabel}</span>
+                                      {isLunas ? (
+                                        <span style={{ fontSize: '0.65rem', backgroundColor: '#16a34a', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>LUNAS</span>
+                                      ) : (
+                                        <span style={{ fontSize: '0.65rem', backgroundColor: '#f59e0b', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>SISA: {formatRp(notaData ? notaData.sisa_hutang : 0)}</span>
+                                      )}
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.75rem', flexWrap: 'wrap' }}>
+                                      <span>Total Nota: {formatRp(notaData ? notaData.total_bayar : 0)}</span>
+                                      <span>Dibayar: <strong style={{ color: '#16a34a', fontSize: '0.8125rem' }}>{formatRp(amount)}</strong></span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : '-'}
+                        </td>
+                        <td>
+                          <button 
+                            onClick={() => setReceiptPayment(p)}
+                            className={styles.riwayatAksiBtn}
+                          >
+                            🖨️ Cetak Struk
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         )}
@@ -338,6 +381,25 @@ export default function PelangganDetail() {
           notas={notas}
           onClose={() => setReceiptPayment(null)}
         />
+      )}
+
+      {/* Floating Bottom Bar (Mobile/Flutter Style) */}
+      {activeTab === 'nota' && (
+        <div className={styles.floatingBottomBar}>
+          <div className={styles.floatingSummary}>
+            <span className={styles.floatingCount}>{selectedNotas.length} Nota Dipilih</span>
+            <span className={styles.floatingTotal}>
+              {formatRp(notas.filter(n => selectedNotas.includes(n.id)).reduce((sum, n) => sum + (n.sisa_hutang || 0), 0))}
+            </span>
+          </div>
+          <button 
+            className={styles.floatingBtnPrimary} 
+            disabled={selectedNotas.length === 0}
+            onClick={() => setShowPaymentForm(true)}
+          >
+            Bayar
+          </button>
+        </div>
       )}
     </div>
   );

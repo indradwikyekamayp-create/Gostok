@@ -1,5 +1,7 @@
 import React from 'react';
 
+import styles from './PelangganDetail.module.css';
+
 export default function NotaListWithCheckbox({ notas, selectedIds, onToggle, onSelectAll }) {
   const unpaidNotas = notas.filter(n => n.sisa_hutang > 0);
   const allSelected = unpaidNotas.length > 0 && unpaidNotas.every(n => selectedIds.includes(n.id));
@@ -30,61 +32,82 @@ export default function NotaListWithCheckbox({ notas, selectedIds, onToggle, onS
 
   const getStatusBadge = (status) => {
     switch((status || '').toLowerCase()) {
-      case 'lunas': return <span style={{color: 'hsl(145, 55%, 42%)', fontWeight: '600'}}>Lunas</span>;
+      case 'lunas': return <span style={{color: '#16a34a', fontWeight: '800', backgroundColor: '#dcfce7', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.65rem', textTransform: 'uppercase'}}>Lunas</span>;
       case 'cicilan':
-      case 'cicil': return <span style={{color: 'hsl(38, 92%, 50%)', fontWeight: '600'}}>Cicilan</span>;
-      default: return <span style={{color: 'hsl(0, 70%, 50%)', fontWeight: '600'}}>Belum Lunas</span>;
+      case 'cicil': return <span style={{color: '#f59e0b', fontWeight: '800', backgroundColor: '#fef3c7', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.65rem', textTransform: 'uppercase'}}>Cicilan</span>;
+      default: return <span style={{color: '#ef4444', fontWeight: '800', backgroundColor: '#fee2e2', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.65rem', textTransform: 'uppercase'}}>Belum Lunas</span>;
     }
   };
 
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+    <div className={styles.notaContainer}>
+      <table className={styles.modernTable}>
         <thead>
-          <tr style={{ borderBottom: '2px solid #eaeaea' }}>
-            <th style={{ padding: '10px 12px', color: '#475569', fontWeight: '600' }}>
+          <tr>
+            <th className={styles.thCheck}>
               <input 
                 type="checkbox" 
                 checked={allSelected} 
                 onChange={handleSelectAllChange}
                 disabled={unpaidNotas.length === 0}
+                style={{ transform: 'scale(1.2)', cursor: 'pointer' }}
               />
             </th>
-            <th style={{ padding: '10px 12px', color: '#475569', fontWeight: '600' }}>No Nota</th>
-            <th style={{ padding: '10px 12px', color: '#475569', fontWeight: '600' }}>Tanggal</th>
-            <th style={{ padding: '10px 12px', color: '#475569', fontWeight: '600' }}>Total</th>
-            <th style={{ padding: '10px 12px', color: '#475569', fontWeight: '600' }}>Sisa Hutang</th>
-            <th style={{ padding: '10px 12px', color: '#475569', fontWeight: '600' }}>Status</th>
+            <th>No Nota</th>
+            <th className={styles.desktopOnly}>Tanggal</th>
+            <th className={styles.desktopOnly}>Total</th>
+            <th className={styles.thRight}>Sisa Hutang</th>
+            <th className={styles.desktopOnly}>Status</th>
           </tr>
         </thead>
         <tbody>
-          {notas.map(n => {
+          {notas.length === 0 ? (
+            <tr>
+              <td colSpan="6" className={styles.emptyState}>Belum ada transaksi</td>
+            </tr>
+          ) : notas.map(n => {
             const isUnpaid = n.sisa_hutang > 0;
             const isSelected = selectedIds.includes(n.id);
             
             return (
               <tr 
                 key={n.id} 
-                style={{ 
-                  borderBottom: '1px solid #f1f5f9',
-                  backgroundColor: isSelected ? 'hsl(215, 50%, 97%)' : 'transparent',
-                  color: '#334155'
+                className={`${styles.modernRow} ${isSelected ? styles.modernRowSelected : ''}`}
+                onClick={(e) => {
+                  if(isUnpaid && e.target.tagName !== 'INPUT') onToggle(n.id);
                 }}
               >
-                <td style={{ padding: '8px 12px' }}>
-                  {isUnpaid && (
+                <td className={styles.colCheck}>
+                  {isUnpaid ? (
                     <input 
                       type="checkbox" 
                       checked={isSelected}
                       onChange={() => onToggle(n.id)}
+                      style={{ transform: 'scale(1.2)', pointerEvents: 'none' }}
                     />
-                  )}
+                  ) : <span style={{color: '#cbd5e1'}}>-</span>}
                 </td>
-                <td style={{ padding: '8px 12px' }}>{n.no_nota}</td>
-                <td style={{ padding: '8px 12px' }}>{formatDate(n.tanggal)}</td>
-                <td style={{ padding: '8px 12px' }}>{formatRp(n.total_bayar)}</td>
-                <td style={{ padding: '8px 12px', fontWeight: '600' }}>{formatRp(n.sisa_hutang)}</td>
-                <td style={{ padding: '8px 12px' }}>{getStatusBadge(n.status_bayar)}</td>
+                
+                <td className={styles.colMain}>
+                  <div className={styles.notaTitle}>{n.no_nota}</div>
+                  <div className={styles.mobileSubtitle}>{formatDate(n.tanggal)}</div>
+                  <div className={styles.mobileSubtitle}>Total: {formatRp(n.total_bayar)}</div>
+                  <div className={styles.mobileBadge}>{getStatusBadge(n.status_bayar)}</div>
+                </td>
+                
+                <td className={styles.desktopOnly}>{formatDate(n.tanggal)}</td>
+                <td className={styles.desktopOnly}>{formatRp(n.total_bayar)}</td>
+                
+                <td className={styles.colAmount}>
+                  <div className={styles.mobileSisaLabel}>Sisa Hutang</div>
+                  <div className={styles.sisaAmount} style={{ color: isUnpaid ? '#ef4444' : '#16a34a' }}>
+                    {formatRp(n.sisa_hutang)}
+                  </div>
+                </td>
+                
+                <td className={styles.desktopOnly}>
+                  {getStatusBadge(n.status_bayar)}
+                </td>
               </tr>
             );
           })}
