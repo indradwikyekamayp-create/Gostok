@@ -332,20 +332,20 @@ export default function NotaPreview({ transaction, onClose, autoPrint = false })
                           <br /><br />
                           1. Pembayaran via transfer/cek/giro diwajibkan ke rekening:
                           <br />
-                          <div style={{ textAlign: 'left', marginTop: '4px', display: 'inline-block' }}>
-                            <table>
+                          <div style={{ textAlign: 'left', marginTop: '4px', width: '100%' }}>
+                            <table style={{ width: '100%' }}>
                               <tbody>
                                 <tr>
-                                  <td style={{ padding: '0 4px', fontWeight: 'bold' }}>Nama Bank</td>
-                                  <td style={{ padding: '0 4px', fontWeight: 'bold' }}>: {settings.bankNama || '-'}</td>
+                                  <td style={{ padding: '0 4px', fontWeight: 'bold', width: '75px', verticalAlign: 'top' }}>Nama Bank</td>
+                                  <td style={{ padding: '0 4px', fontWeight: 'bold', verticalAlign: 'top' }}>: {settings.bankNama || '-'}</td>
                                 </tr>
                                 <tr>
-                                  <td style={{ padding: '0 4px', fontWeight: 'bold' }}>No Rek</td>
-                                  <td style={{ padding: '0 4px', fontWeight: 'bold' }}>: {settings.bankRekening || '-'}</td>
+                                  <td style={{ padding: '0 4px', fontWeight: 'bold', verticalAlign: 'top' }}>No Rek</td>
+                                  <td style={{ padding: '0 4px', fontWeight: 'bold', verticalAlign: 'top' }}>: {settings.bankRekening || '-'}</td>
                                 </tr>
                                 <tr>
-                                  <td style={{ padding: '0 4px', fontWeight: 'bold' }}>A/n</td>
-                                  <td style={{ padding: '0 4px', fontWeight: 'bold' }}>: {settings.bankAtasNama || settings.namaToko}</td>
+                                  <td style={{ padding: '0 4px', fontWeight: 'bold', verticalAlign: 'top' }}>A/n</td>
+                                  <td style={{ padding: '0 4px', fontWeight: 'bold', verticalAlign: 'top', wordBreak: 'break-word' }}>: {settings.bankAtasNama || settings.namaToko}</td>
                                 </tr>
                               </tbody>
                             </table>

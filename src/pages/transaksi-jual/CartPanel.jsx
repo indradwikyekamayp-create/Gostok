@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { X, Minus, Plus, Banknote, CreditCard, Receipt } from 'lucide-react';
 import Card from '../../components/common/Card';
-import { useToast } from '../../context/ToastContext';
+import { ToastContext } from '../../context/ToastContext';
 import styles from './CartPanel.module.css';
 
 const formatRupiah = (number) => {
@@ -17,7 +17,7 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
   const [paymentMethod, setPaymentMethod] = useState('');
   const [catatan, setCatatan] = useState('');
   const [jatuhTempo, setJatuhTempo] = useState('');
-  const { showToast } = useToast();
+  const { showToast } = useContext(ToastContext);
 
   const handleQtyChange = (id, delta) => {
     setCart((prev) =>

@@ -63,9 +63,9 @@
 
 .notaWrapper {
   background-color: white;
-  width: 297mm;
-  min-width: 297mm;
-  min-height: 210mm;
+  width: 1122px; /* 297mm */
+  min-width: 1122px;
+  min-height: 794px; /* 210mm */
   box-sizing: border-box;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
   color: #000;
@@ -77,13 +77,15 @@
 
 .invoiceOutline {
   border: 2px solid #000;
-  margin: 10mm;
-  height: calc(100% - 20mm);
+  margin: 38px; /* 10mm */
+  min-height: 718px; /* 794 - 76 (20mm) */
+  width: 1046px; /* 1122 - 76 (20mm) */
   padding: 0;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   position: relative;
+  background-color: white;
 }
 
 .invoiceHeaderTitle {
@@ -168,6 +170,7 @@
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 11px;
+  flex: 1; /* allow table to fill empty space to push bottom section down */
 }
 
 .itemsTable th, .itemsTable td {
@@ -220,16 +223,18 @@
   text-align: right;
 }
 
-/* Bottom Section */
 .bottomSection {
   display: flex;
   justify-content: space-between;
   padding: 10px;
   margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bottomLeft {
   flex: 1;
+  min-width: 0;
 }
 .bottomLeft table {
   border-collapse: collapse;
@@ -244,6 +249,7 @@
   justify-content: center;
   align-items: center;
   padding: 0 10px;
+  min-width: 0;
 }
 
 .perhatikanBox {
@@ -252,7 +258,9 @@
   padding: 10px;
   text-align: center;
   width: 100%;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 10px;
 }
 
 .bottomRight {
@@ -260,6 +268,7 @@
   display: flex;
   justify-content: flex-end;
   padding-right: 20px;
+  min-width: 0;
 }
 
 .signatureBox {
@@ -381,9 +390,9 @@
   }
   
   .invoiceOutline {
-    width: calc(100% - 20mm) !important;
-    margin: 10mm auto !important;
-    min-height: calc(100% - 20mm) !important;
+    width: 1046px !important;
+    margin: 38px auto !important;
+    min-height: 718px !important;
   }
 }
 
@@ -413,7 +422,12 @@
 @media (max-width: 768px) {
   .notaWrapper {
     zoom: 0.3;
-    min-height: fit-content;
+    min-height: 794px; /* Keep exact A4 proportions to push bottom section down properly */
+    width: 1122px;
+  }
+  .invoiceOutline {
+    width: 1046px;
+    min-height: 718px;
   }
   .modal {
     width: fit-content;
