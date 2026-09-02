@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { collection, onSnapshot, doc, setDoc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import CustomerSelector from './CustomerSelector';
@@ -73,7 +73,7 @@ function TransaksiJualDesktop() {
     });
   }, [products]);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = useCallback((product) => {
     if (product.stok <= 0) {
       showToast('Stok produk habis', 'error');
       return;
@@ -86,24 +86,23 @@ function TransaksiJualDesktop() {
           showToast('Maksimal stok tercapai', 'warning');
           return prev;
         }
-        return prev.map(item => 
-          item.id === product.id 
-            ? { ...item, qty: item.qty + 1, subtotal: (item.qty + 1) * item.harga_jual }
-            : item
-        );
+        // Move updated item to the top
+        const filtered = prev.filter(item => item.id !== product.id);
+        const updatedItem = { ...existing, qty: existing.qty + 1, subtotal: (existing.qty + 1) * existing.harga_jual };
+        return [updatedItem, ...filtered];
       }
-      return [...prev, { ...product, qty: 1, subtotal: product.harga_jual }];
+      return [{ ...product, qty: 1, subtotal: product.harga_jual }, ...prev];
     });
-  };
+  }, [showToast]);
 
-  const handleScanBarcode = (barcode) => {
+  const handleScanBarcode = useCallback((barcode) => {
     const product = products.find(p => p.barcode === barcode || p.kode_barang === barcode);
     if (product) {
       handleAddToCart(product);
     } else {
       showToast('Produk dengan barcode ' + barcode + ' tidak ditemukan', 'warning');
     }
-  };
+  }, [products, handleAddToCart, showToast]);
 
   const handleSaveTransaction = async (paymentMethod, catatan, jatuhTempoDate) => {
     if (!customer || cart.length === 0 || !paymentMethod) return;

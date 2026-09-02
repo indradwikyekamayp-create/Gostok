@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { X, Minus, Plus, Banknote, CreditCard, Receipt } from 'lucide-react';
+import { X, Minus, Plus, Banknote, CreditCard, Receipt, ShoppingCart, FileText } from 'lucide-react';
 import Card from '../../components/common/Card';
 import { ToastContext } from '../../context/ToastContext';
 import styles from './CartPanel.module.css';
@@ -168,96 +168,93 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
         </div>
       </div>
 
-      <div className={styles.summarySection}>
-        <div className={styles.summaryRow}>
-          <span className={styles.summaryLabel}>Total Item</span>
-          <span className={styles.summaryValue}>{totalItem} barang</span>
-        </div>
-        <div className={styles.summaryRow}>
-          <span className={styles.summaryLabel}>Total Harga</span>
-          <span className={styles.summaryValue}>{formatRupiah(totalHarga)}</span>
-        </div>
-        <div className={styles.summaryRow}>
-          <span className={styles.summaryLabel}>Diskon <span className={styles.infoIcon}>ⓘ</span></span>
-          <span className={styles.summaryValueDiscount}>{formatRupiah(diskon)}</span>
-        </div>
-        
-        <div className={styles.grandTotalRow}>
-          <span className={styles.grandTotalLabel}>TOTAL BAYAR</span>
-          <span className={styles.grandTotalValue}>{formatRupiah(grandTotal)}</span>
-        </div>
-      </div>
-
-      <div className={styles.notesSection}>
-        <label className={styles.sectionLabel}>Catatan (Opsional)</label>
-        <input 
-          type="text" 
-          className={styles.notesInput} 
-          placeholder="Tambah catatan transaksi..." 
-          value={catatan}
-          onChange={(e) => setCatatan(e.target.value)}
-        />
-      </div>
-
-      <div className={styles.paymentSection}>
-        <label className={styles.sectionLabel}>Metode Pembayaran</label>
-        <div className={styles.paymentMethods}>
-          <button 
-            className={`${styles.paymentBtn} ${paymentMethod === 'cash' ? styles.activePayment : ''}`}
-            onClick={() => setPaymentMethod('cash')}
-          >
-            <Banknote size={24} className={styles.paymentIcon} />
-            <span>CASH</span>
-          </button>
-          <button 
-            className={`${styles.paymentBtn} ${paymentMethod === 'transfer' ? styles.activePayment : ''}`}
-            onClick={() => setPaymentMethod('transfer')}
-          >
-            <CreditCard size={24} className={styles.paymentIcon} />
-            <span>TRANSFER</span>
-          </button>
-          <button 
-            className={`${styles.paymentBtn} ${paymentMethod === 'hutang' ? styles.activePayment : ''}`}
-            onClick={() => {
-              setPaymentMethod('hutang');
-              if (!jatuhTempo) {
-                const jt = new Date();
-                jt.setDate(jt.getDate() + 14);
-                setJatuhTempo(jt.toISOString().split('T')[0]);
-              }
-            }}
-          >
-            <Receipt size={24} className={styles.paymentIcon} />
-            <span>HUTANG</span>
-          </button>
-        </div>
-        
-        {paymentMethod === 'hutang' && (
-          <div style={{ marginTop: '1rem' }}>
-            <label className={styles.sectionLabel}>Tanggal Jatuh Tempo</label>
+      <div className={styles.bottomPanel}>
+        <div className={styles.compactGrid}>
+          {/* Row 1: Catatan & Payment */}
+          <div className={styles.compactRow}>
             <input 
-              type="date" 
-              className={styles.notesInput} 
-              value={jatuhTempo}
-              onChange={(e) => setJatuhTempo(e.target.value)}
+              type="text" 
+              className={styles.notesInputCompact} 
+              placeholder="Catatan (opsional)..." 
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
             />
+            <div className={styles.paymentMethodsCompact}>
+              <button 
+                className={`${styles.paymentBtnCompact} ${paymentMethod === 'cash' ? styles.activePayment : ''}`}
+                onClick={() => setPaymentMethod('cash')}
+              >
+                <Banknote size={16} />
+                CASH
+              </button>
+              <button 
+                className={`${styles.paymentBtnCompact} ${paymentMethod === 'transfer' ? styles.activePayment : ''}`}
+                onClick={() => setPaymentMethod('transfer')}
+              >
+                <CreditCard size={16} />
+                TRF
+              </button>
+              <button 
+                className={`${styles.paymentBtnCompact} ${paymentMethod === 'hutang' ? styles.activePayment : ''}`}
+                onClick={() => {
+                  setPaymentMethod('hutang');
+                  if (!jatuhTempo) {
+                    const jt = new Date();
+                    jt.setDate(jt.getDate() + 14);
+                    setJatuhTempo(jt.toISOString().split('T')[0]);
+                  }
+                }}
+              >
+                <FileText size={16} />
+                BON
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-
-      <div className={styles.actionSection}>
-        <button 
-          className={styles.saveBtn} 
-          disabled={cart.length === 0 || !hasCustomer || !paymentMethod || isSaving}
-          onClick={() => onSave(paymentMethod, catatan, jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
-        >
-          <Receipt size={20} />
-          {isSaving ? 'Menyimpan...' 
-            : cart.length === 0 ? 'Keranjang Kosong' 
-            : !hasCustomer ? 'Pilih Pelanggan Dulu'
-            : !paymentMethod ? 'Pilih Pembayaran' 
-            : 'Simpan & Cetak Nota'}
-        </button>
+          
+          {/* Row Jatuh Tempo */}
+          {paymentMethod === 'hutang' && (
+            <div className={styles.jatuhTempoRow}>
+              <label>Jatuh Tempo:</label>
+              <input 
+                type="date" 
+                className={styles.notesInputCompact} 
+                style={{ width: '150px', flex: 'none' }}
+                value={jatuhTempo}
+                onChange={(e) => setJatuhTempo(e.target.value)}
+              />
+            </div>
+          )}
+          
+          {/* Row 2: Summary & Save */}
+          <div className={styles.summaryActionRow}>
+            <div className={styles.summaryInfo}>
+              <div className={styles.summaryItems}>
+                <span>{totalItem} barang</span>
+                <span className={styles.dot}>•</span>
+                <span>Sub: {formatRupiah(totalHarga)}</span>
+                <span className={styles.dot}>•</span>
+                <span className={styles.textDiscount}>Disc: {formatRupiah(diskon)}</span>
+              </div>
+              <div className={styles.grandTotalInfo}>
+                <span className={styles.grandTotalLabel}>TOTAL</span>
+                <span className={styles.grandTotalValue}>{formatRupiah(grandTotal)}</span>
+              </div>
+            </div>
+            
+            <button 
+              className={styles.saveBtnCompact} 
+              disabled={cart.length === 0 || !hasCustomer || !paymentMethod || isSaving}
+              onClick={() => onSave(paymentMethod, catatan, jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
+            >
+              {cart.length === 0 ? <ShoppingCart size={18} /> : <Receipt size={18} />}
+              {isSaving ? 'Menyimpan...' 
+                : cart.length === 0 ? 'Kosong' 
+                : !hasCustomer ? 'Pilih Pelanggan'
+                : !paymentMethod ? 'Pilih Pembayaran' 
+                : 'BAYAR'}
+            </button>
+          </div>
+        </div>
       </div>
     </Card>
   );

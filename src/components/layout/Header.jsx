@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Search, Bell, ChevronDown, User, ReceiptText } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Menu, Search, Bell, ChevronDown, User, ReceiptText, LogOut, Home, Maximize, Minimize } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,11 +11,14 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
   const [lowStockItems, setLowStockItems] = useState([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const notifRef = useRef(null);
-  const { userData } = useAuth();
+  const { userData, isKasir, logout } = useAuth();
   
   const userName = userData?.nama || 'Pengguna';
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDashboard = location.pathname === '/dashboard' || location.pathname === '/';
 
   useEffect(() => {
     import('firebase/firestore').then(({ doc, onSnapshot: onSnap }) => {
@@ -50,13 +53,59 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle Fullscreen tracking
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+      setIsFullscreen(isFull);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const elem = document.documentElement;
+    const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    
+    try {
+      if (!isFull) {
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error("Fullscreen error:", error);
+      alert("Browser Anda memblokir tombol Full Screen ini. Sebagai alternatif, silakan tekan tombol F11 di keyboard Anda untuk masuk ke mode Layar Penuh.");
+    }
+  };
+
   const notifCount = lowStockItems.length;
 
   return (
     <header className={styles.header} style={isMobile ? { borderBottom: '1px solid #f1f5f9', backgroundColor: '#fff', padding: '0.5rem 1rem', position: 'sticky', top: 0, zIndex: 50 } : {}}>
       <div className={styles.left}>
         {/* On mobile, we hide the hamburger menu as requested */}
-        {!isMobile && (
+        {!isMobile && !isKasir && (
           <button 
             className={styles.menuButton} 
             onClick={onToggleSidebar}
@@ -65,8 +114,21 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
             <Menu size={24} />
           </button>
         )}
+
+        {!isMobile && isKasir && !isDashboard && (
+          <button 
+            onClick={() => navigate('/dashboard')}
+            aria-label="Kembali ke Dashboard"
+            style={{ marginRight: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f1f5f9', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: '600', color: '#334155', border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+          >
+            <Home size={18} />
+            <span>Kembali</span>
+          </button>
+        )}
         
-        {isMobile ? (
+        {isMobile || isKasir ? (
           <img src="/logo/AyoStock!.png" alt="AyoStock" style={{ height: '60px', objectFit: 'contain', marginLeft: '-4px' }} />
         ) : (
           <h1 className={styles.title}>{title}</h1>
@@ -82,6 +144,16 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
               onClick={() => setShowSearchModal(true)}
             >
               <ReceiptText size={20} />
+            </button>
+          )}
+
+          {!isMobile && (
+            <button 
+              className={styles.iconButton} 
+              title={isFullscreen ? "Keluar Full Screen" : "Mode Full Screen"}
+              onClick={toggleFullscreen}
+            >
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
             </button>
           )}
 
@@ -129,13 +201,26 @@ const Header = ({ onToggleSidebar, title, isMobile }) => {
           </div>
           
           {!isMobile && (
-            <button className={styles.profileDropdown}>
-              <div style={{ backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <User size={14} color="#475569" />
-              </div>
-              <span className={styles.watermark} style={{ fontWeight: '500', color: '#334155', fontSize: '0.875rem' }}>{userName}</span>
-              <ChevronDown size={14} className={styles.chevron} />
-            </button>
+            isKasir ? (
+              <button 
+                onClick={logout}
+                title="Keluar"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600', fontSize: '0.875rem', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fecaca'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+              >
+                <LogOut size={16} />
+                <span>Keluar</span>
+              </button>
+            ) : (
+              <button className={styles.profileDropdown}>
+                <div style={{ backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={14} color="#475569" />
+                </div>
+                <span className={styles.watermark} style={{ fontWeight: '500', color: '#334155', fontSize: '0.875rem' }}>{userName}</span>
+                <ChevronDown size={14} className={styles.chevron} />
+              </button>
+            )
           )}
         </div>
       </div>

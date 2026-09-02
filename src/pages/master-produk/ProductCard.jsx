@@ -2,7 +2,7 @@ import React from 'react';
 import { MoreVertical, Eye, Edit2, Image as ImageIcon } from 'lucide-react';
 import styles from './ProductCard.module.css';
 
-const ProductCard = ({ product, onClick, onEdit, isSelected, viewMode = 'grid', threshold = 10 }) => {
+const ProductCard = ({ product, onClick, onEdit, isSelected, viewMode = 'grid', threshold = 10, isKasir }) => {
   // Determine stock color
   let stockColor = 'var(--color-success, hsl(145, 55%, 42%))'; // green
   if (product.stok === 0) stockColor = 'var(--color-danger, hsl(0, 70%, 50%))'; // red
@@ -60,15 +60,17 @@ const ProductCard = ({ product, onClick, onEdit, isSelected, viewMode = 'grid', 
         <button className={styles.actionBtn} onClick={() => onClick(product)}>
           <Eye size={14} /> Detail
         </button>
-        <button 
-          className={styles.actionBtn} 
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(product);
-          }}
-        >
-          <Edit2 size={14} /> Edit
-        </button>
+        {!isKasir && (
+          <button 
+            className={styles.actionBtn} 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(product);
+            }}
+          >
+            <Edit2 size={14} /> Edit
+          </button>
+        )}
       </div>
 
       {viewMode === 'list' && (

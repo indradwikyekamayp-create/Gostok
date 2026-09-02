@@ -1,10 +1,14 @@
 .tableWrapper {
   overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate; /* Required for sticky borders */
+  border-spacing: 0;
   font-size: 0.875rem;
 }
 
@@ -15,9 +19,14 @@
 }
 
 .table th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background-color: var(--color-bg, #f9fafb);
   font-weight: 600;
   color: var(--color-text, #333);
+  /* Optional: border-bottom needs to be implemented via box-shadow or top/bottom border on td since border-collapse is separate */
+  box-shadow: 0 1px 0 var(--color-border-light, #eee);
 }
 
 .row {
@@ -140,4 +149,70 @@
   padding: 2.5rem;
   text-align: center;
   color: var(--color-text-secondary, #666);
+}
+
+/* === Pagination === */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border-light, #eee);
+  flex-shrink: 0;
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  background-color: white;
+  border: 1px solid var(--color-border, #ccc);
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.pageBtn:hover:not(.disabled) {
+  background-color: var(--color-bg, #f4f6f8);
+}
+
+.pageBtn.active {
+  background-color: var(--color-primary, #1d4ed8);
+  color: white;
+  border-color: var(--color-primary, #1d4ed8);
+}
+
+.pageBtn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageDots {
+  color: var(--color-text-muted, #999);
+}
+
+.perPageSelect {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--radius-sm, 0.25rem);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  background-color: white;
+  margin-left: 1rem;
 }

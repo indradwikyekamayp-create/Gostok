@@ -21,6 +21,47 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
   const [viewMode, setViewMode] = useState('grid');
   const [category, setCategory] = useState('Semua Kategori');
   const [inputVal, setInputVal] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Global Barcode Scanner Listener
+  useEffect(() => {
+    let barcodeBuffer = '';
+    let barcodeTimeout = null;
+
+    const handleGlobalKeyDown = (e) => {
+      // Ignore if typing in a visible input/textarea that is not our hidden input
+      if (
+        (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') &&
+        e.target.name !== 'barcodeScan'
+      ) {
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        if (barcodeBuffer.trim().length > 3) {
+          e.preventDefault();
+          onScanBarcode(barcodeBuffer.trim());
+          barcodeBuffer = '';
+        }
+        return;
+      }
+
+      if (e.key.length === 1) {
+        barcodeBuffer += e.key;
+        if (barcodeTimeout) clearTimeout(barcodeTimeout);
+        barcodeTimeout = setTimeout(() => {
+          barcodeBuffer = '';
+        }, 50); // 50ms interval for scanner
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+      if (barcodeTimeout) clearTimeout(barcodeTimeout);
+    };
+  }, [onScanBarcode]);
 
   // Auto focus barcode input on mount or mode change
   useEffect(() => {
@@ -31,11 +72,12 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
 
   const handleBarcodeSubmit = (e) => {
     e.preventDefault();
-    const barcode = activeFilter === 'scan' ? inputVal : e.target.barcode.value;
-    if (barcode.trim()) {
+    // Read directly from ref for fast hardware scanners
+    const barcode = activeFilter === 'scan' ? barcodeInputRef.current.value : e.target.barcode.value;
+    if (barcode && barcode.trim()) {
       onScanBarcode(barcode.trim());
       if (activeFilter === 'scan') {
-        setInputVal('');
+        barcodeInputRef.current.value = ''; // force clear DOM value immediately
       } else {
         e.target.reset();
       }
@@ -47,6 +89,10 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
     showToast('Memuat lebih banyak produk... (Fitur segera hadir)', 'info');
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, category]);
+
   const filteredProducts = products.filter((product) => {
     if (category !== 'Semua Kategori' && product.kategori !== category) {
       return false;
@@ -56,6 +102,35 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const renderPaginationButtons = () => {
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    if (endPage - startPage < 4) {
+      startPage = Math.max(1, endPage - 4);
+    }
+
+    const buttons = [];
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          className={`${styles.pageBtn} ${currentPage === i ? styles.active : ''}`}
+          onClick={() => setCurrentPage(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+    return buttons;
+  };
 
   return (
     <div className={styles.container}>
@@ -133,12 +208,11 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
               <p className={scanStyles.scanText} style={{ fontSize: '0.95rem', color: '#1e40af' }}>Siap Melakukan Scan...</p>
               <p className={scanStyles.scanSubtext} style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>Arahkan barcode produk ke scanner Anda</p>
               
-              <form onSubmit={handleBarcodeSubmit}>
+              <form onSubmit={(e) => e.preventDefault()}>
                 <input
                   ref={barcodeInputRef}
                   type="text"
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
+                  name="barcodeScan"
                   className={scanStyles.hiddenInput}
                   autoComplete="off"
                   autoFocus
@@ -188,7 +262,7 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
       </div>
 
       <div className={`${styles.productGrid} ${viewMode === 'list' ? styles.listView : ''}`}>
-        {filteredProducts.map((product) => (
+        {currentProducts.map((product) => (
           <div key={product.id} className={styles.productCard}>
             <div className={styles.productImageWrapper}>
               {product.foto ? (
@@ -242,11 +316,28 @@ export default function ProductGrid({ products, onAddToCart, onScanBarcode }) {
         )}
       </div>
       
-      {filteredProducts.length > 0 && (
-        <div className={styles.loadMoreContainer}>
-          <button className={styles.loadMoreBtn} onClick={handleLoadMore}>
-            Muat lebih banyak
-          </button>
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <div className={styles.pageInfo}>
+            Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk
+          </div>
+          <div className={styles.pageControls}>
+            <button 
+              className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              &laquo;
+            </button>
+            {renderPaginationButtons()}
+            <button 
+              className={`${styles.pageBtn} ${currentPage === totalPages ? styles.disabled : ''}`}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              &raquo;
+            </button>
+          </div>
         </div>
       )}
       </>

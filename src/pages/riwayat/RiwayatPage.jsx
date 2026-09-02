@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import styles from './RiwayatPage.module.css';
@@ -55,6 +56,9 @@ function RiwayatDesktop({ transactions, loading, filters, onFilterChange, storeN
 
 export default function RiwayatPage() {
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  
   const [storeName, setStoreName] = useState('PT. WELINDO SUKSES BERSAMA');
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
@@ -62,7 +66,7 @@ export default function RiwayatPage() {
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
-    customer: '',
+    customer: initialSearch,
     product: '',
     status: 'Semua'
   });

@@ -108,7 +108,9 @@ export default function NotaPreview({ transaction, onClose, autoPrint = false })
         if (!element) continue;
 
         const canvas = await html2canvas(element, {
-          scale: 2,
+          scale: 3, // Increased scale for much higher detail
+          useCORS: true,
+          logging: false,
           onclone: (document, clonedElement) => {
             const el = document.getElementById(pageId);
             if (el) {
@@ -120,14 +122,15 @@ export default function NotaPreview({ transaction, onClose, autoPrint = false })
           }
         });
         
-        const imgData = canvas.toDataURL('image/png');
+        // Use high-quality JPEG to maintain crisp text while keeping file size reasonable
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
         if (i > 0) {
           pdf.addPage();
         }
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       }
       
       const namaPelanggan = customer?.nama_perusahaan || customer?.nama_pic || customer?.nama || 'Umum';
@@ -138,7 +141,17 @@ export default function NotaPreview({ transaction, onClose, autoPrint = false })
       const rawFilename = `${namaPelanggan}-${noInvoice}-${tglInvoice}-${jenisInvoice}`;
       const safeFilename = rawFilename.replace(/[^a-zA-Z0-9-_]/g, '_');
       
-      pdf.save(`${safeFilename}.pdf`);
+      const finalFilename = `${safeFilename || 'Invoice'}.pdf`;
+
+      // Use Data URI instead of Blob to bypass Internet Download Manager (IDM) 
+      // or Chrome extensions that strip the filename from blob URLs.
+      const dataUri = pdf.output('datauristring');
+      const link = document.createElement('a');
+      link.href = dataUri;
+      link.download = finalFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Gagal membuat PDF.');

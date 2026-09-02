@@ -220,8 +220,8 @@ export default function PelangganDetail() {
           });
 
           return (
-            <div>
-              <div className={styles.filterContainer}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+              <div className={styles.filterContainer} style={{ flexShrink: 0 }}>
                 <button 
                   className={notaFilter === 'semua' ? styles.filterBtnActive : styles.filterBtn}
                   onClick={() => setNotaFilter('semua')}
@@ -242,14 +242,16 @@ export default function PelangganDetail() {
                 </button>
               </div>
               
-              <NotaListWithCheckbox 
-                notas={filteredNotas}
-                selectedIds={selectedNotas}
-                onToggle={handleToggleNota}
-                onSelectAll={handleSelectAll}
-              />
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                <NotaListWithCheckbox 
+                  notas={filteredNotas}
+                  selectedIds={selectedNotas}
+                  onToggle={handleToggleNota}
+                  onSelectAll={handleSelectAll}
+                />
+              </div>
               
-              <div className={`${styles.actionFooter} ${styles.desktopOnlyBtn}`}>
+              <div className={`${styles.actionFooter} ${styles.desktopOnlyBtn}`} style={{ flexShrink: 0 }}>
                 <button 
                   className={styles.payBtn}
                   disabled={selectedNotas.length === 0}
@@ -263,9 +265,9 @@ export default function PelangganDetail() {
         })()}
 
         {activeTab === 'riwayat' && (
-          <div className={payments.length === 0 ? styles.riwayatEmpty : ''}>
+          <div className={payments.length === 0 ? styles.riwayatEmpty : ''} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
             {payments.length === 0 ? 'Belum ada riwayat pembayaran.' : (
-              <div className={styles.riwayatContainer}>
+              <div className={styles.riwayatContainer} style={{ flex: 1, overflowY: 'auto' }}>
                 <table className={styles.riwayatTable}>
                   <thead>
                     <tr>

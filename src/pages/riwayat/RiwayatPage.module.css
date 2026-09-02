@@ -1,11 +1,16 @@
 .container {
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 2.5rem 1.5rem; /* Includes safe area for taskbar */
   background-color: var(--color-bg, hsl(220, 15%, 97%));
-  min-height: 100vh;
+  height: 100%;
+  max-height: calc(100vh - var(--header-height, 60px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   font-family: var(--font-family, 'Inter', sans-serif);
 }
 
 .header {
+  flex-shrink: 0;
   margin-bottom: 1.5rem;
 }
 
@@ -23,6 +28,7 @@
 }
 
 .filterSection {
+  flex-shrink: 0;
   margin-bottom: 1.5rem;
 }
 
@@ -31,4 +37,8 @@
   border-radius: var(--radius-lg, 0.5rem);
   box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   padding: 1.25rem;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }

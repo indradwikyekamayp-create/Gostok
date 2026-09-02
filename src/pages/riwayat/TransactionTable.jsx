@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './TransactionTable.module.css';
 
 const formatCurrency = (amount) => {
@@ -45,9 +46,59 @@ const StatusBadge = ({ status }) => {
 
 const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) => {
   const [expandedRow, setExpandedRow] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Reset page when transactions change (filter applied)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [transactions]);
 
   const toggleRow = (id) => {
     setExpandedRow(expandedRow === id ? null : id);
+  };
+
+  const totalPages = Math.max(1, Math.ceil((transactions?.length || 0) / itemsPerPage));
+  const currentTransactions = transactions?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  ) || [];
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxButtons = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+    
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+      buttons.push(<button key="1" className={styles.pageBtn} onClick={() => setCurrentPage(1)}>1</button>);
+      if (startPage > 2) buttons.push(<span key="dots1" className={styles.pageDots}>...</span>);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button 
+          key={i} 
+          className={`${styles.pageBtn} ${currentPage === i ? styles.active : ''}`}
+          onClick={() => setCurrentPage(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) buttons.push(<span key="dots2" className={styles.pageDots}>...</span>);
+      buttons.push(<button key={totalPages} className={styles.pageBtn} onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>);
+    }
+
+    return buttons;
   };
 
   if (loading) {
@@ -63,8 +114,9 @@ const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) =>
   }
 
   return (
-    <div className={styles.tableWrapper}>
-      <table className={styles.table}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
         <thead>
           <tr>
             <th>No Nota</th>
@@ -76,7 +128,7 @@ const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) =>
           </tr>
         </thead>
         <tbody>
-          {transactions.map((trx) => (
+          {currentTransactions.map((trx) => (
             <React.Fragment key={trx.id}>
               <tr 
                 className={`${styles.row} ${expandedRow === trx.id ? styles.rowExpanded : ''}`}
@@ -148,6 +200,46 @@ const TransactionTable = ({ transactions, loading, onViewDetail, onReprint }) =>
           ))}
         </tbody>
       </table>
+      </div>
+
+      {/* Pagination */}
+      <div className={styles.pagination}>
+        <div className={styles.pageInfo}>
+          Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, transactions.length)} dari {transactions.length} transaksi
+        </div>
+        <div className={styles.pageControls}>
+          <button 
+            className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          {renderPaginationButtons()}
+          
+          <button 
+            className={`${styles.pageBtn} ${currentPage === totalPages ? styles.disabled : ''}`}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight size={16} />
+          </button>
+          
+          <select 
+            className={styles.perPageSelect}
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10}>10 / halaman</option>
+            <option value={20}>20 / halaman</option>
+            <option value={50}>50 / halaman</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 };

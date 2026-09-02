@@ -5,6 +5,7 @@ import ProductGrid from './ProductGrid';
 import ProductDetailPanel from './ProductDetailPanel';
 import ProductForm from './ProductForm';
 import { ToastContext } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
 import styles from './MasterProdukPage.module.css';
 import { 
   Plus, 
@@ -35,8 +36,54 @@ function MasterProdukDesktop({
   editingProduct,
   isOwner, threshold,
   selectedProduct, setSelectedProduct,
-  showFilters, setShowFilters
+  showFilters, setShowFilters,
+  isKasir,
+  currentPage, setCurrentPage,
+  itemsPerPage, setItemsPerPage
 }) {
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage, 
+    currentPage * itemsPerPage
+  );
+  
+  // Create pagination range (e.g. 1, 2, 3, ..., 10)
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxButtons = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+    
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+      buttons.push(<button key="1" className={styles.pageBtn} onClick={() => setCurrentPage(1)}>1</button>);
+      if (startPage > 2) buttons.push(<span key="dots1" className={styles.pageDots}>...</span>);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button 
+          key={i} 
+          className={`${styles.pageBtn} ${currentPage === i ? styles.active : ''}`}
+          onClick={() => setCurrentPage(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) buttons.push(<span key="dots2" className={styles.pageDots}>...</span>);
+      buttons.push(<button key={totalPages} className={styles.pageBtn} onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>);
+    }
+
+    return buttons;
+  };
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -45,9 +92,11 @@ function MasterProdukDesktop({
           <h1>Master Produk</h1>
           <p>Kelola seluruh data produk toko Anda</p>
         </div>
-        <button className={styles.addButton} onClick={handleAddProduct}>
-          <Plus size={18} /> Tambah Produk
-        </button>
+        {!isKasir && (
+          <button className={styles.addButton} onClick={handleAddProduct}>
+            <Plus size={18} /> Tambah Produk
+          </button>
+        )}
       </header>
 
       {/* Dashboard Cards */}
@@ -173,12 +222,13 @@ function MasterProdukDesktop({
       <div className={styles.content}>
         <div className={styles.gridWrapper}>
           <ProductGrid 
-            products={filteredProducts} 
+            products={currentProducts} 
             viewMode={viewMode}
             onSelect={(p) => setSelectedProduct(p)}
             selectedBarcode={selectedProduct?.barcode}
             onEdit={handleEditProduct}
             threshold={threshold}
+            isKasir={isKasir}
           />
         </div>
         
@@ -189,6 +239,7 @@ function MasterProdukDesktop({
               onClose={() => setSelectedProduct(null)}
               onEdit={handleEditProduct}
               isOwner={isOwner}
+              isKasir={isKasir}
             />
           </div>
         )}
@@ -197,21 +248,38 @@ function MasterProdukDesktop({
       {/* Pagination */}
       <div className={styles.pagination}>
         <div className={styles.pageInfo}>
-          Menampilkan 1 - {filteredProducts.length} dari {products.length} produk
+          Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredProducts.length)} dari {filteredProducts.length} produk (Total: {products.length})
         </div>
         <div className={styles.pageControls}>
-          <button className={`${styles.pageBtn} ${styles.disabled}`}><ChevronLeft size={16} /></button>
-          <button className={`${styles.pageBtn} ${styles.active}`}>1</button>
-          <button className={styles.pageBtn}>2</button>
-          <button className={styles.pageBtn}>3</button>
-          <span className={styles.pageDots}>...</span>
-          <button className={styles.pageBtn}>21</button>
-          <button className={styles.pageBtn}><ChevronRight size={16} /></button>
+          <button 
+            className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft size={16} />
+          </button>
           
-          <select className={styles.perPageSelect}>
-            <option>12 / halaman</option>
-            <option>24 / halaman</option>
-            <option>48 / halaman</option>
+          {renderPaginationButtons()}
+          
+          <button 
+            className={`${styles.pageBtn} ${currentPage === totalPages ? styles.disabled : ''}`}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight size={16} />
+          </button>
+          
+          <select 
+            className={styles.perPageSelect}
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={10}>10 / halaman</option>
+            <option value={20}>20 / halaman</option>
+            <option value={50}>50 / halaman</option>
           </select>
         </div>
       </div>
@@ -247,18 +315,20 @@ const MasterProdukPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, categoryFilter, sortBy]);
 
   const { showToast } = useContext(ToastContext);
-  const [isOwner, setIsOwner] = useState(false);
+  const { isOwner, isAdmin, isKasir } = useAuth();
   const [threshold, setThreshold] = useState(10);
 
   useEffect(() => {
-    // Determine if user is owner
-    const userRole = localStorage.getItem('userRole');
-    if (userRole === 'owner') {
-      setIsOwner(true);
-    }
-    
     // Listen to threshold setting
     const unsubSettings = onSnapshot(doc(db, 'settings', 'store_config'), (docSnap) => {
       if (docSnap.exists() && docSnap.data().stockThreshold) {
@@ -377,7 +447,10 @@ const MasterProdukPage = () => {
     editingProduct,
     isOwner, threshold,
     selectedProduct, setSelectedProduct,
-    showFilters, setShowFilters
+    showFilters, setShowFilters,
+    isKasir,
+    currentPage, setCurrentPage,
+    itemsPerPage, setItemsPerPage
   };
 
   return isMobile ? <MasterProdukMobile {...commonProps} /> : <MasterProdukDesktop {...commonProps} />;

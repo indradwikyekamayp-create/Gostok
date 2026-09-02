@@ -1,8 +1,14 @@
 .container {
   padding: 1.5rem;
   background-color: #f8fafc;
-  min-height: 100vh;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -25,6 +31,7 @@
   gap: 0.5rem;
   font-weight: 600;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .backBtn:hover {
@@ -38,6 +45,7 @@
   border: 1px solid #e2e8f0;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
   margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -231,6 +239,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   border-bottom: none;
+  flex-shrink: 0;
 }
 
 .tab, .tabActive {
@@ -269,6 +278,11 @@
   padding: 1.5rem;
   border: 1px solid #e2e8f0;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .filterContainer {
@@ -501,6 +515,10 @@
   font-weight: 600;
   font-size: 13px;
   border-bottom: 2px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
 }
 
 .thCheck { width: 40px; }
@@ -586,7 +604,17 @@
    ======================================================== */
 .riwayatContainer { width: 100%; }
 .riwayatTable { width: 100%; border-collapse: collapse; text-align: left; }
-.riwayatTable th { padding: 12px; color: #475569; font-weight: 600; font-size: 13px; border-bottom: 2px solid #eaeaea; }
+.riwayatTable th { 
+  padding: 12px; 
+  color: #475569; 
+  font-weight: 600; 
+  font-size: 13px; 
+  border-bottom: 2px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
 .riwayatRow { border-bottom: 1px solid #f1f5f9; }
 .riwayatRow td { padding: 12px; font-size: 13px; vertical-align: top; }
 .riwayatWaktu { color: #64748b; font-weight: 500; }

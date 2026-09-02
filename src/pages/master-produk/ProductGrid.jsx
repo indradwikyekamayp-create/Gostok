@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductCard from './ProductCard';
 
-const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = 'grid', threshold = 10 }) => {
+const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = 'grid', threshold = 10, isKasir }) => {
   if (!products || products.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary, #666)' }}>
@@ -14,8 +14,8 @@ const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = '
   const containerStyle = viewMode === 'grid' 
     ? {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-        gap: '1.25rem'
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: '1rem'
       }
     : {
         display: 'flex',
@@ -34,6 +34,7 @@ const ProductGrid = ({ products, onSelect, onEdit, selectedBarcode, viewMode = '
           isSelected={selectedBarcode === product.barcode}
           viewMode={viewMode}
           threshold={threshold}
+          isKasir={isKasir}
         />
       ))}
     </div>

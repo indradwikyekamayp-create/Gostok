@@ -1,8 +1,9 @@
 .layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background-color: var(--color-background, hsl(220, 15%, 97%));
   width: 100%;
+  overflow: hidden;
 }
 
 .mainContent {
@@ -15,9 +16,23 @@
 
 .content {
   flex: 1;
-  padding: 1.5rem;
+  min-height: 0;
+  padding: 1.5rem 1.5rem 0.75rem 1.5rem;
   overflow-y: auto;
   height: calc(100vh - var(--header-height, 60px));
+  box-sizing: border-box;
+}
+
+.contentKasir {
+  flex: 1;
+  min-height: 0;
+  padding: 1.5rem 1.5rem 2.5rem 1.5rem; /* 2.5rem bottom padding for Windows Taskbar Safe Area */
+  overflow: hidden; /* Lock scrolling for Kasir */
+  height: calc(100vh - var(--header-height, 60px));
+  max-height: calc(100vh - var(--header-height, 60px));
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 @media (max-width: 767px) {

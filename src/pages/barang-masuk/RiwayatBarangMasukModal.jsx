@@ -9,6 +9,14 @@ const RiwayatBarangMasukModal = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     // Prevent body scroll
@@ -62,6 +70,49 @@ const RiwayatBarangMasukModal = ({ onClose }) => {
     );
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredHistory.length / itemsPerPage));
+  const currentHistory = filteredHistory.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxButtons = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+    
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+      buttons.push(<button key="1" className={styles.pageBtn} onClick={() => setCurrentPage(1)}>1</button>);
+      if (startPage > 2) buttons.push(<span key="dots1" className={styles.pageDots}>...</span>);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button 
+          key={i} 
+          className={`${styles.pageBtn} ${currentPage === i ? styles.active : ''}`}
+          onClick={() => setCurrentPage(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) buttons.push(<span key="dots2" className={styles.pageDots}>...</span>);
+      buttons.push(<button key={totalPages} className={styles.pageBtn} onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>);
+    }
+
+    return buttons;
+  };
+
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
@@ -97,7 +148,7 @@ const RiwayatBarangMasukModal = ({ onClose }) => {
             </div>
           ) : (
             <div className={styles.list}>
-              {filteredHistory.map((record) => (
+              {currentHistory.map((record) => (
                 <div key={record.id} className={styles.recordCard}>
                   <div 
                     className={styles.recordHeader} 
@@ -141,6 +192,45 @@ const RiwayatBarangMasukModal = ({ onClose }) => {
                   )}
                 </div>
               ))}
+              
+              {/* Pagination */}
+              <div className={styles.pagination}>
+                <div className={styles.pageInfo}>
+                  Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredHistory.length)} dari {filteredHistory.length} riwayat
+                </div>
+                <div className={styles.pageControls}>
+                  <button 
+                    className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    &lt;
+                  </button>
+                  
+                  {renderPaginationButtons()}
+                  
+                  <button 
+                    className={`${styles.pageBtn} ${currentPage === totalPages ? styles.disabled : ''}`}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    &gt;
+                  </button>
+                  
+                  <select 
+                    className={styles.perPageSelect}
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value={10}>10 / halaman</option>
+                    <option value={20}>20 / halaman</option>
+                    <option value={50}>50 / halaman</option>
+                  </select>
+                </div>
+              </div>
             </div>
           )}
         </div>

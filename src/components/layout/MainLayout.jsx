@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import MobileBottomNav from './MobileBottomNav';
+import { useAuth } from '../../hooks/useAuth';
 import styles from './MainLayout.module.css';
 
 const MainLayout = ({ title = 'AyoStock!' }) => {
+  const { isKasir } = useAuth();
+  const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const isPelangganDetail = location.pathname.startsWith('/pelanggan/') && location.pathname !== '/pelanggan';
+  const isLockedLayout = location.pathname === '/transaksi-jual' || location.pathname === '/master-produk' || isPelangganDetail;
 
   useEffect(() => {
     const handleResize = () => {
@@ -44,7 +50,7 @@ const MainLayout = ({ title = 'AyoStock!' }) => {
 
   return (
     <div className={styles.layout}>
-      {!isMobile && (
+      {!isMobile && !isKasir && (
         <Sidebar 
           isCollapsed={isSidebarCollapsed} 
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
@@ -52,9 +58,9 @@ const MainLayout = ({ title = 'AyoStock!' }) => {
           setMobileMenuOpen={setMobileMenuOpen}
         />
       )}
-      <div className={`${styles.mainContent} ${isSidebarCollapsed && !isMobile ? styles.contentExpanded : ''} ${isMobile ? styles.contentMobile : ''}`}>
+      <div className={`${styles.mainContent} ${isSidebarCollapsed && !isMobile && !isKasir ? styles.contentExpanded : ''} ${isMobile ? styles.contentMobile : ''}`}>
         <Header onToggleSidebar={handleToggleSidebar} title={title} isMobile={isMobile} />
-        <main className={`${styles.content} ${isMobile ? styles.mobilePadding : ''}`}>
+        <main className={`${isLockedLayout ? styles.contentKasir : styles.content} ${isMobile ? styles.mobilePadding : ''}`}>
           <Outlet />
         </main>
       </div>

@@ -63,7 +63,7 @@ function App() {
   return (
     <>
       {showAnimation && <OpeningAnimation onComplete={handleAnimationComplete} />}
-      <div style={{ display: showAnimation ? 'none' : 'block' }}>
+      <div style={{ display: showAnimation ? 'none' : 'flex', flexDirection: 'column', height: '100%', flex: 1 }}>
         <BrowserRouter>
           <AuthProvider>
             <ToastProvider>
@@ -88,19 +88,11 @@ function App() {
               {/* Admin & Owner only routes */}
               <Route
                 path="/master-produk"
-                element={
-                  <ProtectedRoute requiredRole={ROLES.ADMIN}>
-                    <MasterProdukPage />
-                  </ProtectedRoute>
-                }
+                element={<MasterProdukPage />}
               />
               <Route
                 path="/barang-masuk"
-                element={
-                  <ProtectedRoute requiredRole={ROLES.ADMIN}>
-                    <BarangMasukPage />
-                  </ProtectedRoute>
-                }
+                element={<BarangMasukPage />}
               />
               <Route
                 path="/kerugian"

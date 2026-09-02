@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './ProductDetailPanel.module.css';
 
-const ProductDetailPanel = ({ product, onClose, onEdit, isOwner }) => {
+const ProductDetailPanel = ({ product, onClose, onEdit, isOwner, isKasir }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -63,7 +63,9 @@ const ProductDetailPanel = ({ product, onClose, onEdit, isOwner }) => {
           )}
         </div>
 
-        <button className={styles.editBtn} onClick={() => onEdit(product)}>Edit Produk</button>
+        {!isKasir && (
+          <button className={styles.editBtn} onClick={() => onEdit(product)}>Edit Produk</button>
+        )}
       </div>
     </div>
   );

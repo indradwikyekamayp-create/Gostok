@@ -12,6 +12,13 @@ export default function PelangganPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
   const navigate = useNavigate();
   const { showToast } = useContext(ToastContext);
 
@@ -32,6 +39,49 @@ export default function PelangganPage() {
     c.nama_perusahaan?.toLowerCase().includes(search.toLowerCase()) || 
     c.nama_pic?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / itemsPerPage));
+  const currentCustomers = filteredCustomers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxButtons = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = startPage + maxButtons - 1;
+    
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+      buttons.push(<button key="1" className={styles.pageBtn} onClick={() => setCurrentPage(1)}>1</button>);
+      if (startPage > 2) buttons.push(<span key="dots1" className={styles.pageDots}>...</span>);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button 
+          key={i} 
+          className={`${styles.pageBtn} ${currentPage === i ? styles.active : ''}`}
+          onClick={() => setCurrentPage(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) buttons.push(<span key="dots2" className={styles.pageDots}>...</span>);
+      buttons.push(<button key={totalPages} className={styles.pageBtn} onClick={() => setCurrentPage(totalPages)}>{totalPages}</button>);
+    }
+
+    return buttons;
+  };
 
   const handleSelect = (customer) => {
     navigate(`/pelanggan/${customer.id}`);
@@ -72,10 +122,49 @@ export default function PelangganPage() {
 
       <main className={styles.content}>
         <PelangganList 
-          customers={filteredCustomers} 
+          customers={currentCustomers} 
           onSelect={handleSelect} 
-          loading={false}
+          loading={loading}
         />
+        
+        {/* Pagination */}
+        <div className={styles.pagination}>
+          <div className={styles.pageInfo}>
+            Menampilkan {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredCustomers.length)} dari {filteredCustomers.length} pelanggan
+          </div>
+          <div className={styles.pageControls}>
+            <button 
+              className={`${styles.pageBtn} ${currentPage === 1 ? styles.disabled : ''}`}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              &lt;
+            </button>
+            
+            {renderPaginationButtons()}
+            
+            <button 
+              className={`${styles.pageBtn} ${currentPage === totalPages ? styles.disabled : ''}`}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              &gt;
+            </button>
+            
+            <select 
+              className={styles.perPageSelect}
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={12}>12 / halaman</option>
+              <option value={24}>24 / halaman</option>
+              <option value={48}>48 / halaman</option>
+            </select>
+          </div>
+        </div>
       </main>
 
       {showForm && (
