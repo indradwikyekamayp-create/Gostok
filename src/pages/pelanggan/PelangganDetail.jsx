@@ -25,6 +25,7 @@ export default function PelangganDetail() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [receiptPayment, setReceiptPayment] = useState(null);
+  const [historyNotaId, setHistoryNotaId] = useState(null);
 
   useEffect(() => {
     // 1. Fetch Customer
@@ -214,8 +215,10 @@ export default function PelangganDetail() {
       <div className={styles.tabContent}>
         {activeTab === 'nota' && (() => {
           const filteredNotas = notas.filter(n => {
-            if (notaFilter === 'lunas') return n.sisa_hutang <= 0;
-            if (notaFilter === 'belum_lunas') return n.sisa_hutang > 0;
+            const method = (n.paymentMethod || n.metodePembayaran || '').toLowerCase();
+            if (notaFilter === 'cash') return method === 'cash' || method === 'tunai';
+            if (notaFilter === 'transfer') return method === 'transfer';
+            if (notaFilter === 'hutang') return ['bon', 'kredit', 'hutang'].includes(method);
             return true;
           });
 
@@ -229,16 +232,22 @@ export default function PelangganDetail() {
                   Semua
                 </button>
                 <button 
-                  className={notaFilter === 'belum_lunas' ? styles.filterBtnActive : styles.filterBtn}
-                  onClick={() => setNotaFilter('belum_lunas')}
+                  className={notaFilter === 'cash' ? styles.filterBtnActive : styles.filterBtn}
+                  onClick={() => setNotaFilter('cash')}
                 >
-                  Belum Lunas
+                  Cash
                 </button>
                 <button 
-                  className={notaFilter === 'lunas' ? styles.filterBtnActive : styles.filterBtn}
-                  onClick={() => setNotaFilter('lunas')}
+                  className={notaFilter === 'transfer' ? styles.filterBtnActive : styles.filterBtn}
+                  onClick={() => setNotaFilter('transfer')}
                 >
-                  Lunas
+                  Transfer
+                </button>
+                <button 
+                  className={notaFilter === 'hutang' ? styles.filterBtnActive : styles.filterBtn}
+                  onClick={() => setNotaFilter('hutang')}
+                >
+                  Hutang
                 </button>
               </div>
               
@@ -248,6 +257,7 @@ export default function PelangganDetail() {
                   selectedIds={selectedNotas}
                   onToggle={handleToggleNota}
                   onSelectAll={handleSelectAll}
+                  onViewHistory={(id) => setHistoryNotaId(id)}
                 />
               </div>
               
@@ -384,6 +394,59 @@ export default function PelangganDetail() {
           onClose={() => setReceiptPayment(null)}
         />
       )}
+
+      {historyNotaId && (() => {
+        const targetNota = notas.find(n => n.id === historyNotaId);
+        const relatedPayments = payments.filter(p => p.allocations && p.allocations[historyNotaId] > 0);
+        
+        return (
+          <div 
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} 
+            onClick={() => setHistoryNotaId(null)}
+          >
+            <div 
+              style={{ background: 'white', borderRadius: '0.75rem', width: '100%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', overflow: 'hidden' }} 
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1.125rem', color: '#1e293b' }}>Riwayat Cicilan</h3>
+                <button 
+                  onClick={() => setHistoryNotaId(null)}
+                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b', lineHeight: 1 }}
+                >&times;</button>
+              </div>
+              <div style={{ padding: '1.25rem' }}>
+                <div style={{ marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '2px dashed #e2e8f0' }}>
+                  <div style={{ fontSize: '0.875rem', color: '#64748b' }}>No. Invoice</div>
+                  <div style={{ fontWeight: '700', color: '#0f172a' }}>{targetNota ? targetNota.no_nota : historyNotaId}</div>
+                </div>
+                
+                {relatedPayments.length === 0 ? (
+                  <p style={{ color: '#64748b', textAlign: 'center', margin: '2rem 0' }}>Belum ada riwayat cicilan.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {relatedPayments.map((p) => (
+                      <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', backgroundColor: '#f1f5f9', borderRadius: '0.5rem' }}>
+                        <div>
+                          <div style={{ fontWeight: '600', color: '#334155', fontSize: '0.875rem' }}>
+                            {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(p.tanggal))}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.125rem' }}>
+                            Metode: {p.metode}
+                          </div>
+                        </div>
+                        <div style={{ fontWeight: '700', color: '#16a34a', fontSize: '1rem' }}>
+                          {formatRp(p.allocations[historyNotaId])}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Floating Bottom Bar (Mobile/Flutter Style) */}
       {activeTab === 'nota' && (

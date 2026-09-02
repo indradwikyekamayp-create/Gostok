@@ -107,7 +107,6 @@ const LaporanPenjualan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Penjualan</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalPenjualan)}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 12.5% dari periode sebelumnya</div>
           </div>
         </div>
         
@@ -119,7 +118,6 @@ const LaporanPenjualan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Jumlah Transaksi</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.jumlahTransaksi}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 2 transaksi</div>
           </div>
         </div>
 
@@ -131,7 +129,6 @@ const LaporanPenjualan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Rata-rata per Transaksi</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.rataRata)}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9660;</span> 4.3% dari periode sebelumnya</div>
           </div>
         </div>
 
@@ -143,7 +140,6 @@ const LaporanPenjualan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Item Terjual</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.totalItem}</div>
-            <div style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 5 item</div>
           </div>
         </div>
       </div>

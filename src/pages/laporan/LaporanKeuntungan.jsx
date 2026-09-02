@@ -244,7 +244,6 @@ const LaporanKeuntungan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Omzet</div>
             <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalOmzet)}</div>
-            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 12.5% dari periode sebelumnya</div>
           </div>
         </div>
 
@@ -255,7 +254,6 @@ const LaporanKeuntungan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Modal (HPP)</div>
             <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalModal)}</div>
-            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9660;</span> 4.8% dari periode sebelumnya</div>
           </div>
         </div>
 
@@ -266,7 +264,6 @@ const LaporanKeuntungan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Total Laba Kotor</div>
             <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{formatCurrency(summary.totalKeuntungan)}</div>
-            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}><span>&#9650;</span> 18.2% dari periode sebelumnya</div>
           </div>
         </div>
 
@@ -277,7 +274,6 @@ const LaporanKeuntungan = ({ dateRange }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Rata-rata Margin</div>
             <div className={styles.summaryCardValue} style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a' }}>{summary.margin}%</div>
-            <div className={styles.summaryCardTrend} style={{ fontSize: '0.6875rem', color: '#16a34a', fontWeight: '500' }}>Sangat Baik</div>
           </div>
         </div>
       </div>

@@ -1,5 +1,7 @@
-import React, { useState, useContext } from 'react';
-import { X, Minus, Plus, Banknote, CreditCard, Receipt, ShoppingCart, FileText } from 'lucide-react';
+import React, { useState, useEffect, useContext } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { ShoppingCart, Trash2, X, Minus, Plus, Banknote, CreditCard, Receipt, FileText, AlertTriangle, Calendar, Printer, Copy, Cpu } from 'lucide-react';
 import Card from '../../components/common/Card';
 import { ToastContext } from '../../context/ToastContext';
 import styles from './CartPanel.module.css';
@@ -17,7 +19,23 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
   const [paymentMethod, setPaymentMethod] = useState('');
   const [catatan, setCatatan] = useState('');
   const [jatuhTempo, setJatuhTempo] = useState('');
+  const [showTrfConfirm, setShowTrfConfirm] = useState(false);
+  const [storeConfig, setStoreConfig] = useState(null);
   const { showToast } = useContext(ToastContext);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'settings', 'store_config'));
+        if (snap.exists()) {
+          setStoreConfig(snap.data());
+        }
+      } catch (err) {
+        console.error("Gagal memuat pengaturan toko:", err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   const handleQtyChange = (id, delta) => {
     setCart((prev) =>
@@ -86,6 +104,14 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
   const totalHarga = cart.reduce((sum, item) => sum + item.subtotal, 0);
   const diskon = 0; // Placeholder for now
   const grandTotal = totalHarga - diskon;
+
+  const handleSaveClick = () => {
+    if (paymentMethod === 'transfer') {
+      setShowTrfConfirm(true);
+    } else {
+      onSave(paymentMethod, catatan, jatuhTempo ? new Date(jatuhTempo).toISOString() : null);
+    }
+  };
 
   return (
     <Card className={styles.container} padding="none">
@@ -206,7 +232,7 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
                 }}
               >
                 <FileText size={16} />
-                BON
+                HUTANG
               </button>
             </div>
           </div>
@@ -244,7 +270,7 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
             <button 
               className={styles.saveBtnCompact} 
               disabled={cart.length === 0 || !hasCustomer || !paymentMethod || isSaving}
-              onClick={() => onSave(paymentMethod, catatan, jatuhTempo ? new Date(jatuhTempo).toISOString() : null)}
+              onClick={handleSaveClick}
             >
               {cart.length === 0 ? <ShoppingCart size={18} /> : <Receipt size={18} />}
               {isSaving ? 'Menyimpan...' 
@@ -256,6 +282,97 @@ export default function CartPanel({ cart, setCart, onSave, isSaving, hasCustomer
           </div>
         </div>
       </div>
+
+      {showTrfConfirm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            
+            <div className={styles.modalHeaderModern}>
+              <h3 className={styles.modalTitle}>Konfirmasi Pembayaran</h3>
+              <button onClick={() => setShowTrfConfirm(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              
+              {/* FLUTTER BANK CARD */}
+              <div className={styles.flutterBankCard}>
+                
+                <div className={styles.fbcHeader}>
+                  <div>
+                    <div className={styles.fbcLabel}>BANK</div>
+                    <div className={styles.fbcBankName}>{storeConfig?.bankNama || 'Bank Belum Diset'}</div>
+                  </div>
+                  <div className={styles.fbcChip}>
+                    <Cpu size={22} color="#8D712C" />
+                  </div>
+                </div>
+
+                <div className={styles.fbcMiddle}>
+                  <div className={styles.fbcNumLabel}>NOMOR REKENING</div>
+                  <div className={styles.fbcNumRow}>
+                    <div className={styles.fbcNumber}>
+                      {(storeConfig?.bankRekening || '0000000000').replace(/(.{4})/g, '$1 ').trim()}
+                    </div>
+                    <button 
+                      className={styles.fbcCopyBtn}
+                      onClick={() => {
+                        navigator.clipboard.writeText(storeConfig?.bankRekening || '');
+                        showToast('Nomor rekening disalin', 'success');
+                      }}
+                      title="Salin Nomor Rekening"
+                    >
+                      <Copy size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.fbcBottom}>
+                  <div className={styles.fbcNameLabel}>NAMA REKENING</div>
+                  <div className={styles.fbcName}>{(storeConfig?.bankAtasNama || 'PENGATURAN TOKO').toUpperCase()}</div>
+                </div>
+
+              </div>
+              {/* END FLUTTER BANK CARD */}
+
+              {/* TOTAL PEMBAYARAN BOX */}
+              <div className={styles.fbcTotalBox}>
+                <div className={styles.fbcTotalLabel}>TOTAL PEMBAYARAN</div>
+                <div className={styles.fbcTotalValue}>{formatRupiah(grandTotal)}</div>
+              </div>
+
+              <div className={styles.flutterWarning}>
+                <AlertTriangle size={20} color="#B46209" style={{ flexShrink: 0 }} />
+                <p className={styles.flutterWarningText}>
+                  <strong>Peringatan Kasir:</strong> Mohon periksa kembali bukti transfer dari pelanggan, pastikan bank tujuan, nama rekening, dan nominal transfer sudah sesuai dengan mutasi di atas.
+                </p>
+              </div>
+
+              <div className={styles.flutterActions}>
+                <button 
+                  className={styles.flutterBtnCancel}
+                  onClick={() => setShowTrfConfirm(false)}
+                  disabled={isSaving}
+                >
+                  Batal
+                </button>
+                <button 
+                  className={styles.flutterBtnConfirm}
+                  onClick={() => {
+                    setShowTrfConfirm(false);
+                    onSave(paymentMethod, catatan, jatuhTempo ? new Date(jatuhTempo).toISOString() : null);
+                  }}
+                  disabled={isSaving}
+                >
+                  <Receipt size={18} /> Cetak Struk
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

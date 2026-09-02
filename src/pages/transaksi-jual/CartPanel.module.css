@@ -381,3 +381,304 @@
     width: 100%;
   }
 }
+
+/* =======================================================
+   PREMIUM MODAL OVERLAY (FLUTTER STYLE)
+   ======================================================= */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  padding: 0;
+  width: 90%;
+  max-width: 460px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modalHeaderModern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+/* Bank Card (Flutter Port) */
+.flutterBankCard {
+  background: linear-gradient(135deg, #244F88 0%, #173C70 50%, #0C274C 100%);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+  color: white;
+  aspect-ratio: 1.586 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.flutterBankCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,0.15) 0%, transparent 50%),
+    repeating-radial-gradient(
+      circle at -10% 110%, 
+      transparent 0, 
+      rgba(255,255,255,0.04) 2px, 
+      transparent 3px, 
+      transparent 15px
+    ),
+    repeating-radial-gradient(
+      circle at 110% -10%, 
+      transparent 0, 
+      rgba(255,255,255,0.03) 1px, 
+      transparent 2px, 
+      transparent 10px
+    );
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.fbcHeader, .fbcMiddle, .fbcBottom {
+  position: relative;
+  z-index: 1;
+}
+
+.fbcHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.fbcLabel {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.fbcBankName {
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.fbcChip {
+  width: 45px;
+  height: 34px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FFE9A6 0%, #D8B45C 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fbcSpacing1 {
+  height: 38px;
+}
+
+.fbcNumLabel {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.fbcNumRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fbcNumber {
+  color: white;
+  font-size: 24px;
+  letter-spacing: 2px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.fbcCopyBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.fbcCopyBtn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.fbcSpacing2 {
+  height: 28px;
+}
+
+.fbcDivider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.fbcSpacing3 {
+  height: 18px;
+}
+
+.fbcNameLabel {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.fbcName {
+  color: white;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Total Box */
+.fbcTotalBox {
+  background-color: #F7F9FC;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.fbcTotalLabel {
+  font-size: 11px;
+  color: #73819A;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.fbcTotalValue {
+  font-size: 28px;
+  color: #163A6B;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* Warning */
+.flutterWarning {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background-color: #FFF8EB;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+}
+.flutterWarningText {
+  margin: 0;
+  font-size: 12px;
+  color: #B46209;
+  line-height: 1.5;
+}
+
+/* Actions */
+.flutterActions {
+  display: flex;
+  gap: 12px;
+}
+
+.flutterBtnCancel {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid #E2E8F0;
+  background-color: white;
+  border-radius: 12px;
+  color: #64748B;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.flutterBtnCancel:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.flutterBtnConfirm {
+  flex: 2;
+  padding: 14px;
+  border: none;
+  background-color: #163A6B;
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.flutterBtnConfirm:hover:not(:disabled) {
+  background-color: #1e4b8a;
+  transform: translateY(-2px);
+}
+
+.flutterBtnConfirm:disabled, .flutterBtnCancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}

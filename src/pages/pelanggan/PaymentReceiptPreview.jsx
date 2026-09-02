@@ -102,20 +102,33 @@ const PaymentReceiptPreview = ({ payment, customer, notas, onClose, autoPrint = 
               <table className={styles.itemsTable} style={{ flex: 1 }}>
                 <thead>
                   <tr>
-                    <th style={{ width: '10%' }}>NO.</th>
-                    <th style={{ width: '60%', textAlign: 'left', paddingLeft: '15px' }}>ALOKASI NOTA (CICILAN)</th>
-                    <th style={{ width: '30%', textAlign: 'right', paddingRight: '15px' }}>NOMINAL DIBAYAR</th>
+                    <th style={{ width: '5%' }}>NO.</th>
+                    <th style={{ width: '30%', textAlign: 'left', paddingLeft: '15px' }}>NO. INVOICE</th>
+                    <th style={{ width: '15%', textAlign: 'right' }}>TOTAL NOTA</th>
+                    <th style={{ width: '15%', textAlign: 'right' }}>DP/TERBAYAR</th>
+                    <th style={{ width: '15%', textAlign: 'right' }}>BAYAR S'KRNG</th>
+                    <th style={{ width: '20%', textAlign: 'right', paddingRight: '15px' }}>SISA HUTANG</th>
                   </tr>
                 </thead>
                 <tbody>
                   {Object.entries(payment.allocations || {}).filter(([_, amount]) => amount > 0).map(([notaId, amount], index) => {
                     const notaData = notas.find(n => n.id === notaId);
                     const notaLabel = notaData ? notaData.no_nota : notaId;
+                    const totalTagihan = notaData ? (notaData.total_bayar || notaData.grandTotal || 0) : 0;
+                    const sisaHutang = notaData ? (notaData.sisa_hutang || 0) : 0;
+                    // Hitung berapa yang sudah dibayar SEBELUM transaksi ini
+                    // Total yang sudah dibayar sampai detik ini = totalTagihan - sisaHutang
+                    const totalTerbayarSampaiSekarang = totalTagihan - sisaHutang;
+                    const telahDibayarSebelumnya = Math.max(0, totalTerbayarSampaiSekarang - amount);
+                    
                     return (
                       <tr key={notaId}>
                         <td className={styles.colCenter}>{index + 1}</td>
                         <td style={{ textAlign: 'left', paddingLeft: '15px', fontWeight: '600' }}>{notaLabel}</td>
-                        <td className={styles.colRight} style={{ paddingRight: '15px' }}>{formatRp(amount)}</td>
+                        <td className={styles.colRight}>{formatRp(totalTagihan)}</td>
+                        <td className={styles.colRight}>{formatRp(telahDibayarSebelumnya)}</td>
+                        <td className={styles.colRight}>{formatRp(amount)}</td>
+                        <td className={styles.colRight} style={{ paddingRight: '15px' }}>{formatRp(sisaHutang)}</td>
                       </tr>
                     );
                   })}
@@ -126,16 +139,20 @@ const PaymentReceiptPreview = ({ payment, customer, notas, onClose, autoPrint = 
                       <td>&nbsp;</td>
                       <td></td>
                       <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
                     </tr>
                   ))}
                   
                   <tr className={styles.grandTotalRow}>
-                    <td colSpan="2" className={styles.grandTotalLabel} style={{ paddingRight: '15px' }}>
+                    <td colSpan="4" className={styles.grandTotalLabel} style={{ paddingRight: '15px' }}>
                       TOTAL DIBAYAR :
                     </td>
-                    <td className={styles.grandTotalValue} style={{ paddingRight: '15px', fontSize: '16px', color: '#16a34a' }}>
+                    <td className={styles.grandTotalValue} style={{ color: '#16a34a' }}>
                       {formatRp(payment.jumlahBayar)}
                     </td>
+                    <td style={{ borderLeft: '1px solid #000' }}></td>
                   </tr>
                 </tbody>
               </table>
@@ -147,10 +164,24 @@ const PaymentReceiptPreview = ({ payment, customer, notas, onClose, autoPrint = 
                 </div>
                 
                 <div className={styles.bottomRight}>
-                  <div className={styles.signatureBox}>
-                    <div style={{ marginBottom: '5px' }}>Penerima,</div>
-                    <div className={styles.ttdSpace}></div>
-                    <div style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+                  <div className={styles.signatureBox} style={{ position: 'relative' }}>
+                    <div style={{ marginBottom: '5px', position: 'relative', zIndex: 1 }}>Penerima,</div>
+                    <div className={styles.ttdSpace}>
+                      <img 
+                        src="/logo/BG STEMP.png" 
+                        alt="Stempel" 
+                        style={{ 
+                          position: 'absolute', 
+                          top: '45%', 
+                          left: '50%', 
+                          transform: 'translate(-50%, -50%)', 
+                          width: '120px', 
+                          zIndex: 0,
+                          pointerEvents: 'none'
+                        }} 
+                      />
+                    </div>
+                    <div style={{ textDecoration: 'underline', fontWeight: 'bold', position: 'relative', zIndex: 1 }}>
                       {settings.namaToko || 'PT. Welindo Sukses Bersama'}
                     </div>
                   </div>

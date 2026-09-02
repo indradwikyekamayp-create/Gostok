@@ -368,8 +368,11 @@ export default function NotaPreview({ transaction, onClose, autoPrint = false })
 
                       <div className={styles.bottomRight}>
                         <div className={styles.signatureBox}>
-                          <p style={{ margin: '0 0 50px 0' }}>Hormat kami,</p>
-                          <div style={{ borderTop: '1px dotted #000', width: '100%' }}></div>
+                          <p style={{ margin: '0 0 55px 0', position: 'relative', zIndex: 1 }}>Hormat kami,</p>
+                          <img src="/logo/BG STEMP.png" alt="Stamp" className={styles.stampLogo} />
+                          <p style={{ margin: 0, position: 'relative', zIndex: 1, fontSize: '10px', fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', paddingBottom: '2px', whiteSpace: 'nowrap' }}>
+                            PT.WELINDO SUKSES BERSAMA
+                          </p>
                         </div>
                       </div>
                     </div>

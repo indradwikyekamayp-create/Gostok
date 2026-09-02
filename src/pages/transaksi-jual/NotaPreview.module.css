@@ -273,8 +273,23 @@
 
 .signatureBox {
   text-align: center;
-  width: 120px;
+  width: 180px;
   font-size: 12px;
+  position: relative;
+}
+
+.stampLogo {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: auto;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .ttdSpace {

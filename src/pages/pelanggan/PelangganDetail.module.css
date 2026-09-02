@@ -599,6 +599,12 @@
   .colAmount .sisaAmount { font-size: 0.95rem; }
 }
 
+.mobileOnly { display: none; }
+
+@media (max-width: 768px) {
+  .mobileOnly { display: block; }
+}
+
 /* ========================================================
    MODERN RIWAYAT PEMBAYARAN
    ======================================================== */
