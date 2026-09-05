@@ -63,20 +63,20 @@ const KasirDashboard = () => {
     <div className={styles.dashboard}>
       
       {/* Welcome & Live Clock Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '2rem', borderRadius: '1.5rem', border: '1px solid #e2e8f0', marginBottom: '0.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025)' }}>
+      <div className={styles.welcomeHeader}>
         <div>
-          <h1 className={styles.pageTitle} style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
+          <h1 className={styles.welcomeTitle}>
             Halo, {userData?.nama || (isAdmin ? 'Admin' : 'Kasir')}! 👋
           </h1>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '1rem' }}>Selamat bertugas hari ini. Mesin kasir siap digunakan.</p>
+          <p className={styles.welcomeSubtitle}>Selamat bertugas hari ini. Mesin kasir siap digunakan.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', backgroundColor: '#f8fafc', padding: '1rem 1.5rem', borderRadius: '1rem', border: '1px solid #f1f5f9' }}>
-          <div style={{ padding: '0.75rem', backgroundColor: '#eff6ff', borderRadius: '50%', color: '#3b82f6' }}>
+        <div className={styles.clockWidget}>
+          <div className={styles.clockIcon}>
             <Clock size={28} />
           </div>
           <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b', letterSpacing: '0.5px' }}>{formatTime(time)}</div>
-            <div style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: '500' }}>{formatDate(time)}</div>
+            <div className={styles.clockTime}>{formatTime(time)}</div>
+            <div className={styles.clockDate}>{formatDate(time)}</div>
           </div>
         </div>
       </div>
@@ -164,30 +164,22 @@ const KasirDashboard = () => {
       </div>
 
       {/* System Status Footer */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '1rem 1.5rem', borderRadius: '1rem', border: '1px solid #e2e8f0', marginTop: 'auto', boxShadow: '0 -2px 10px rgba(0,0,0,0.02)' }}>
-        
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: isOnline ? '#0f172a' : '#ef4444' }}>
+      <div className={styles.systemStatusFooter}>
+        <div className={styles.statusBadges}>
+          <div className={styles.statusBadge} style={{ color: isOnline ? '#0f172a' : '#ef4444' }}>
             {isOnline ? <Database size={18} color="#10b981" /> : <ServerCrash size={18} color="#ef4444" />}
-            <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>Server: {isOnline ? 'Aktif' : 'Error'}</span>
+            <span>Server: {isOnline ? 'Aktif' : 'Error'}</span>
           </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: isOnline ? '#0f172a' : '#ef4444' }}>
+          <div className={styles.statusBadge} style={{ color: isOnline ? '#0f172a' : '#ef4444' }}>
             {isOnline ? <Wifi size={18} color="#10b981" /> : <WifiOff size={18} color="#ef4444" />}
-            <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>Internet: {isOnline ? 'Terhubung' : 'Terputus'}</span>
+            <span>Internet: {isOnline ? 'Terhubung' : 'Terputus'}</span>
           </div>
         </div>
 
-        <button 
-          onClick={logout}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: '600', fontSize: '0.875rem', transition: 'all 0.2s' }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fecaca'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
-        >
+        <button className={styles.logoutBtn} onClick={logout}>
           <LogOut size={16} />
-          <span>Keluar Sistem</span>
+          <span>Keluar</span>
         </button>
-
       </div>
 
       {/* Modal Lacak Pesanan */}

@@ -7,8 +7,10 @@ import styles from './BarangMasukPage.module.css';
 import ScanInput from './ScanInput';
 import StockInList from './StockInList';
 import RiwayatBarangMasukModal from './RiwayatBarangMasukModal';
+import useIsMobile from '../../hooks/useIsMobile';
+import BarangMasukMobile from './BarangMasukMobile';
 
-const BarangMasukPage = () => {
+const BarangMasukDesktop = () => {
   const { showToast } = useContext(ToastContext);
   const [items, setItems] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -146,4 +148,7 @@ const BarangMasukPage = () => {
   );
 };
 
-export default BarangMasukPage;
+export default function BarangMasukPage() {
+  const isMobile = useIsMobile();
+  return isMobile ? <BarangMasukMobile /> : <BarangMasukDesktop />;
+}

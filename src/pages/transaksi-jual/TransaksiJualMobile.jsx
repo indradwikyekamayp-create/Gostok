@@ -4,6 +4,7 @@ import { db } from '../../firebase';
 import { ToastContext } from '../../context/ToastContext';
 import { AuthContext } from '../../context/AuthContext';
 import { Search, ScanBarcode, Plus, Minus, ShoppingBag, ShoppingCart, X, ChevronRight, User, UserPlus } from 'lucide-react';
+import MobileScanner from '../../components/common/MobileScanner';
 import NotaPreview from './NotaPreview';
 import PelangganForm from '../pelanggan/PelangganForm';
 
@@ -31,6 +32,7 @@ export default function TransaksiJualMobile() {
   const [activeCategory, setActiveCategory] = useState('Semua');
   const [showCartSheet, setShowCartSheet] = useState(false);
   const [showCustomerSheet, setShowCustomerSheet] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [jatuhTempo, setJatuhTempo] = useState('');
   const [isHutangMode, setIsHutangMode] = useState(false);
@@ -104,6 +106,19 @@ export default function TransaksiJualMobile() {
   const getQtyInCart = (productId) => {
     const item = cart.find(c => c.id === productId);
     return item ? item.qty : 0;
+  };
+
+  const handleScanSuccess = (decodedText) => {
+    setShowScanner(false);
+    // Cari produk berdasarkan kode barang / barcode
+    const product = products.find(p => p.barcode === decodedText || p.kode_barang === decodedText);
+    if (product) {
+      handleAddToCart(product);
+      showToast(`Berhasil menambahkan ${product.nama_barang}`, 'success');
+    } else {
+      setSearchQuery(decodedText);
+      showToast(`Produk tidak ditemukan dengan kode: ${decodedText}`, 'warning');
+    }
   };
 
   const handleAddToCart = (product) => {
@@ -300,7 +315,11 @@ export default function TransaksiJualMobile() {
               style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '1rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '0.875rem', outline: 'none' }}
             />
           </div>
-          <button className="flutter-ripple" style={{ width: '48px', height: '48px', borderRadius: '1rem', backgroundColor: '#eff6ff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+          <button 
+            className="flutter-ripple" 
+            onClick={() => setShowScanner(true)}
+            style={{ width: '48px', height: '48px', borderRadius: '1rem', backgroundColor: '#eff6ff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}
+          >
             <ScanBarcode size={24} />
           </button>
         </div>
@@ -684,6 +703,14 @@ export default function TransaksiJualMobile() {
 
         </div>
       </div>
+    )}
+
+    {/* Scanner Modal */}
+    {showScanner && (
+      <MobileScanner 
+        onScanSuccess={handleScanSuccess} 
+        onClose={() => setShowScanner(false)} 
+      />
     )}
 
     {completedTransaction && (

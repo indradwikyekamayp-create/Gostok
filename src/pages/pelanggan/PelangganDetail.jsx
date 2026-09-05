@@ -223,7 +223,7 @@ export default function PelangganDetail() {
           });
 
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
               <div className={styles.filterContainer} style={{ flexShrink: 0 }}>
                 <button 
                   className={notaFilter === 'semua' ? styles.filterBtnActive : styles.filterBtn}
@@ -251,13 +251,13 @@ export default function PelangganDetail() {
                 </button>
               </div>
               
-              <div style={{ flex: 1, overflowY: 'auto' }}>
+              <div style={{ paddingBottom: '1rem' }}>
                 <NotaListWithCheckbox 
                   notas={filteredNotas}
                   selectedIds={selectedNotas}
                   onToggle={handleToggleNota}
                   onSelectAll={handleSelectAll}
-                  onViewHistory={(id) => setHistoryNotaId(id)}
+                  onViewHistory={(notaId) => setHistoryNotaId(notaId)}
                 />
               </div>
               
@@ -275,9 +275,9 @@ export default function PelangganDetail() {
         })()}
 
         {activeTab === 'riwayat' && (
-          <div className={payments.length === 0 ? styles.riwayatEmpty : ''} style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+          <div className={payments.length === 0 ? styles.riwayatEmpty : ''} style={{ display: 'flex', flexDirection: 'column' }}>
             {payments.length === 0 ? 'Belum ada riwayat pembayaran.' : (
-              <div className={styles.riwayatContainer} style={{ flex: 1, overflowY: 'auto' }}>
+              <div className={styles.riwayatContainer} style={{ paddingBottom: '1rem' }}>
                 <table className={styles.riwayatTable}>
                   <thead>
                     <tr>
@@ -449,7 +449,7 @@ export default function PelangganDetail() {
       })()}
 
       {/* Floating Bottom Bar (Mobile/Flutter Style) */}
-      {activeTab === 'nota' && (
+      {activeTab === 'nota' && selectedNotas.length > 0 && (
         <div className={styles.floatingBottomBar}>
           <div className={styles.floatingSummary}>
             <span className={styles.floatingCount}>{selectedNotas.length} Nota Dipilih</span>
@@ -469,3 +469,5 @@ export default function PelangganDetail() {
     </div>
   );
 }
+
+// Trigger HMR

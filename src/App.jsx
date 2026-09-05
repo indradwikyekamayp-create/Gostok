@@ -6,6 +6,8 @@ import { MainLayout } from './components/layout';
 import { ProtectedRoute } from './components/layout';
 import { ROLES } from './constants/roles';
 import OpeningAnimation from './components/OpeningAnimation';
+import MobileOpeningAnimation from './components/MobileOpeningAnimation';
+import useIsMobile from './hooks/useIsMobile';
 
 // Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -34,6 +36,7 @@ import './styles/print.css';
 
 function App() {
   const [showAnimation, setShowAnimation] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Listener untuk pengaturan aplikasi global (seperti ukuran font)
@@ -62,7 +65,11 @@ function App() {
 
   return (
     <>
-      {showAnimation && <OpeningAnimation onComplete={handleAnimationComplete} />}
+      {showAnimation && (
+        isMobile ? 
+          <MobileOpeningAnimation onComplete={handleAnimationComplete} /> : 
+          <OpeningAnimation onComplete={handleAnimationComplete} />
+      )}
       <div style={{ display: showAnimation ? 'none' : 'flex', flexDirection: 'column', height: '100%', flex: 1 }}>
         <BrowserRouter>
           <AuthProvider>
